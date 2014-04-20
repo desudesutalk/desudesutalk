@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.0.14
+// @version      0.0.15
 // @description  Write something useful!
 // @match        http://dobrochan.com/*/res/*
 // @match        http://dobrochan.ru/*/res/*
@@ -2896,7 +2896,7 @@ var do_encode = function() {
 
 };
 
-var do_decode = function(arc, msgPrepend, thumb, fdate) {
+var do_decode = function(arc, msgPrepend, thumb, fdate, post_id) {
     "use strict";
 
     if (arc.byteLength === 0) return false;
@@ -2917,6 +2917,7 @@ var do_decode = function(arc, msgPrepend, thumb, fdate) {
     arc = arc.subarray(0, skip);
 
     var out_msg = {
+        post_id: post_id,
         id: '',
         txt: {
             ts: Math.round(fdate.getTime() / 1000),
@@ -3579,6 +3580,7 @@ var messages_list = [];
 var push_msg = function(msg, msgPrepend, thumb) {
 	"use strict";
 /*var out_msg = {
+    post_id: post_id,
     id: '',
     txt: {
         msg:
@@ -3589,6 +3591,8 @@ var push_msg = function(msg, msgPrepend, thumb) {
     status: 'OK',
     to: []
   },*/
+
+  console.log(msg);
 
     var prependTo = '#allgetter_button',
         txt, person = '', recipients = '',
@@ -3602,6 +3606,10 @@ var push_msg = function(msg, msgPrepend, thumb) {
 
     if(messages_list.length > 0){
         messages_list.sort(function(a, b) {
+            if(b.post_id != a.post_id){
+                return b.post_id - a.post_id;
+            }
+
             if(b.txt.ts != a.txt.ts){
                 return b.txt.ts - a.txt.ts;
             }else{
@@ -3614,9 +3622,16 @@ var push_msg = function(msg, msgPrepend, thumb) {
             }
         });
         for (i = 0; i < messages_list.length; i++) {
-            if(messages_list[i].txt.ts <= msg.txt.ts){
-                prependTo = '#msg_' + messages_list[i].id;
-                break;
+            if(msg.post_id !==0){
+                if(messages_list[i].post_id <= msg.post_id){
+                    prependTo = '#msg_' + messages_list[i].id;
+                    break;
+                }
+            }else{
+                if(messages_list[i].txt.ts <= msg.txt.ts){
+                    prependTo = '#msg_' + messages_list[i].id;
+                    break;
+                }
             }
         }
     }
@@ -4331,11 +4346,20 @@ var jpegInserted = function(event) {
     "use strict";
     if (event.animationName == 'hidbordNodeInserted') {
         var jpgURL = $(event.target).closest('a').attr('href');
+        var post_el = $(event.target).closest('.reply');
+        var post_id = 0;
+
+        if(post_el.length === 1){
+            post_id = parseInt(post_el.attr('id').replace(/[^0-9]/g, ''));
+            if(isNaN(post_id)){
+                post_id = 0;
+            }
+        }
 
         getURLasAB(jpgURL, function(arrayBuffer, date) {
             var byteArray = new Uint8Array(arrayBuffer),
                 arc = fileStripJpeg(byteArray);
-            do_decode(arc, null, $(event.target).attr('src'), date);
+            do_decode(arc, null, $(event.target).attr('src'), date, post_id);
         });
     }
 };
