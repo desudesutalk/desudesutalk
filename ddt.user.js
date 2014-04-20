@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.0.11
+// @version      0.0.12
 // @description  Write something useful!
 // @match        http://dobrochan.com/*/res/*
 // @match        http://dobrochan.ru/*/res/*
@@ -24,17 +24,10 @@
 // @run-at       document-start
 // ==/UserScript==
 
-// fix for Greasemonkey in TorBrouser.
-if(setTimeout === undefined){
-    setTimeout = window.setTimeout;
-    prompt = window.prompt;
-    confirm = window.confirm;
-}
+var ddt_script = function () {
 
 //fix for % escaping.
 var _spoilerTag = '%' + '%';
-
-(function () {
 
 // Copyright (c) 2005  Tom Wu
 // All Rights Reserved.
@@ -4367,4 +4360,28 @@ $(function($) {
 
 });
 
-}());
+};
+
+// fix for Greasemonkey in TorBrouser.
+if(setTimeout === undefined){
+    addJS_Node (null, null, ddt_script);
+}else{
+	ddt_script();
+}
+
+
+
+function addJS_Node (text, s_URL, funcToRun, runOnLoad) {
+    var D                                   = document;
+    var scriptNode                          = D.createElement ('script');
+    if (runOnLoad) {
+        scriptNode.addEventListener ("load", runOnLoad, false);
+    }
+    scriptNode.type                         = "text/javascript";
+    if (text)       scriptNode.textContent  = text;
+    if (s_URL)      scriptNode.src          = s_URL;
+    if (funcToRun)  scriptNode.textContent  = '(' + funcToRun.toString() + ')()';
+
+    var targ = D.getElementsByTagName ('head')[0] || D.body || D.documentElement;
+    targ.appendChild (scriptNode);
+}
