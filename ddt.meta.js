@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.0.10
+// @version      0.0.11
 // @description  Write something useful!
 // @match        http://dobrochan.com/*/res/*
 // @match        http://dobrochan.ru/*/res/*
@@ -18,7 +18,7 @@
 // @include      http://2ch.hk/*/res/*
 // @include      http://iichan.hk/*/res/*
 // @copyright    2014+, Boku 
-// @icon		 https://github.com/desudesutalk/desudesutalk/raw/master/icon.jpg
+// @icon         https://github.com/desudesutalk/desudesutalk/raw/master/icon.jpg
 // @updateURL	 https://github.com/desudesutalk/desudesutalk/raw/master/ddt.meta.js
 // @grant        none
 // @run-at       document-start
