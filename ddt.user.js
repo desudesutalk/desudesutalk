@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.0.15
+// @version      0.0.16
 // @description  Write something useful!
 // @match        http://dobrochan.com/*/res/*
 // @match        http://dobrochan.ru/*/res/*
@@ -3592,7 +3592,7 @@ var push_msg = function(msg, msgPrepend, thumb) {
     to: []
   },*/
 
-  console.log(msg);
+  //console.log(msg);
 
     var prependTo = '#allgetter_button',
         txt, person = '', recipients = '',
@@ -3741,7 +3741,17 @@ var read_old_messages = function() {
     }
     $('a[href*=jpg] img, a[href*=jpeg] img').each(function(i, e) {
         var url = $(e).closest('a').attr('href');
-        if (url.indexOf('?') == -1 && url.match(/\.jpe?g$/)) process_images.push([url, $(e).attr('src')]);
+        var post_el = $(e).closest('.reply');
+        var post_id = 0;
+
+        if(post_el.length === 1){
+            post_id = parseInt(post_el.attr('id').replace(/[^0-9]/g, ''));
+            if(isNaN(post_id)){
+                post_id = 0;
+            }
+        }
+
+        if (url.indexOf('?') == -1 && url.match(/\.jpe?g$/)) process_images.push([url, $(e).attr('src'), post_id]);
     });
 
 //    console.log(process_images);
@@ -3760,7 +3770,7 @@ var process_olds = function() {
             var byteArray = new Uint8Array(arrayBuffer);
             if (byteArray) {
                 var arc = fileStripJpeg(byteArray);
-                do_decode(arc, true, jpgURL[1], date);
+                do_decode(arc, true, jpgURL[1], date, jpgURL[2]);
             }
             if (process_images.length !== 0) {
                 $('#allgetter_button input').val('Stop fetch! ['+process_images.length+']');
