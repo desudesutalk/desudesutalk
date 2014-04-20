@@ -18,6 +18,8 @@
 // @include      http://2ch.hk/*/res/*
 // @include      http://iichan.hk/*/res/*
 // @copyright    2014+, Boku 
+// @icon		 https://github.com/desudesutalk/desudesutalk/raw/master/icon.jpg
+// @updateURL	 https://github.com/desudesutalk/desudesutalk/raw/master/ddt.meta.js
 // @grant        none
 // @run-at       document-start
 // ==/UserScript==

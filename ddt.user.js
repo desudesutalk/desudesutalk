@@ -17,6 +17,8 @@
 // @include      https://8chan.co/*/res/*
 // @include      http://2ch.hk/*/res/*
 // @include      http://iichan.hk/*/res/*
+// @icon		 https://github.com/desudesutalk/desudesutalk/raw/master/icon.jpg
+// @updateURL	 https://github.com/desudesutalk/desudesutalk/raw/master/ddt.meta.js
 // @copyright    2014+, Boku 
 // @grant        none
 // @run-at       document-start
