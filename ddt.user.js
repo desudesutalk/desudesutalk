@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.0.16
+// @version      0.0.17
 // @description  Write something useful!
 // @match        http://dobrochan.com/*/res/*
 // @match        http://dobrochan.ru/*/res/*
@@ -2716,7 +2716,8 @@ var sendBoardForm = function(file) {
 
     fd.append(fileInputName, uint8toBlob(file, 'image/jpeg'), fnme);
 
-    replyForm.find("input[type=submit]").attr("disabled", "disabled");
+    replyForm.find("#do_encode").val('..Working...').attr("disabled", "disabled");
+
     $.ajax({
         url: $("#de-pform form")[0].action, //+ "?X-Progress-ID=" + upload_handler,
         type: 'POST',
@@ -2751,9 +2752,11 @@ var sendBoardForm = function(file) {
                 replyForm = null;
                 container_image = null;
                 container_data = null;
+
             } else {
                 replyForm.find("input[type=submit]").attr("disabled", null);
                 alert('Can\'t post. Wrong capch? Fucked up imageboard software?.');
+                replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
 //                console.log(data, textStatus, jqXHR, doc, doc.find('#delform, form[name="delform"]'));
             }
 
@@ -2761,6 +2764,7 @@ var sendBoardForm = function(file) {
         error: function(jqXHR, textStatus, errorThrown) {
 //            console.log(jqXHR, textStatus, errorThrown);
             alert('Error while posting. Something in network or so.');
+            replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
         }
     });
 };
