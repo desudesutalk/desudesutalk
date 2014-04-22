@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.0.17
+// @version      0.0.18
 // @description  Write something useful!
 // @match        http://dobrochan.com/*/res/*
 // @match        http://dobrochan.ru/*/res/*
@@ -3393,10 +3393,9 @@ var inject_ui = function() {
 
     var ui = '<div class="hidbord_main" style="display: none">'+
             '    <div class="hidbord_thread hidbord_maincontent">'+
-            '        <p style="text-align: center;" id="allgetter_button">'+
-            '            <input type="button" value="Get old messages" id="read_old">'+
+            '        <p style="text-align: center; display: none;" id="allgetter_button">'+
             '        </p>'+
-            '        <p style="text-align: center;" id="hidbord_reply_button"><a href="javascript:;">[write reply]</a>'+
+            '        <p style="text-align: center; display: none;" id="hidbord_reply_button">'+
             '        </p>'+
             '    </div>'+
             '    <div class="hidbord_contacts hidbord_maincontent" style="display: none"></div>'+
@@ -3426,10 +3425,15 @@ var inject_ui = function() {
             '            <div class="hidbord_clickable" id="hidbord_show_cfg">Log in!</div>'+
             '        </div>'+
             '    </div>'+
+                '<div style="position: absolute;left: 0;right: 0;bottom: 0;background-color: rgb(217,225,229);border-top: 1px solid #fff;  box-shadow: 0 0 10px #000;height: 27px;text-align: center;padding: 0 5px;">'+
+                '<input type="button" value="Write reply" style="font-weight: bold;float: left;font-size: 12px;" id="hidbord_btn_reply">'+
+                '<input type="button" value="Get old messages" style="font-size: 12px;" id="hidbord_btn_getold">'+
+                '<a href="javascript:;" style="float: right;line-height: 27px;" id="hidbord_btn_checknew">check for new</a>'+
+                '</div>'+
             '</div>'+
             '<div class="hidbord_notifer">'+
             '    <img id="hidbord_show" class="hidbord_clickable" alt="Moshi moshi!" title="Moshi moshi!" src="' + desudesuicon +'" width="64" style="margin:0; z-index:50;vertical-align: bottom;"/>'+
-            '<span class="hidbord_clickable" style="position: absolute;background: #f00;z-index: 100;bottom: 4px;right: 4px;font-weight: bold;padding: 2px 7px;border-radius: 30px; color: #fff;box-shadow: 0 0 1px #f00;font-size: 15px;display: none;">1</span>'+
+            '<span id="hidbord_notify_counter" class="hidbord_clickable" style="position: absolute;background: #f00;z-index: 100;bottom: 4px;right: 4px;font-weight: bold;padding: 2px 7px;border-radius: 30px; color: #fff;box-shadow: 0 0 1px #f00;font-size: 15px;display: none;">1</span>'+
             '</div>';
     
     injectCSS('.hidbord_notifer{font-size: smaller !important;padding: 0;font-family: calibri;position: fixed;bottom: 25px;right: 25px;box-shadow: 0 0 10px #999;display: block;border: 3px solid #fff;border-radius: 5px;background-color: rgb(217,225,229);overflow: hidden;} '+
@@ -3444,7 +3448,7 @@ var inject_ui = function() {
             '.hidbord_quot1 { color: #789922; }'+
             '.hidbord_quot2 { color: #546c18; } '+
             '.hidbord_main { font-size: medium !important; font-family: calibri; position: fixed; bottom: 25px; right: 25px; box-shadow: 0 0 10px #999; display: block; width: 650px; border: 3px solid #fff; border-radius: 5px; background-color: rgb(217,225,229); overflow: hidden; top: 25px; background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAEAgMAAADUn3btAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gQIFQEfWioE/wAAAAlQTFRF0Njc2eHl////72WY8QAAAAFiS0dEAmYLfGQAAAAQSURBVAgdY2BlEGEIYHAEAAHAAKtr/oOEAAAAAElFTkSuQmCC); } '+
-            '.hidbord_maincontent{ padding: 5px; overflow-y: scroll; overflow-x: hidden; position: absolute; top: 65px; width: 640px; bottom: 0; } '+
+            '.hidbord_maincontent{ padding: 5px; overflow-y: scroll; overflow-x: hidden; position: absolute; top: 65px; width: 640px; bottom: 28px; } '+
             '.hidbord_head{ height: 64px; border-bottom: 1px solid #fff; box-shadow: 0 0 10px #000; position: absolute; top: 0; left: 0; right: 0; text-align: center; background-color: rgb(217,225,229); } '+
             '.hidbord_head h3{ margin-top: 5px; padding-left: 0; font-family: comic sans ms; font-style: italic; font-size: x-large; } '+
             '.hidbord_nav{ position: absolute; bottom: 0; margin: auto; width: 370px; left: 0; right: 0; } '+
@@ -3477,6 +3481,8 @@ var inject_ui = function() {
         $('.hidbord_main').hide();
         $('.hidbord_msg_new').removeClass('hidbord_msg_new');
         $('body').css('margin-right', '0');
+        $('#hidbord_notify_counter').hide();
+        new_messages = 0;
         $('.hidbord_notifer').show();
     });
 
@@ -3509,12 +3515,16 @@ var inject_ui = function() {
         $('#pub_key_info').val(linebrk(rsa.n.toString(16), 64));
     }
 
-    $('#hidbord_reply_button a').on('click', function() {
+    $('#hidbord_btn_reply').on('click', function() {
         showReplyform('#hidbord_reply_button');
     });
 
+    $('#hidbord_btn_checknew').on('click', function() {
+        $('#de-updater-btn').click();
+    });
+
     $('#do_login').on('click', do_login);
-    $('#read_old').on('click', read_old_messages);
+    $('#hidbord_btn_getold').on('click', read_old_messages);
 
 
 };
@@ -3579,7 +3589,7 @@ var del_popup = function() {
     }, 200);
 };
 
-var messages_list = [];
+var messages_list = [], new_messages = 0;
 
 var push_msg = function(msg, msgPrepend, thumb) {
 	"use strict";
@@ -3731,6 +3741,9 @@ var push_msg = function(msg, msgPrepend, thumb) {
         size: 18
     });
 
+    new_messages++;
+    $('#hidbord_notify_counter').text(new_messages).show();
+
 };
 
 var process_images = [];
@@ -3740,7 +3753,7 @@ var read_old_messages = function() {
 
     if (process_images.length !== 0) {
         process_images = [];
-        $('#allgetter_button input').val('Get old messages');
+        $('#hidbord_btn_getold').val('Get old messages');
         return true;
     }
     $('a[href*=jpg] img, a[href*=jpeg] img').each(function(i, e) {
@@ -3759,7 +3772,7 @@ var read_old_messages = function() {
     });
 
 //    console.log(process_images);
-    $('#allgetter_button input').val('Stop fetch! ['+process_images.length+']');
+    $('#hidbord_btn_getold').val('Stop fetch! ['+process_images.length+']');
     setTimeout(process_olds, 0);//500 + Math.round(500 * Math.random()));
 };
 
@@ -3777,10 +3790,10 @@ var process_olds = function() {
                 do_decode(arc, true, jpgURL[1], date, jpgURL[2]);
             }
             if (process_images.length !== 0) {
-                $('#allgetter_button input').val('Stop fetch! ['+process_images.length+']');
+                $('#hidbord_btn_getold').val('Stop fetch! ['+process_images.length+']');
                 setTimeout(process_olds, 0); //500 + Math.round(500 * Math.random()));
             }else{
-                $('#allgetter_button input').val('Get old messages');
+                $('#hidbord_btn_getold').val('Get old messages');
             }
         });
     }
