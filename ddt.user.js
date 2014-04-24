@@ -3395,7 +3395,8 @@ var inject_ui = function() {
             '    <div class="hidbord_thread hidbord_maincontent">'+
             '        <p style="text-align: center; display: none;" id="allgetter_button">'+
             '        </p>'+
-            '        <p style="text-align: center; height: 80%" id="hidbord_reply_button">'+
+            '        <p style="text-align: center; display: none;" id="hidbord_reply_button">'+
+            '        </p><p style="text-align: center; height: 80%;">'+
             '        </p>'+
             '    </div>'+
             '    <div class="hidbord_contacts hidbord_maincontent" style="display: none"></div>'+
