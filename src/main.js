@@ -1,0 +1,54 @@
+var rsaProfile = {},
+    rsa = new RSAKey(),
+    rsa_hash, rsa_hashB64,
+    $ = Zepto;
+
+if (localStorage.getItem('magic_desu_numbers')) {
+    rsaProfile = JSON.parse(localStorage.getItem('magic_desu_numbers'));
+    rsa.setPrivateEx(rsaProfile.n, '10001', rsaProfile.d, rsaProfile.p, rsaProfile.q, rsaProfile.dmp1, rsaProfile.dmq1, rsaProfile.coeff);
+    rsa_hash = hex_sha1(rsaProfile.n);
+    rsa_hashB64 = hex2b64(rsa_hash);
+}
+
+var jpegInserted = function(event) {
+    "use strict";
+    if (event.animationName == 'hidbordNodeInserted') {
+        var jpgURL = $(event.target).closest('a').attr('href');
+        var post_el = $(event.target).closest('.reply');
+        var post_id = 0;
+
+        if(post_el.length === 1){
+            post_id = parseInt(post_el.attr('id').replace(/[^0-9]/g, ''));
+            if(isNaN(post_id)){
+                post_id = 0;
+            }
+        }
+
+        getURLasAB(jpgURL, function(arrayBuffer, date) {
+            var byteArray = new Uint8Array(arrayBuffer),
+                arc = fileStripJpeg(byteArray);
+            do_decode(arc, null, $(event.target).attr('src'), date, post_id);
+        });
+    }
+};
+
+$(function($) {
+    "use strict";
+    sjcl.random.startCollectors();
+
+    var insertAnimation = ' hidbordNodeInserted{from{clip:rect(1px,auto,auto,auto);}to{clip:rect(0px,auto,auto,auto);}}',
+        animationTrigger = '{animation-duration:0.001s;-o-animation-duration:0.001s;-ms-animation-duration:0.001s;-moz-animation-duration:0.001s;-webkit-animation-duration:0.001s;animation-name:hidbordNodeInserted;-o-animation-name:hidbordNodeInserted;-ms-animation-name:hidbordNodeInserted;-moz-animation-name:hidbordNodeInserted;-webkit-animation-name:hidbordNodeInserted;}';
+
+    $('<style type="text/css">@keyframes ' + insertAnimation + '@-moz-keyframes ' + insertAnimation + '@-webkit-keyframes ' +
+        insertAnimation + '@-ms-keyframes ' + insertAnimation + '@-o-keyframes ' + insertAnimation +
+        'a[href*=jpg] img, a[href*=jpeg] img ' + animationTrigger + '</style>').appendTo('head');
+
+    setTimeout(function() {
+        $(document).bind('animationstart', jpegInserted).bind('MSAnimationStart', jpegInserted).bind('webkitAnimationStart', jpegInserted);
+    }, 3000);
+
+    inject_ui();
+
+    render_contact();
+
+});

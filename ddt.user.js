@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.0.18
+// @version      0.0.19
 // @description  Write something useful!
 // @match        http://dobrochan.com/*/res/*
 // @match        http://dobrochan.ru/*/res/*
@@ -19,7 +19,7 @@
 // @include      http://iichan.hk/*/res/*
 // @copyright    2014+, Boku 
 // @icon         https://github.com/desudesutalk/desudesutalk/raw/master/icon.jpg
-// @updateURL	 https://github.com/desudesutalk/desudesutalk/raw/master/ddt.meta.js
+// @updateURL    https://github.com/desudesutalk/desudesutalk/raw/master/ddt.meta.js
 // @grant        none
 // @run-at       document-start
 // ==/UserScript==
@@ -3395,7 +3395,7 @@ var inject_ui = function() {
             '    <div class="hidbord_thread hidbord_maincontent">'+
             '        <p style="text-align: center; display: none;" id="allgetter_button">'+
             '        </p>'+
-            '        <p style="text-align: center; display: none;" id="hidbord_reply_button">'+
+            '        <p style="text-align: center; height: 80%" id="hidbord_reply_button">'+
             '        </p>'+
             '    </div>'+
             '    <div class="hidbord_contacts hidbord_maincontent" style="display: none"></div>'+
@@ -3454,7 +3454,7 @@ var inject_ui = function() {
             '.hidbord_nav{ position: absolute; bottom: 0; margin: auto; width: 370px; left: 0; right: 0; } '+
             '.hidbord_nav div{ display: inline-block; background: #eee; width: 120px; } '+
             '.hidbord_nav .active{ background: #fff; box-shadow: 0 0 5px #999; } '+
-            '.hidbord_msg { font-family: calibri; display: block; border-right: 1px solid #999; border-bottom: 1px solid #999; border-left: 1px solid #fafafa; border-top: 1px solid #fafafa; margin: 2px 10px 10px 2px; background-color: #fafafa; padding: 5px; } '+
+            '.hidbord_msg { font-family: calibri; display: block; border-right: 1px solid #999; border-bottom: 1px solid #999; border-left: 1px solid #fafafa; border-top: 1px solid #fafafa; margin: 2px 10px 10px 2px; background-color: #fafafa; padding: 5px; word-wrap: break-word;} '+
             '.hidbord_msg_focused { border: 1px dashed #e00; } '+
             '.hidbord_msg_new { background-color: #ffe; } '+
             '.hidbord_main hr { background:#ddd; border:0; height:1px } '+
