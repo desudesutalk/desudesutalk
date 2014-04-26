@@ -17,10 +17,10 @@ var jpegInserted = function(event) {
 
         getURLasAB(jpgURL, function(arrayBuffer, date) {
             var arc = jpegExtract(arrayBuffer);
-            console.log(arc);
+//            console.log(arc);
             if(arc){
                 var p = decodeMessage(arc);
-                console.log(p);
+//                console.log(p);
                 if(p) do_decode(p, null, thumbURL, date, post_id);
             }            
         });
