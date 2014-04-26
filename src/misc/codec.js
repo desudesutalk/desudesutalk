@@ -1,3 +1,7 @@
+var rsaProfile = {},
+    rsa = new RSAKey(),
+    rsa_hash, rsa_hashB64;
+
 var do_login = function() {
     "use strict";
 
@@ -34,7 +38,7 @@ var do_login = function() {
     rsa_hash = hex_sha1(rsaProfile.n);
     rsa_hashB64 = hex2b64(rsa_hash);
 
-    localStorage.setItem('magic_desu_numbers', JSON.stringify(rsaProfile));
+    ssSet('magic_desu_numbers', rsaProfile);
 
     $('#identi').html(rsa_hash).identicon5({
         rotate: true,
@@ -44,180 +48,58 @@ var do_login = function() {
     lf.magik_num.value = lf.passwd.value = '';
 };
 
-
 var do_encode = function() {
     "use strict";
 
+    var payLoad = {};
+
     if(!container_data){
         alert('Image needed. Please select one.');
-    }
+        return false;
+    }    
 
-    var plaintext, p, p2, rp = {}, key, pwd, salt, preIter, ct, iv, message = {}, msgDate, payLoad = {}, i;
-
-    payLoad.msg = $('#hidbord_reply_text').val();
+    payLoad.text = $('#hidbord_reply_text').val();
     payLoad.ts = Math.floor((new Date()).getTime() / 1000);
 
-    plaintext = JSON.stringify(payLoad);
-
-    $("#dloadarea").empty();
-
-    preIter = Math.random() * 20;
-    for (i = 0; i < preIter; i++) {
-        sjcl.random.randomWords(8, 0);
-    }
-    pwd = sjcl.codec.hex.fromBits(sjcl.random.randomWords(8, 0));
-    
-    preIter = Math.random() * 20;
-    for (i = 0; i < preIter; i++) {
-        sjcl.random.randomWords(8, 0);
-    }
-    salt = sjcl.random.randomWords(8, 0);
-    
-    preIter = Math.random() * 20;
-    for (i = 0; i < preIter; i++) {
-        sjcl.random.randomWords(8, 0);
-    }
-    iv = sjcl.random.randomWords(4, 0);
-
     var keys = {};
-    keys[rsa_hash] = hex2b64(rsa.encrypt(pwd));
+    keys[rsa_hash] = rsaProfile.n;
 
     for (var c in contacts) {
         if('hide' in contacts[c] && contacts[c].hide == 1){
             continue;
         }
-        var testRsa = new RSAKey();
-        testRsa.setPublic(contacts[c].key, '10001');
-        keys[c] = hex2b64(testRsa.encrypt(pwd));
+        keys[c] = contacts[c].key;
     }
 
-    p2 = {
-        salt: salt,
-        iter: 1000
-    };
-    p2 = sjcl.misc.cachedPbkdf2(pwd, p2);
+    var p = encodeMessage(payLoad,keys);
+    var testEncode = decodeMessage(p);
 
-    p = {
-        adata: JSON.stringify(keys),
-        iv: iv,
-        iter: 1000,
-        mode: "ccm",
-        ts: 64,
-        ks: 256,
-        salt: p2.salt
-    };
+    if(!testEncode || testEncode.status != "OK"){
+        alert('Error in crypt module!');
+    }
 
-    message.k = rsa.n.toString(16);
-
-    message.m = sjcl.encrypt(p2.key, plaintext, p, rp);
-
-    message.s = rsa.signStringWithSHA1(message.m);
-
-    var gzip = new Zlib.Gzip(stringToByteArray(JSON.stringify(message)));
-    var compressed = gzip.compress();
-    var endmark = new Uint8Array(2);
-    endmark[0] = 255;
-    endmark[1] = 217;
-
-    var out_file = appendBuffer(container_data, appendBuffer(compressed, endmark));
-
+    var out_file = jpegEmbed(container_data, p);
     var compressedB64 = arrayBufferDataUri(out_file);
 
-    $("#dloadarea").empty().append('<a href="data:image/jpeg;base64,' + compressedB64 + '" download="SecretMessageImage.jpg">Download container image</a>');
-
     sendBoardForm(out_file);
-
 };
 
-var do_decode = function(arc, msgPrepend, thumb, fdate, post_id) {
+var do_decode = function(message, msgPrepend, thumb, fdate, post_id) {
     "use strict";
-
-    if (arc.byteLength === 0) return false;
-
-    var hasEndMark = false,
-        skip = -2;
-
-    for (var i = 0; i < 16; i++) {
-        if (arc[arc.byteLength + skip] == 255 && arc[arc.byteLength + skip + 1] == 217) {
-            hasEndMark = true;
-            break;
-        }
-        skip--;
-    }
-
-    if (!hasEndMark) return false;
-
-    arc = arc.subarray(0, skip);
 
     var out_msg = {
         post_id: post_id,
-        id: '',
+        id: message.id,
         txt: {
-            ts: Math.round(fdate.getTime() / 1000),
-            msg: null
+            ts: message.ts,
+            msg: message.message.text
         },
-        keyid: '',
-        pubkey: '',
-        status: 'OK',
-        to: [],
-    },
-        coded, rp = {}, key, msg;
+        keyid: message.keyhash,
+        pubkey: message.key,
+        status: message.status,
+        to: message.keys,
+    };
 
-    try {
-        var gunzip = new Zlib.Gunzip(arc);
-        var plain = gunzip.decompress();
-        plain = ab2Str(plain);
-        coded = JSON.parse(plain);
-    } catch (e) {
-//        console.log('gunzip error.', arc);
-        return false;
-    }
-
-    out_msg.pubkey = coded.k;
-
-    var testRsa = new RSAKey();
-    testRsa.setPublic(coded.k, '10001');
-    if (!testRsa.verifyString(coded.m, coded.s)) {
-        return false;
-    }
-
-    var new_rsa_hash = hex_sha1(coded.k);
-
-    out_msg.keyid = new_rsa_hash;
-    out_msg.id = hex_sha1(coded.m);
-
-    msg = coded.m;
-    coded = JSON.parse(coded.m);
-    var keys;
-
-    try {
-        keys = JSON.parse(decodeURIComponent(coded.adata));
-    } catch (e) {
-        return false;
-    }
-
-    for (var kk in keys) {
-        out_msg.to.push(kk);
-    }
-
-    if (!(rsa_hash in keys)) {
-        out_msg.status = 'NOKEY';
-//        console.log(out_msg, rsa_hash, keys);
-        push_msg(out_msg, msgPrepend, thumb);
-        return true;
-    }
-
-    try {
-        key = rsa.decrypt(b64tohex(keys[rsa_hash]));
-        var om = sjcl.decrypt(key, msg, {}, rp);
-        out_msg.id = hex_sha1(om);
-        out_msg.txt = JSON.parse(om);
-    } catch (e) {
-        return false;
-    }
-
-//    console.log(out_msg);
     push_msg(out_msg, msgPrepend, thumb);
-
     return true;
 };

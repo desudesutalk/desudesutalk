@@ -163,7 +163,7 @@ var do_popup = function(e) {
         msgClone.removeClass('hidbord_msg_focused').find('.hidbord_mnu').remove();
         oMsgH = oMsg.height();
     } else {
-        oMsg = msgClone = $('<div style="padding: 10px; background: #fee; border: 1px solid #f00; float:left;">NOT FOUND</div>');
+        oMsg = msgClone = $('<div style="padding: 10px; background: #fee; border: 1px solid #f00; font-weight: bold; text-align:center;">NOT FOUND</div>');
         oMsgH = 50;
     }
 
@@ -405,8 +405,11 @@ var process_olds = function() {
         getURLasAB(jpgURL[0], function(arrayBuffer, date) {
             var byteArray = new Uint8Array(arrayBuffer);
             if (byteArray) {
-                var arc = fileStripJpeg(byteArray);
-                do_decode(arc, true, jpgURL[1], date, jpgURL[2]);
+                var arc = jpegExtract(arrayBuffer);
+                if(arc){
+                    var p = decodeMessage(arc);
+                    if(p) do_decode(p, true, jpgURL[1], date, jpgURL[2]);
+                }                   
             }
             if (process_images.length !== 0) {
                 $('#hidbord_btn_getold').val('Stop fetch! ['+process_images.length+']');
@@ -431,33 +434,47 @@ function handleFileSelect(evt) {
 
         reader.onload = (function(theFile) {
             return function(e) {
-                // result e.target.result;
+                console.log(theFile);
 
-                var img = new Image();
+                if(theFile.type != "image/jpeg" || isDobro){
+                    var img = new Image();
 
-                img.onload = function() {
-                    var o1 = Math.round(Math.random() * 10),
-                        o2 = Math.round(Math.random() * 10),
-                        o3 = Math.round(Math.random() * 10),
-                        o4 = Math.round(Math.random() * 10);
+                    img.onload = function() {
+                        var o1 = 0, o2 = 0, o3 = 0, o4 = 0, q = 0.9;
+                        if(isDobro){
+                            o1 = Math.round(Math.random() * 10);
+                            o2 = Math.round(Math.random() * 10);
+                            o3 = Math.round(Math.random() * 10);
+                            o4 = Math.round(Math.random() * 10);
+                            q  = (85 + Math.random() * 10) / 100;
+                        }
 
-                    var buffer = document.createElement('canvas'),
-                        ctxB = buffer.getContext('2d');
-                    buffer.width = img.width - o1 - o2;
-                    buffer.height = img.height - o3 - o4;
+                        var buffer = document.createElement('canvas'),
+                            ctxB = buffer.getContext('2d');
+                        buffer.width = img.width - o1 - o2;
+                        buffer.height = img.height - o3 - o4;
 
+                        ctxB.beginPath();
+                        ctxB.fillStyle = "white";
+                        ctxB.rect(0, 0, buffer.width, buffer.height); 
+                        ctxB.fill();
 
-                    ctxB.drawImage(img, -o1, -o3);
-                    container_image = jpegStripExtra(buffer.toDataURL("image/jpeg", (80 + Math.random() * 10) / 100));
-                    container_data = dataURLtoUint8Array(container_image);
-                    //console.log(container_data);
-                    $('#img_prev').empty().append($('<img width=200 src="' + container_image + '"/>'));
-
-                };
-                img.src = e.target.result;
+                        ctxB.drawImage(img, -o1, -o3);
+                        container_data = jpegClean(dataURLtoUint8Array(buffer.toDataURL("image/jpeg", q)));
+                        container_image= "data:image/Jpeg;base64," + arrayBufferDataUri(container_data);
+                    };
+                    img.src = "data:image/Jpeg;base64," +arrayBufferDataUri(e.target.result);
+                }else{
+                    container_data = jpegClean(e.target.result);
+                    container_image= "data:"+theFile.type+";base64," + arrayBufferDataUri(container_data);
+                }
             };
         })(files[0]);
-        reader.readAsDataURL(files[0]);
+        reader.readAsArrayBuffer(files[0]);
+    }else{
+        container_image = null;
+        container_data = null;
+        alert('Please select image.');
     }
 
 }

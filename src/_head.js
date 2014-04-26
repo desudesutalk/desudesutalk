@@ -1,4 +1,3 @@
-var ddt_script = function () {
-
+(function(){
 //fix for % escaping.
 var _spoilerTag = '%' + '%';

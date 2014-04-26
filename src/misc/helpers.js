@@ -1,3 +1,21 @@
+// Convert a byte array to a hex string
+var bytesToHex = function (bytes) {
+    "use strict";
+    for (var hex = [], i = 0; i < bytes.length; i++) {
+        hex.push((bytes[i] >>> 4).toString(16));
+        hex.push((bytes[i] & 0xF).toString(16));
+    }
+    return hex.join("");
+};
+
+// Convert a hex string to a byte array
+var hexToBytes = function (hex) {
+    "use strict";
+    for (var bytes = [], c = 0; c < hex.length; c += 2)
+        bytes.push(parseInt(hex.substr(c, 2), 16));
+    return bytes;
+};
+
 var dateToStr = function(date, onlyNums) {
     "use strict";
 

@@ -1,19 +1,10 @@
-var rsaProfile = {},
-    rsa = new RSAKey(),
-    rsa_hash, rsa_hashB64,
-    $ = Zepto;
-
-if (localStorage.getItem('magic_desu_numbers')) {
-    rsaProfile = JSON.parse(localStorage.getItem('magic_desu_numbers'));
-    rsa.setPrivateEx(rsaProfile.n, '10001', rsaProfile.d, rsaProfile.p, rsaProfile.q, rsaProfile.dmp1, rsaProfile.dmq1, rsaProfile.coeff);
-    rsa_hash = hex_sha1(rsaProfile.n);
-    rsa_hashB64 = hex2b64(rsa_hash);
-}
+var isDobro = !!document.URL.match(/\/dobrochan\.[comrgu]+\//);
 
 var jpegInserted = function(event) {
     "use strict";
     if (event.animationName == 'hidbordNodeInserted') {
         var jpgURL = $(event.target).closest('a').attr('href');
+        var thumbURL = $(event.target).attr('src');
         var post_el = $(event.target).closest('.reply');
         var post_id = 0;
 
@@ -25,9 +16,13 @@ var jpegInserted = function(event) {
         }
 
         getURLasAB(jpgURL, function(arrayBuffer, date) {
-            var byteArray = new Uint8Array(arrayBuffer),
-                arc = fileStripJpeg(byteArray);
-            do_decode(arc, null, $(event.target).attr('src'), date, post_id);
+            var arc = jpegExtract(arrayBuffer);
+            console.log(arc);
+            if(arc){
+                var p = decodeMessage(arc);
+                console.log(p);
+                if(p) do_decode(p, null, thumbURL, date, post_id);
+            }            
         });
     }
 };
@@ -46,6 +41,14 @@ $(function($) {
     setTimeout(function() {
         $(document).bind('animationstart', jpegInserted).bind('MSAnimationStart', jpegInserted).bind('webkitAnimationStart', jpegInserted);
     }, 3000);
+
+    if (ssGet('magic_desu_numbers')) {
+        rsaProfile = ssGet('magic_desu_numbers');
+        rsa.setPrivateEx(rsaProfile.n, '10001', rsaProfile.d, rsaProfile.p, rsaProfile.q, rsaProfile.dmp1, rsaProfile.dmq1, rsaProfile.coeff);
+        rsa_hash = hex_sha1(rsaProfile.n);
+        rsa_hashB64 = hex2b64(rsa_hash);
+    }
+
 
     inject_ui();
 
