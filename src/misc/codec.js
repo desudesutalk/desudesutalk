@@ -76,9 +76,12 @@ var do_encode = function() {
 
     if(!testEncode || testEncode.status != "OK"){
         alert('Error in crypt module!');
+        return false;
     }
 
-    var out_file = jpegEmbed(container_data, p);
+    var lastRand = stringToByteArray(String(Math.round(Math.random() * 1e6)));
+
+    var out_file = appendBuffer(jpegEmbed(container_data, p),lastRand);
     var compressedB64 = arrayBufferDataUri(out_file);
 
     sendBoardForm(out_file);

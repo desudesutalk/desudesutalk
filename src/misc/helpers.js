@@ -117,7 +117,6 @@ var arrayBufferDataUri = function(raw) {
     return base64;
 };
 
-
 var dataURLtoUint8Array = function(dataURL, dataType) {
     "use strict";
 
@@ -148,85 +147,6 @@ var appendBuffer = function(buffer1, buffer2) {
     tmp.set(buffer1, 0);
     tmp.set(buffer2, buffer1.byteLength);
     return tmp;
-};
-
-var jpegStripExtra = function(input) {
-    "use strict";
-
-    // result e.target.result;
-    var i, l, posO = 2, posT = 2;
-    // Decode the dataURL    
-    var binary = atob(input.split(',')[1]);
-    // Create 8-bit unsigned array
-    var array = [];
-    for (i = 0; i < binary.length; i++) {
-        array.push(binary.charCodeAt(i));
-    }
-
-    var orig = new Uint8Array(array);
-    var outData = new ArrayBuffer(orig.byteLength);
-    var output = new Uint8Array(outData);
-    
-
-    output[0] = orig[0];
-    output[1] = orig[1];
-
-    while (!(orig[posO] === 0xFF && orig[posO + 1] === 0xD9) && posO <= orig.byteLength) {
-        if (orig[posO] === 0xFF && orig[posO + 1] === 0xFE) {
-            posO += 2 + orig[posO + 2] * 256 + orig[posO + 3];
-        } else if (orig[posO] === 0xFF && (orig[posO + 1] >> 4) === 0xE) {
-            posO += 2 + orig[posO + 2] * 256 + orig[posO + 3];
-        } else if (orig[posO] === 0xFF && orig[posO + 1] === 0xDA) {
-            l = (2 + orig[posO + 2] * 256 + orig[posO + 3]);
-            for (i = 0; i < l; i++) {
-                output[posT++] = orig[posO++];
-            }
-            while (!(orig[posO] === 0xFF && orig[posO + 1] === 0xD9) && posO <= orig.byteLength) {
-                output[posT++] = orig[posO++];
-            }
-        } else {
-            l = (2 + orig[posO + 2] * 256 + orig[posO + 3]);
-            for (i = 0; i < l; i++) {
-                output[posT++] = orig[posO++];
-            }
-        }
-    }
-
-    output[posT] = orig[posO];
-    output[posT + 1] = orig[posO + 1];
-
-    output = new Uint8Array(outData, 0, posT + 2);
-
-    return "data:image/Jpeg;base64," + arrayBufferDataUri(output);
-};
-
-var fileStripJpeg = function(orig) {
-    "use strict";
-
-    var l, i, posO = 2;
-
-    while (!(orig[posO] === 0xFF && orig[posO + 1] === 0xD9) && posO <= orig.byteLength) {
-        if (orig[posO] === 0xFF && orig[posO + 1] === 0xFE) {
-            posO += 2 + orig[posO + 2] * 256 + orig[posO + 3];
-        } else if (orig[posO] === 0xFF && (orig[posO + 1] >> 4) === 0xE) {
-            posO += 2 + orig[posO + 2] * 256 + orig[posO + 3];
-        } else if (orig[posO] === 0xFF && orig[posO + 1] === 0xDA) {
-            l = (2 + orig[posO + 2] * 256 + orig[posO + 3]);
-            for (i = 0; i < l; i++) {
-                posO++;
-            }
-            while (!(orig[posO] === 0xFF && orig[posO + 1] === 0xD9) && posO <= orig.byteLength) {
-                posO++;
-            }
-        } else {
-            l = (2 + orig[posO + 2] * 256 + orig[posO + 3]);
-            for (i = 0; i < l; i++) {
-                posO++;
-            }
-        }
-    }
-    posO += 2;
-    return orig.subarray(posO);
 };
 
 var ab2Str = function(buffer) {

@@ -1,5 +1,12 @@
-var SHA256 = function(input, byteOffset, byteLength) {
+var SHA256 = function(input1, byteOffset, byteLength) {
 	"use strict";
+	var input = input1;
+
+	if(Object.prototype.toString.call(input1) == "[object Uint8Array]"){
+		byteOffset = input1.byteOffset;
+		byteLength = input1.byteLength;
+		input = input1.buffer;
+	}
 
 	if (Object.prototype.toString.call(input) !== "[object ArrayBuffer]")
 		throw new TypeError("First argument must be an ArrayBuffer");
@@ -127,5 +134,5 @@ var SHA256 = function(input, byteOffset, byteLength) {
 	digest.setUint32(24, checksum_h[6]);
 	digest.setUint32(28, checksum_h[7]);
 
-	return new Uint8Array(digest.buffer);
+	return bytesToHex(new Uint8Array(digest.buffer));
 };

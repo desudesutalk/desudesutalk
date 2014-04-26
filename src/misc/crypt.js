@@ -91,7 +91,7 @@ var encodeMessage = function(message, keys){
         container[keyshift + i] = crypted[i];
     }
 
-    sig = rsa.signStringWithSHA1(ab2Str(signedPart));
+    sig = rsa.signStringWithSHA256(signedPart);
 
     arrTemp = hexToBytes(sig); // keyhash
     for (i = 0; i < arrTemp.length; i++) {
@@ -130,8 +130,7 @@ var decodeMessage = function(data){
 
     var testRsa = new RSAKey();
     testRsa.setPublic(key, '10001');
-    var testData = ab2Str(signedPart);
-    if (!testRsa.verifyString(testData, sig)) {
+    if (!testRsa.verifyString(signedPart, sig)) {
         console.log('signature error.');
         return false;
     }
@@ -163,7 +162,7 @@ var decodeMessage = function(data){
 
 
     var container = {
-        id: hex_sha1(testData),
+        id: SHA256(signedPart),
         ts: compressedAt,
         key: key,
         keyhash: hex_sha1(key),

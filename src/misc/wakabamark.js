@@ -269,7 +269,7 @@ var parseOneLineTags = function(match, tag, str) {
 
     if (tag === null) {
         //reflinks
-        res = res.replace(/(\&gt\;\&gt\;)([0-9a-f]{40})/ig, function(match, a, b) {
+        res = res.replace(/(\&gt\;\&gt\;)([0-9a-f]{64})/ig, function(match, a, b) {
             return '<a href="javascript:;" alt="' + b + '" class="hidbord_msglink">&gt;&gt;' + b.substr(0, 8) + '</a>';
         });
     }
