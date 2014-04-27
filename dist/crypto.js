@@ -2160,7 +2160,7 @@ function _rsasign_getDecryptSignatureBI(biSig, hN, hE)
 function _rsasign_getHexDigestInfoFromSig(biSig, hN, hE)
 {
     var biDecryptedSig = _rsasign_getDecryptSignatureBI(biSig, hN, hE);
-    var hDigestInfo = biDecryptedSig.toString(16).replace(/^1f+00/, '');
+    var hDigestInfo = biDecryptedSig.toString(16).replace(/^\s*1f+00/, '');
     return hDigestInfo;
 }
 
@@ -2183,6 +2183,7 @@ function _rsasign_verifySignatureWithArgs(sMsg, biSig, hN, hE)
 {
     var hDigestInfo = _rsasign_getHexDigestInfoFromSig(biSig, hN, hE);
     var digestInfoAry = _rsasign_getAlgNameAndHashFromHexDisgestInfo(hDigestInfo);
+
     if (digestInfoAry.length == 0) return false;
     var algName = digestInfoAry[0];
     var diHashValue = digestInfoAry[1];
@@ -2203,7 +2204,7 @@ function _rsasign_verifyString(sMsg, hSig)
     hSig = hSig.replace(/[ \n]+/g, "");
     var biSig = parseBigInt(hSig, 16);
     var biDecryptedSig = this.doPublic(biSig);
-    var hDigestInfo = biDecryptedSig.toString(16).replace(/^1f+00/, '');
+    var hDigestInfo = biDecryptedSig.toString(16).replace(/^\s*1f+00/, '');
     var digestInfoAry = _rsasign_getAlgNameAndHashFromHexDisgestInfo(hDigestInfo);
 
     if (digestInfoAry.length == 0) return false;

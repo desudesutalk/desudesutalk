@@ -2194,7 +2194,7 @@ function _rsasign_getDecryptSignatureBI(biSig, hN, hE)
 function _rsasign_getHexDigestInfoFromSig(biSig, hN, hE)
 {
     var biDecryptedSig = _rsasign_getDecryptSignatureBI(biSig, hN, hE);
-    var hDigestInfo = biDecryptedSig.toString(16).replace(/^1f+00/, '');
+    var hDigestInfo = biDecryptedSig.toString(16).replace(/^\s*1f+00/, '');
     return hDigestInfo;
 }
 
@@ -2217,6 +2217,7 @@ function _rsasign_verifySignatureWithArgs(sMsg, biSig, hN, hE)
 {
     var hDigestInfo = _rsasign_getHexDigestInfoFromSig(biSig, hN, hE);
     var digestInfoAry = _rsasign_getAlgNameAndHashFromHexDisgestInfo(hDigestInfo);
+
     if (digestInfoAry.length == 0) return false;
     var algName = digestInfoAry[0];
     var diHashValue = digestInfoAry[1];
@@ -2237,7 +2238,7 @@ function _rsasign_verifyString(sMsg, hSig)
     hSig = hSig.replace(/[ \n]+/g, "");
     var biSig = parseBigInt(hSig, 16);
     var biDecryptedSig = this.doPublic(biSig);
-    var hDigestInfo = biDecryptedSig.toString(16).replace(/^1f+00/, '');
+    var hDigestInfo = biDecryptedSig.toString(16).replace(/^\s*1f+00/, '');
     var digestInfoAry = _rsasign_getAlgNameAndHashFromHexDisgestInfo(hDigestInfo);
 
     if (digestInfoAry.length == 0) return false;
@@ -3285,7 +3286,6 @@ var decodeMessage = function(data){
     'use strict';
 
     if(data[0] != CODEC_VERSION) return false;
-//    console.log('Version ok');
     var msgType = data[261],
         keyNum = data[314] + data[315] * 256,
         dataLength = data[1] + data[2] * 256 + data[3] * 65536 + data[4] * 16777216,
@@ -3294,9 +3294,7 @@ var decodeMessage = function(data){
         signedPart = data.subarray(261), keys = {}, i, j, message;
 
     if(dataLength != data.byteLength) return false;
-//    console.log('length ok');
     if(keyNum * 148 > data.byteLength) return false;
-//    console.log('keysize seems ok');
 
     var key = [], sig = [], iv = [], salt = [];
 
@@ -3308,15 +3306,14 @@ var decodeMessage = function(data){
     key = bytesToHex(key);
     sig = bytesToHex(sig);
 
+
     try{
         var testRsa = new RSAKey();
         testRsa.setPublic(key, '10001');
         if (!testRsa.verifyString(signedPart, sig)) {
-//            console.log('signature error.');
             return false;
         }
     } catch (e) {
-//        console.log('signature error.');
         return false;
     }
 
