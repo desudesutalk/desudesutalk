@@ -4194,7 +4194,6 @@ function handleFileSelect(evt) {
 
         reader.onload = (function(theFile) {
             return function(e) {
-                console.log(theFile);
 
                 if(theFile.type != "image/jpeg" || isDobro){
                     var img = new Image();
