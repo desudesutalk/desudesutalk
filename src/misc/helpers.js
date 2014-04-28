@@ -11,8 +11,11 @@ var bytesToHex = function (bytes) {
 // Convert a hex string to a byte array
 var hexToBytes = function (hex) {
     "use strict";
-    for (var bytes = [], c = 0; c < hex.length; c += 2)
-        bytes.push(parseInt(hex.substr(c, 2), 16));
+
+    var str = hex.length % 2 ? "0" + hex : hex;
+    
+    for (var bytes = [], c = 0; c < str.length; c += 2)
+        bytes.push(parseInt(str.substr(c, 2), 16));
     return bytes;
 };
 

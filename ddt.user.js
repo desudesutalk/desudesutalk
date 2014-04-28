@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.1.1
+// @version      0.1.3
 // @description  Write something useful!
 // @match        http://dobrochan.com/*/res/*
 // @include      http://dobrochan.com/*/res/*
@@ -17,6 +17,8 @@
 // @include      http://2ch.hk/*/res/*
 // @match        http://iichan.hk/*/res/*
 // @include      http://iichan.hk/*/res/*
+// @match        http://2-ch.su/*/res/*
+// @include      http://2-ch.su/*/res/*
 // @copyright    2014+, Boku 
 // @icon         https://github.com/desudesutalk/desudesutalk/raw/master/icon.jpg
 // @updateURL    https://github.com/desudesutalk/desudesutalk/raw/master/ddt.meta.js
@@ -2987,7 +2989,12 @@ var do_encode = function() {
     if(!container_data){
         alert('Image needed. Please select one.');
         return false;
-    }    
+    }
+
+    if(!("n" in rsaProfile)){
+        alert('Please log in.');
+        return false;   
+    }
 
     payLoad.text = $('#hidbord_reply_text').val();
     payLoad.ts = Math.floor((new Date()).getTime() / 1000);
@@ -3306,7 +3313,6 @@ var decodeMessage = function(data){
     key = bytesToHex(key);
     sig = bytesToHex(sig);
 
-
     try{
         var testRsa = new RSAKey();
         testRsa.setPublic(key, '10001');
@@ -3397,8 +3403,11 @@ var bytesToHex = function (bytes) {
 // Convert a hex string to a byte array
 var hexToBytes = function (hex) {
     "use strict";
-    for (var bytes = [], c = 0; c < hex.length; c += 2)
-        bytes.push(parseInt(hex.substr(c, 2), 16));
+
+    var str = hex.length % 2 ? "0" + hex : hex;
+    
+    for (var bytes = [], c = 0; c < str.length; c += 2)
+        bytes.push(parseInt(str.substr(c, 2), 16));
     return bytes;
 };
 

@@ -56,7 +56,12 @@ var do_encode = function() {
     if(!container_data){
         alert('Image needed. Please select one.');
         return false;
-    }    
+    }
+
+    if(!("n" in rsaProfile)){
+        alert('Please log in.');
+        return false;   
+    }
 
     payLoad.text = $('#hidbord_reply_text').val();
     payLoad.ts = Math.floor((new Date()).getTime() / 1000);

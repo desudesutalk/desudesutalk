@@ -125,7 +125,6 @@ var decodeMessage = function(data){
     key = bytesToHex(key);
     sig = bytesToHex(sig);
 
-
     try{
         var testRsa = new RSAKey();
         testRsa.setPublic(key, '10001');
