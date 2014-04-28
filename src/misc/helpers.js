@@ -1,3 +1,15 @@
+function repeat(pattern, count) {
+    "use strict";
+    if (count < 1) return '';
+    var result = '';
+    while (count > 0) {
+        if (count & 1) result += pattern;
+        count >>= 1; 
+        pattern += pattern;
+    }
+    return result;
+}
+
 // Convert a byte array to a hex string
 var bytesToHex = function (bytes) {
     "use strict";
@@ -9,11 +21,16 @@ var bytesToHex = function (bytes) {
 };
 
 // Convert a hex string to a byte array
-var hexToBytes = function (hex) {
+var hexToBytes = function (hex, length) {
     "use strict";
 
     var str = hex.length % 2 ? "0" + hex : hex;
-    
+
+    if(length){
+        str = (repeat("00", length) + str);
+        str = str.substr(str.length - length * 2);
+    }
+
     for (var bytes = [], c = 0; c < str.length; c += 2)
         bytes.push(parseInt(str.substr(c, 2), 16));
     return bytes;

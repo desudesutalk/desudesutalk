@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.1.3
+// @version      0.1.4
 // @description  Write something useful!
 // @match        http://dobrochan.com/*/res/*
 // @include      http://dobrochan.com/*/res/*
@@ -3229,7 +3229,7 @@ var encodeMessage = function(message, keys){
     container[3] = (finalLength >> 16) & 255;
     container[4] = (finalLength >> 24) & 255;
 
-    arrTemp = hexToBytes(rsaProfile.n); // our publick key
+    arrTemp = hexToBytes(rsaProfile.n, 128); // our publick key
     for (i = 0; i < arrTemp.length; i++) {
         container[5 + i] = arrTemp[i];
     }
@@ -3258,7 +3258,7 @@ var encodeMessage = function(message, keys){
     keyshift = 0;
     for (var c in keys) {
 
-        arrTemp = hexToBytes(c); // keyhash
+        arrTemp = hexToBytes(c, 20); // keyhash
         for (i = 0; i < arrTemp.length; i++) {
             container[316 + i + keyshift*148] = arrTemp[i];
         }
@@ -3266,7 +3266,7 @@ var encodeMessage = function(message, keys){
         var testRsa = new RSAKey();
         testRsa.setPublic(keys[c], '10001');
 
-        arrTemp = hexToBytes(testRsa.encrypt(pwd)); // crypted password
+        arrTemp = hexToBytes(testRsa.encrypt(pwd), 128); // crypted password
         for (i = 0; i < arrTemp.length; i++) {
             container[336 + i + keyshift*148] = arrTemp[i];
         }
@@ -3281,7 +3281,7 @@ var encodeMessage = function(message, keys){
 
     sig = rsa.signStringWithSHA256(signedPart);
 
-    arrTemp = hexToBytes(sig); // keyhash
+    arrTemp = hexToBytes(sig, 128); // keyhash
     for (i = 0; i < arrTemp.length; i++) {
         container[133 + i] = arrTemp[i];
     }
@@ -3390,6 +3390,18 @@ var decodeMessage = function(data){
 
     return false;
 };
+function repeat(pattern, count) {
+    "use strict";
+    if (count < 1) return '';
+    var result = '';
+    while (count > 0) {
+        if (count & 1) result += pattern;
+        count >>= 1; 
+        pattern += pattern;
+    }
+    return result;
+}
+
 // Convert a byte array to a hex string
 var bytesToHex = function (bytes) {
     "use strict";
@@ -3401,11 +3413,16 @@ var bytesToHex = function (bytes) {
 };
 
 // Convert a hex string to a byte array
-var hexToBytes = function (hex) {
+var hexToBytes = function (hex, length) {
     "use strict";
 
     var str = hex.length % 2 ? "0" + hex : hex;
-    
+
+    if(length){
+        str = (repeat("00", length) + str);
+        str = str.substr(str.length - length * 2);
+    }
+
     for (var bytes = [], c = 0; c < str.length; c += 2)
         bytes.push(parseInt(str.substr(c, 2), 16));
     return bytes;

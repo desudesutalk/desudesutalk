@@ -41,7 +41,7 @@ var encodeMessage = function(message, keys){
     container[3] = (finalLength >> 16) & 255;
     container[4] = (finalLength >> 24) & 255;
 
-    arrTemp = hexToBytes(rsaProfile.n); // our publick key
+    arrTemp = hexToBytes(rsaProfile.n, 128); // our publick key
     for (i = 0; i < arrTemp.length; i++) {
         container[5 + i] = arrTemp[i];
     }
@@ -70,7 +70,7 @@ var encodeMessage = function(message, keys){
     keyshift = 0;
     for (var c in keys) {
 
-        arrTemp = hexToBytes(c); // keyhash
+        arrTemp = hexToBytes(c, 20); // keyhash
         for (i = 0; i < arrTemp.length; i++) {
             container[316 + i + keyshift*148] = arrTemp[i];
         }
@@ -78,7 +78,7 @@ var encodeMessage = function(message, keys){
         var testRsa = new RSAKey();
         testRsa.setPublic(keys[c], '10001');
 
-        arrTemp = hexToBytes(testRsa.encrypt(pwd)); // crypted password
+        arrTemp = hexToBytes(testRsa.encrypt(pwd), 128); // crypted password
         for (i = 0; i < arrTemp.length; i++) {
             container[336 + i + keyshift*148] = arrTemp[i];
         }
@@ -93,7 +93,7 @@ var encodeMessage = function(message, keys){
 
     sig = rsa.signStringWithSHA256(signedPart);
 
-    arrTemp = hexToBytes(sig); // keyhash
+    arrTemp = hexToBytes(sig, 128); // keyhash
     for (i = 0; i < arrTemp.length; i++) {
         container[133 + i] = arrTemp[i];
     }
