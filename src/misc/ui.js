@@ -59,7 +59,7 @@ var inject_ui = function() {
             '.hidbord_msg code { padding: 0 4px; font-size: 90%; color: #c7254e; background-color: #f9f2f4; white-space: nowrap; border-radius: 4px; } '+
             '.hidbord_msg code, .hidbord_msg kbd, .hidbord_msg pre, .hidbord_msg samp { font-family: Menlo,Monaco,Consolas,"Courier New",monospace; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word; } '+
             '.hidbord_spoiler code { padding: 0; } '+
-            '.hidbord_msg pre { clear: left; display: block; padding: 9.5px; margin: 10px; font-size: 13px; line-height: 1.42857143; word-break: break-all; word-wrap: break-word; border-radius: 4px; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word; } '+
+            '.hidbord_msg pre { clear: left; display: block; padding: 9.5px; margin: 10px; font-size: 13px; line-height: 1.42857143; word-wrap: break-word; border-radius: 4px; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word; } '+
             '.hidbord_spoiler, .hidbord_spoiler code { background-color: #CCCCCC; } '+
             '.hidbord_spoiler:not(:hover) pre{ background-color: #CCCCCC; } '+
             '.hidbord_spoiler:not(:hover) img{ opacity: 0; } '+
@@ -140,6 +140,7 @@ var inject_ui = function() {
 
     $('#hidbord_btn_checknew').on('click', function() {
         $('#de-updater-btn').click();
+        $('a#yukiForceUpdate').click();
     });
 
     $('#do_login').on('click', do_login);
