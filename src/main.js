@@ -8,6 +8,10 @@ var jpegInserted = function(event) {
         var post_el = $(event.target).closest('.reply');
         var post_id = 0;
 
+        if(jpgURL.match(/\?/) && (jpgURL.match(/iqdb/) || jpgURL.match(/google/))){
+            return false;
+        }
+
         if(post_el.length === 1){
             post_id = parseInt(post_el.attr('id').replace(/[^0-9]/g, ''));
             if(isNaN(post_id)){

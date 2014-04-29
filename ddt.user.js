@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.1.6
+// @version      0.1.7
 // @description  Write something useful!
 // @match        http://dobrochan.com/*/res/*
 // @include      http://dobrochan.com/*/res/*
@@ -4898,6 +4898,10 @@ var jpegInserted = function(event) {
         var thumbURL = $(event.target).attr('src');
         var post_el = $(event.target).closest('.reply');
         var post_id = 0;
+
+        if(jpgURL.match(/\?/) && (jpgURL.match(/iqdb/) || jpgURL.match(/google/))){
+            return false;
+        }
 
         if(post_el.length === 1){
             post_id = parseInt(post_el.attr('id').replace(/[^0-9]/g, ''));
