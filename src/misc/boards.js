@@ -1,7 +1,7 @@
 var upload_handler = (new Date()).getTime() * 10000;
 ParseUrl = function(url){
     "use strict";
-    m = (url || document.location.href).match( /https?:\/\/([^\/]+)\/([^\/]+)\/((\d+)|res\/(\d+)|\w+)(\.x?html)?(#i?(\d+))?/);
+    var m = (url || document.location.href).match( /https?:\/\/([^\/]+)\/([^\/]+)\/((\d+)|res\/(\d+)|\w+)(\.x?html)?(#i?(\d+))?/);
     return m?{host:m[1], board:m[2], page:m[4], thread:m[5], pointer:m[8]}:{};
 };
 var Hanabira={URL:ParseUrl()};

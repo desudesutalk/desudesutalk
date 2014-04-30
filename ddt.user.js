@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.1.7
+// @version      0.1.8
 // @description  Write something useful!
 // @match        http://dobrochan.com/*/res/*
 // @include      http://dobrochan.com/*/res/*
@@ -2860,7 +2860,7 @@ var hljs=new function(){function j(v){return v.replace(/&/gm,"&amp;").replace(/<
 var upload_handler = (new Date()).getTime() * 10000;
 ParseUrl = function(url){
     "use strict";
-    m = (url || document.location.href).match( /https?:\/\/([^\/]+)\/([^\/]+)\/((\d+)|res\/(\d+)|\w+)(\.x?html)?(#i?(\d+))?/);
+    var m = (url || document.location.href).match( /https?:\/\/([^\/]+)\/([^\/]+)\/((\d+)|res\/(\d+)|\w+)(\.x?html)?(#i?(\d+))?/);
     return m?{host:m[1], board:m[2], page:m[4], thread:m[5], pointer:m[8]}:{};
 };
 var Hanabira={URL:ParseUrl()};
