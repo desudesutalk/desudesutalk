@@ -19,7 +19,12 @@ var add_contact = function(e) {
 
 function safe_tags(str) {
     "use strict";
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') ;
+
+    if(str && typeof str === 'string'){
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    return "";
 }
 
 var getContactHTML = function(hash, key) {

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.1.8
+// @version      0.1.9
 // @description  Write something useful!
 // @match        http://dobrochan.com/*/res/*
 // @include      http://dobrochan.com/*/res/*
@@ -3099,7 +3099,12 @@ var add_contact = function(e) {
 
 function safe_tags(str) {
     "use strict";
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') ;
+
+    if(str && typeof str === 'string'){
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    return "";
 }
 
 var getContactHTML = function(hash, key) {
