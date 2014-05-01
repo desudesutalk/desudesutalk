@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.1.11
+// @version      0.1.12
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/res/*
 // @include      http://dobrochan.ru/*/res/*
@@ -3612,7 +3612,28 @@ var ab2Str = function(buffer) {
 
 var getURLasAB = function(URL, cb) {
     "use strict";
-    
+
+    if(URL[0]=='/' && URL[1]=='/'){
+        URL = 'http:' + URL;
+    }
+
+    /*jshint newcap: false  */
+    if (typeof GM_xmlhttpRequest === "function") {
+        GM_xmlhttpRequest({
+            method: "GET",
+            responseType: 'arraybuffer',
+            url: URL,
+            onload: function(oEvent) {
+                var arrayBuffer = oEvent.response; // Note: not oReq.responseText
+                var byteArray = new Uint8Array(arrayBuffer);
+                if (arrayBuffer) {
+                    cb(arrayBuffer, new Date(0));
+                }
+            }
+        });
+        return true;
+    }
+
     var oReq = new XMLHttpRequest();
 
     oReq.open("GET", URL, true);
