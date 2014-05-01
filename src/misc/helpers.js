@@ -188,11 +188,11 @@ var ab2Str = function(buffer) {
 var getURLasAB = function(URL, cb) {
     "use strict";
 
-    if(URL[0]=='/' && URL[1]=='/'){
+/*    if(URL[0]=='/' && URL[1]=='/'){
         URL = 'http:' + URL;
     }
 
-    /*jshint newcap: false  */
+    /*jshint newcap: false  * /
     if (typeof GM_xmlhttpRequest === "function") {
         GM_xmlhttpRequest({
             method: "GET",
@@ -207,7 +207,7 @@ var getURLasAB = function(URL, cb) {
             }
         });
         return true;
-    }
+    }*/
 
     var oReq = new XMLHttpRequest();
 
