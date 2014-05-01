@@ -36,7 +36,7 @@ var sendBoardForm = function(file) {
     }
 
 
-    if (document.URL.match(/\/8chan.co\//)) {
+    if ($('form[name*="postcontrols"]').length !==0) {
         fd.append('post', $('#de-pform input[type=submit]').val());
     }
 
