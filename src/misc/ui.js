@@ -589,6 +589,7 @@ var showReplyform = function(msg_id, textInsert) {
             '              <span title="Strike"><input value="S" style="font-weight: bold; text-decoration: line-through" type="button" id="hidbordBtStrike"></span>' +
             '              <span title="Spoiler"><input value="%" style="font-weight: bold;" type="button" id="hidbordBtSpoiler"></span>' +
             '              <span title="Code"><input value="C" style="font-weight: bold;" type="button" id="hidbordBtCode"></span>' +
+            '              <span title="irony"><input value=":)" style="font-weight: bold;" type="button" id="hidbordBtCode"></span>' +
             '              <span title="Quote selected"><input value=">" style="font-weight: bold;" type="button" id="hidbordBtQuote"></span>' +
             '            </span>  ' +
             '      </div>  ' +
@@ -645,9 +646,10 @@ var showReplyform = function(msg_id, textInsert) {
                 }
             }
 
-            if (mode == 'B' || mode == 'i' || mode == 'S') {
-                 tag = mode == 'B' ? '**' : '*';
+            if (mode == 'B' || mode == 'i' || mode == 'S' || mode == ':)') {
+                tag = mode == 'B' ? '**' : '*';
                 tag = mode == 'S' ? '--' : tag;
+                tag = mode == ':)' ? '++' : tag;
                  selected = ta.val().substring(taStart, taEnd).split("\n");
                 for (var i = 0; i < selected.length; i++) {
                     parts = selected[i].match(/^(\s*)(.*?)(\s*)$/);

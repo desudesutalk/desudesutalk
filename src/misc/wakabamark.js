@@ -250,7 +250,8 @@ var parseOneLineTags = function(match, tag, str) {
         "**": ["<strong>", "</strong>"],
         "_":  ["<em>", "</em>"],
         "__": ["<strong>", "</strong>"],
-        "--": ["<strike>", "</strike>"]
+        "--": ["<strike>", "</strike>"],
+        "++": ["<span style='color: #ee0000; font-style: italic;'>", "</span>"]
     }, res;
 
     // fix escaping of %
@@ -258,7 +259,7 @@ var parseOneLineTags = function(match, tag, str) {
 
     res = tag === null ? saveURLs(saveCode(str)).replace(/\&/g, '&amp;').replace(/</g, '&lt;').replace(/\>/g, '&gt;') : str;
 
-    res = res.replace(/(\*\*|\*|\_\_|\_|\%\%|\-\-)(([^\s]|[^\s].*?[^\s])[\*\_]?)\1/g, parseOneLineTags);
+    res = res.replace(/(\*\*|\*|\_\_|\_|\%\%|\-\-|\+\+)(([^\s]|[^\s].*?[^\s])[\*\_]?)\1/g, parseOneLineTags);
 
     if (tag === null) {
         //imoticons

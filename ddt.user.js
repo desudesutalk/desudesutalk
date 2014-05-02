@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.1.15
+// @version      0.1.16
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/res/*
 // @include      http://dobrochan.ru/*/res/*
@@ -4421,6 +4421,7 @@ var showReplyform = function(msg_id, textInsert) {
             '              <span title="Strike"><input value="S" style="font-weight: bold; text-decoration: line-through" type="button" id="hidbordBtStrike"></span>' +
             '              <span title="Spoiler"><input value="%" style="font-weight: bold;" type="button" id="hidbordBtSpoiler"></span>' +
             '              <span title="Code"><input value="C" style="font-weight: bold;" type="button" id="hidbordBtCode"></span>' +
+            '              <span title="irony"><input value=":)" style="font-weight: bold;" type="button" id="hidbordBtCode"></span>' +
             '              <span title="Quote selected"><input value=">" style="font-weight: bold;" type="button" id="hidbordBtQuote"></span>' +
             '            </span>  ' +
             '      </div>  ' +
@@ -4477,9 +4478,10 @@ var showReplyform = function(msg_id, textInsert) {
                 }
             }
 
-            if (mode == 'B' || mode == 'i' || mode == 'S') {
-                 tag = mode == 'B' ? '**' : '*';
+            if (mode == 'B' || mode == 'i' || mode == 'S' || mode == ':)') {
+                tag = mode == 'B' ? '**' : '*';
                 tag = mode == 'S' ? '--' : tag;
+                tag = mode == ':)' ? '++' : tag;
                  selected = ta.val().substring(taStart, taEnd).split("\n");
                 for (var i = 0; i < selected.length; i++) {
                     parts = selected[i].match(/^(\s*)(.*?)(\s*)$/);
@@ -4871,7 +4873,8 @@ var parseOneLineTags = function(match, tag, str) {
         "**": ["<strong>", "</strong>"],
         "_":  ["<em>", "</em>"],
         "__": ["<strong>", "</strong>"],
-        "--": ["<strike>", "</strike>"]
+        "--": ["<strike>", "</strike>"],
+        "++": ["<span style='color: #ee0000; font-style: italic;'>", "</span>"]
     }, res;
 
     // fix escaping of %
@@ -4879,7 +4882,7 @@ var parseOneLineTags = function(match, tag, str) {
 
     res = tag === null ? saveURLs(saveCode(str)).replace(/\&/g, '&amp;').replace(/</g, '&lt;').replace(/\>/g, '&gt;') : str;
 
-    res = res.replace(/(\*\*|\*|\_\_|\_|\%\%|\-\-)(([^\s]|[^\s].*?[^\s])[\*\_]?)\1/g, parseOneLineTags);
+    res = res.replace(/(\*\*|\*|\_\_|\_|\%\%|\-\-|\+\+)(([^\s]|[^\s].*?[^\s])[\*\_]?)\1/g, parseOneLineTags);
 
     if (tag === null) {
         //imoticons
