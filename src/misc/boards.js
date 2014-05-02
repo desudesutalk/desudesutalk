@@ -80,6 +80,7 @@ var sendBoardForm = function(file) {
                 $('#de-pform img[src*=captcha]').click();
                 $('#hidbord_replyform #c_file').val('');
                 $('#de-updater-btn').click();
+                $('#de-thrupdbtn').click();
                 $('a#yukiForceUpdate').click();
                 replyForm.remove();
                 replyForm = null;
