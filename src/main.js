@@ -1,4 +1,5 @@
 var isDobro = !!document.URL.match(/\/dobrochan\.[comrgu]+\//);
+var is4chan = !!document.URL.match(/\/boards\.4chan\.org\//);
 
 var jpegInserted = function(event) {
     "use strict";

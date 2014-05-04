@@ -28,6 +28,17 @@ var sendBoardForm = function(file) {
         formAction = '/' + Hanabira.URL.board + '/post/new.xhtml' + "?X-Progress-ID=" + upload_handler;   
     }
 
+    if(is4chan){
+        var forForm = $('form[name=post]');
+        if($('form[name=qrPost]').length !==0){
+            forForm = $('form[name=qrPost]');
+        }
+
+        formData = forForm.serializeArray();
+        fileInputName = forForm.find("input[type=file]")[0].name;
+        formAction = forForm[0].action; 
+    }
+
 
     for (var i = 0; i < formData.length; i++) {
         if (formData[i].name != fileInputName) {
@@ -70,6 +81,10 @@ var sendBoardForm = function(file) {
                     if(isDobro && data.match(/parent\.location\.replace/)){
                         p = 1;
                     }
+
+                    if(is4chan && data.indexOf('<title>Post successful!</title>') != -1){
+                        p = 1;
+                    }
             } else {
                 p = 1;
             }
@@ -82,6 +97,14 @@ var sendBoardForm = function(file) {
                 $('#de-updater-btn').click();
                 $('#de-thrupdbtn').click();
                 $('a#yukiForceUpdate').click();
+                if(is4chan){
+                    setTimeout(function() {$('a[data-cmd=update]').first().click();}, 2500);                    
+                    $('#qrCapField').val('');
+                    $('#recaptcha_response_field').val('');
+                    $('#recaptcha_challenge_image').click();
+                    $('#qrCaptcha').click();
+                    $('textarea[name=com]').val('');
+                }
                 replyForm.remove();
                 replyForm = null;
                 container_image = null;

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.1.18
+// @version      0.1.19
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/res/*
 // @include      http://dobrochan.ru/*/res/*
@@ -14,6 +14,8 @@
 // @include      http://syn-ch.com/*/res/*
 // @include      http://syn-ch.org/*/res/*
 // @include      http://syn-ch.ru/*/res/*
+// @include      https://boards.4chan.org/*/thread/*
+// @include      http://boards.4chan.org/*/thread/*
 // @copyright    2014+, Boku 
 // @icon         https://github.com/desudesutalk/desudesutalk/raw/master/icon.jpg
 // @updateURL    https://github.com/desudesutalk/desudesutalk/raw/master/ddt.meta.js
@@ -2882,6 +2884,17 @@ var sendBoardForm = function(file) {
         formAction = '/' + Hanabira.URL.board + '/post/new.xhtml' + "?X-Progress-ID=" + upload_handler;   
     }
 
+    if(is4chan){
+        var forForm = $('form[name=post]');
+        if($('form[name=qrPost]').length !==0){
+            forForm = $('form[name=qrPost]');
+        }
+
+        formData = forForm.serializeArray();
+        fileInputName = forForm.find("input[type=file]")[0].name;
+        formAction = forForm[0].action; 
+    }
+
 
     for (var i = 0; i < formData.length; i++) {
         if (formData[i].name != fileInputName) {
@@ -2924,6 +2937,10 @@ var sendBoardForm = function(file) {
                     if(isDobro && data.match(/parent\.location\.replace/)){
                         p = 1;
                     }
+
+                    if(is4chan && data.indexOf('<title>Post successful!</title>') != -1){
+                        p = 1;
+                    }
             } else {
                 p = 1;
             }
@@ -2936,6 +2953,14 @@ var sendBoardForm = function(file) {
                 $('#de-updater-btn').click();
                 $('#de-thrupdbtn').click();
                 $('a#yukiForceUpdate').click();
+                if(is4chan){
+                    setTimeout(function() {$('a[data-cmd=update]').first().click();}, 2500);                    
+                    $('#qrCapField').val('');
+                    $('#recaptcha_response_field').val('');
+                    $('#recaptcha_challenge_image').click();
+                    $('#qrCaptcha').click();
+                    $('textarea[name=com]').val('');
+                }
                 replyForm.remove();
                 replyForm = null;
                 container_image = null;
@@ -3692,26 +3717,26 @@ var ab2Str = function(buffer) {
 var getURLasAB = function(URL, cb) {
     "use strict";
 
-/*    if(URL[0]=='/' && URL[1]=='/'){
+    if(URL[0]=='/' && URL[1]=='/'){
         URL = 'http:' + URL;
     }
 
-    /*jshint newcap: false  * /
+    /*jshint newcap: false  */
     if (typeof GM_xmlhttpRequest === "function") {
         GM_xmlhttpRequest({
             method: "GET",
-            responseType: 'arraybuffer',
+            responseType: 'blob',
             url: URL,
             onload: function(oEvent) {
-                var arrayBuffer = oEvent.response; // Note: not oReq.responseText
-                var byteArray = new Uint8Array(arrayBuffer);
-                if (arrayBuffer) {
-                    cb(arrayBuffer, new Date(0));
-                }
+                var fileReader = new FileReader();
+                fileReader.onload = function() {
+                    cb(this.result, new Date(0));
+                };
+                fileReader.readAsArrayBuffer(oEvent.response);      
             }
         });
         return true;
-    }*/
+    }
 
     var oReq = new XMLHttpRequest();
 
@@ -5034,6 +5059,7 @@ var parseOneLineTags = function(match, tag, str) {
 };
 
 var isDobro = !!document.URL.match(/\/dobrochan\.[comrgu]+\//);
+var is4chan = !!document.URL.match(/\/boards\.4chan\.org\//);
 
 var jpegInserted = function(event) {
     "use strict";

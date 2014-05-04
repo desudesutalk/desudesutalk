@@ -188,26 +188,26 @@ var ab2Str = function(buffer) {
 var getURLasAB = function(URL, cb) {
     "use strict";
 
-/*    if(URL[0]=='/' && URL[1]=='/'){
+    if(URL[0]=='/' && URL[1]=='/'){
         URL = 'http:' + URL;
     }
 
-    /*jshint newcap: false  * /
+    /*jshint newcap: false  */
     if (typeof GM_xmlhttpRequest === "function") {
         GM_xmlhttpRequest({
             method: "GET",
-            responseType: 'arraybuffer',
+            responseType: 'blob',
             url: URL,
             onload: function(oEvent) {
-                var arrayBuffer = oEvent.response; // Note: not oReq.responseText
-                var byteArray = new Uint8Array(arrayBuffer);
-                if (arrayBuffer) {
-                    cb(arrayBuffer, new Date(0));
-                }
+                var fileReader = new FileReader();
+                fileReader.onload = function() {
+                    cb(this.result, new Date(0));
+                };
+                fileReader.readAsArrayBuffer(oEvent.response);      
             }
         });
         return true;
-    }*/
+    }
 
     var oReq = new XMLHttpRequest();
 
