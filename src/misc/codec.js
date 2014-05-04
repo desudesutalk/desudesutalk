@@ -51,6 +51,15 @@ var do_login = function() {
 var do_encode = function() {
     "use strict";
 
+    prev_to = $('#hidbord_cont_type').val();
+    prev_cont = $('#hidbord_cont_direct').val();
+
+    var to_group = null;
+
+    if(prev_to.indexOf('group_') === 0){
+        to_group = prev_to.substring(6);
+    }
+
     var payLoad = {};
 
     if(!container_data){
@@ -70,13 +79,35 @@ var do_encode = function() {
     keys[rsa_hash] = rsaProfile.n;
 
     for (var c in contacts) {
+        console.log(to_group, contacts[c].groups);
+
+        if(prev_to == 'direct' && c == prev_cont){
+            keys[c] = contacts[c].key;
+            continue;
+        }
+        
         if('hide' in contacts[c] && contacts[c].hide == 1){
             continue;
         }
+
+        console.log(to_group !== null , contacts[c].groups , $.isArray(contacts[c].groups) );
+
+        if(to_group !== null && contacts[c].groups && $.isArray(contacts[c].groups) ){
+            console.log('use', to_group in contacts[c].groups);
+        }
+
+        if(to_group !== null && contacts[c].groups && $.isArray(contacts[c].groups) && contacts[c].groups.indexOf(to_group) != -1){
+            keys[c] = contacts[c].key;
+        }
+
+        if(prev_to == 'direct' || to_group !== null){
+            continue;
+        }
+
         keys[c] = contacts[c].key;
     }
 
-    var p = encodeMessage(payLoad,keys);
+    var p = encodeMessage(payLoad,keys, 0);
     var testEncode = decodeMessage(p);
 
     if(!testEncode || testEncode.status != "OK"){

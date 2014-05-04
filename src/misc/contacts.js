@@ -1,4 +1,4 @@
-var contacts = {};
+var contacts = {}, cont_groups = [];
 
 var add_contact = function(e) {
     "use strict";
@@ -10,7 +10,8 @@ var add_contact = function(e) {
     contacts[rsa_hash] = {
         key: key,
         name: name,
-        hide: 0
+        hide: 0,
+        groups: []
     };
 
     localStorage.setItem('magic_desu_contacts', JSON.stringify(contacts));
@@ -50,8 +51,29 @@ var getContactHTML = function(hash, key) {
 
 };
 
+var contactsSelector = function(){
+    "use strict";
+    var code = '<div id="hidbord_contacts_select"><strong>to:</strong>&nbsp;<select id="hidbord_cont_type"><option selected="selected" value="all">All</option><option value="direct">Direct</option><option disabled="disabled">Groups:</option>';
+
+    for (var i = 0; i < cont_groups.length; i++) {
+        code += '<option value="group_'+safe_tags(cont_groups[i])+'">'+safe_tags(cont_groups[i])+'</option>';
+    }
+    
+    code += '</select>&nbsp;<select id="hidbord_cont_direct" style="display: none;">';
+    
+    for (var c in contacts) {
+        code += '<option value="'+c+'">'+safe_tags(contacts[c].name)+'</option>';
+    }
+
+    code += '</select>';
+
+    return code + '</div>';
+};
+
 var render_contact = function() {
     "use strict";
+
+    cont_groups = {};
 
     var code = '<br><a href="data:text/plain;base64,' + strToDataUri(encodeURIComponent(JSON.stringify(contacts))) + 
                '" download="[DDT] Contacts - ' + document.location.host + ' - ' + dateToStr(new Date(), true) + 
@@ -59,12 +81,24 @@ var render_contact = function() {
 
     for (var c in contacts) {
         var ren_action = ('hide' in contacts[c] && contacts[c].hide == 1) ? 'enable' : 'disable';
+        var groups_list = '';
+
+        if(contacts[c].groups && $.isArray(contacts[c].groups) && contacts[c].groups.length > 0){
+            groups_list = '<div style="float:right; color: #999;">['+safe_tags(contacts[c].groups.join('; '))+']</div>';
+            for (var i = 0; i < contacts[c].groups.length; i++) {
+                var grp = contacts[c].groups[i].trim().toLowerCase();
+                cont_groups[grp] = grp;
+            }
+        }
+
+
         code += '<div class="hidbord_msg">' +
             '<div class="cont_identi" style="float: left">' + c + '</div>' +
             '<div  style="float: left; padding: 5px;">' + getContactHTML(c) + '<br/><i style="color: #090">' + c + '</i><br/>' +
             '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">delete</a>]</sub> '+
             '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">' + ren_action + '</a>]</sub> '+
-            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">rename</a>]</sub></div><br style="clear: both;"/></div>';
+            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">rename</a>]</sub>'+
+            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">groups</a>]</sub></div>'+groups_list+'<br style="clear: both;"/></div>';
     }
 
     var cont_list = $(code);
@@ -78,13 +112,14 @@ var render_contact = function() {
     $('.hidbord_contacts').empty().append(cont_list);
     $('.hidbord_contacts #cont_import_file').on('change', import_contact);
 
+    cont_groups = Object.keys(cont_groups).sort();
 };
 
 var manage_contact = function(e) {
     "use strict";
 
     var action = $(e.target).text(),
-        key = $(e.target).attr('alt'), name;
+        key = $(e.target).attr('alt'), name, prmpt;
     
     if (action == 'delete' && confirm('Really delete?')) {
         delete contacts[key];
@@ -98,8 +133,20 @@ var manage_contact = function(e) {
         contacts[key].hide = 0;
     }
 
-    if (action == 'rename') {        
-        contacts[key].name = '' + prompt("Name this contact:", contacts[key].name);
+    if (action == 'rename') {
+        prmpt = prompt("Name this contact:", contacts[key].name);
+        if(prmpt !== null) contacts[key].name = '' + prmpt;
+    }
+
+    if (action == 'groups') {
+        prmpt = prompt("Groups separated by semicolon (;)", $.isArray(contacts[key].groups) ? contacts[key].groups.join('; ') : "");
+        if(prmpt !== null){
+            if(prmpt === ''){
+                contacts[key].groups = [];
+            }else{
+                contacts[key].groups = prmpt.split(';').map(function(s){return s.trim().toLowerCase();}).sort();
+            }
+        }
     }
 
     localStorage.setItem('magic_desu_contacts', JSON.stringify(contacts));

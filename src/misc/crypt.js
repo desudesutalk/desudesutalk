@@ -1,6 +1,6 @@
-var CODEC_VERSION = 1;
+var CODEC_VERSION = 1, MESSAGE_NORMAL = 0, MESSAGE_DIRECT = 1;
 
-var encodeMessage = function(message, keys){
+var encodeMessage = function(message, keys, msg_type){
     'use strict';
 
     var i, pwd,salt,iv,preIter, arrTemp, keyshift, rp, p, sig,
@@ -46,7 +46,7 @@ var encodeMessage = function(message, keys){
         container[5 + i] = arrTemp[i];
     }
 
-    container[261] = 0; //type of message
+    container[261] = msg_type; //type of message
     container[262] = compressedAt & 255; //coding unix_timestamp
     container[263] = (compressedAt >> 8) & 255;
     container[264] = (compressedAt >> 16) & 255;

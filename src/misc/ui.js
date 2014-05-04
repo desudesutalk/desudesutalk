@@ -19,17 +19,14 @@ var inject_ui = function() {
             '    </div>'+
             '    <div class="hidbord_contacts hidbord_maincontent" style="display: none"></div>'+
             '    <div class="hidbord_config hidbord_maincontent" style="display: none">'+
+            '    <div class="hidbord_msg"><p id="identi" style="text-align: center;"></p>'+
             '        <form name="loginform">'+
-            '            <div style="border: 1px solid #999; background-color: #eee; padding: 5px;">'+
-            '                <div id="identi" style="float: left"></div>'+
-            '                <div style="float: left; padding: 5px;">Password:'+
-            '                    <input name="passwd" type="text" value="" size=10>Magic number:'+
+            '            <p  style="text-align: center;">'+
+            '                    Password: <input name="passwd" type="text" value="" size=10> Magic number:'+
             '                    <input name="magik_num" type="text" value="" size=10>'+
             '                    <input type="button" value="log in" id="do_login">'+
-            '                </div>'+
-            '                <br style="clear: both;" />'+
-            '            </div>'+
-            '        </form>'+
+            '            </p>'+
+            '        </form></div>'+
             '    </div>'+
             '    <div class="hidbord_head">'+
             '        <img alt="Moshi moshi!" title="Moshi moshi!" src="' + desudesuicon +'" width="64" style="float:left;" class="hidbord_clickable" id="hidbord_headicon">'+
@@ -132,6 +129,7 @@ var inject_ui = function() {
             rotate: true,
             size: 64
         });
+        $('#identi').append('<br/><br/><i style="color: #090;">'+rsa_hash+'</i>');
         $('#pub_key_info').val(linebrk(rsa.n.toString(16), 64));
     }
 
@@ -290,7 +288,7 @@ var push_msg = function(msg, msgPrepend, thumb) {
     person = getContactHTML(msg.keyid, msg.pubkey);
 
     var code = '<div class="hidbord_msg hidbord_msg_new" id="msg_' + msg.id + '">'+
-            '    <div class="hidbord_mnu"><a href="javascript:;" id="hidbord_mnu_info">info</a> <a href="javascript:;" class="hidbord_mnu_reply">reply</a></div>'+
+            '    <div class="hidbord_mnu"><a href="javascript:;" id="hidbord_mnu_info">info</a> <a href="javascript:;" class="hidbord_mnu_replydirect">direct</a> <a href="javascript:;" class="hidbord_mnu_reply">reply</a></div>'+
             '    <div class="hidbord_msg_header hidbord_hidden" >'+
             '        <div style="float:left; width:40px; background: #fff;" class="idntcn">' + msg.keyid + '</div>'+
             '        <div style="float:left;padding-left: 5px;">' + person + ' <i style="color: #999;">(' + msgTimeTxt + ')  <span href="javascript:;" class="hidbord_mnu_reply hidbord_clickable">#'+msg.id.substr(0, 8)+'</span></i>'+
@@ -321,6 +319,7 @@ var push_msg = function(msg, msgPrepend, thumb) {
 
     $("#msg_" + msg.id + ' .hidbord_mnu_reply').on('click', replytoMsg);
     $("#msg_" + msg.id + ' .hidbord_usr_reply').on('click', replytoUsr);
+    $("#msg_" + msg.id + ' .hidbord_mnu_replydirect').on('click', replytoMsgDirect);
 
     $("#msg_" + msg.id + ' #hidbord_mnu_info').on('click', function(e){
         var msg_id = $(e.target).closest('.hidbord_msg').first().attr('id');
@@ -488,6 +487,30 @@ var replytoMsg = function(e) {
     showReplyform('#msg_' + msg_id, '>>' + msg_id);
 };
 
+var replytoMsgDirect = function(e) {
+    "use strict";
+
+    var msg_id = $(e.target).closest('.hidbord_msg').first().attr('id').replace(/^msg\_/, ''),
+        usr_id = $(e.target).closest('.hidbord_msg').first().find('.hidbord_usr_reply').attr('alt');
+
+    if(rsa_hash == usr_id){
+        alert('So ronery?');
+        return false;
+    }
+
+    if(!(usr_id in contacts)){
+        alert('Unknow contact!');
+        return false;
+    }
+
+    console.log(usr_id);
+    showReplyform('#msg_' + msg_id, '>>' + msg_id);
+    $('#hidbord_cont_type').val('direct').trigger('change');
+    $('#hidbord_cont_direct').val(usr_id);
+};
+
+
+
 var replytoUsr = function(e) {
 	"use strict";
 
@@ -565,6 +588,8 @@ var do_imgpreview_popup = function(e) {
 
 };
 
+var prev_to = null, prev_cont = null;
+
 var showReplyform = function(msg_id, textInsert) {
 	"use strict";
 
@@ -579,6 +604,7 @@ var showReplyform = function(msg_id, textInsert) {
             '  <div class="hidbord_mnu"><a href="javascript:;" id="hidbordform_hide">hide</a></div>' +
             '  </div>' +
             '  <hr style="clear:both;">' +
+            contactsSelector()+
             '  <div>' +
             '    <div style="margin:  3px;">' +
             '      <div style="width: 590px;">' +
@@ -604,6 +630,20 @@ var showReplyform = function(msg_id, textInsert) {
         replyForm = $('#hidbord_replyform');
 
 //        console.log('ddd', $('#hidbord_replyform'));
+
+
+        $('#hidbord_cont_type').on('change',function(){
+            if($('#hidbord_cont_type').val()=='direct'){
+                $('#hidbord_cont_direct').show();
+            }else{
+                $('#hidbord_cont_direct').hide();
+            }
+        });
+
+        if(prev_to !== null){
+            $('#hidbord_cont_type').val(prev_to).trigger('change');
+            $('#hidbord_cont_direct').val(prev_cont);
+        }
 
         $('#hidbord_replyform .idntcn').identicon5({
             rotate: true,

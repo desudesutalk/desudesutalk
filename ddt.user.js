@@ -3013,6 +3013,15 @@ var do_login = function() {
 var do_encode = function() {
     "use strict";
 
+    prev_to = $('#hidbord_cont_type').val();
+    prev_cont = $('#hidbord_cont_direct').val();
+
+    var to_group = null;
+
+    if(prev_to.indexOf('group_') === 0){
+        to_group = prev_to.substring(6);
+    }
+
     var payLoad = {};
 
     if(!container_data){
@@ -3032,13 +3041,35 @@ var do_encode = function() {
     keys[rsa_hash] = rsaProfile.n;
 
     for (var c in contacts) {
+        console.log(to_group, contacts[c].groups);
+
+        if(prev_to == 'direct' && c == prev_cont){
+            keys[c] = contacts[c].key;
+            continue;
+        }
+        
         if('hide' in contacts[c] && contacts[c].hide == 1){
             continue;
         }
+
+        console.log(to_group !== null , contacts[c].groups , $.isArray(contacts[c].groups) );
+
+        if(to_group !== null && contacts[c].groups && $.isArray(contacts[c].groups) ){
+            console.log('use', to_group in contacts[c].groups);
+        }
+
+        if(to_group !== null && contacts[c].groups && $.isArray(contacts[c].groups) && contacts[c].groups.indexOf(to_group) != -1){
+            keys[c] = contacts[c].key;
+        }
+
+        if(prev_to == 'direct' || to_group !== null){
+            continue;
+        }
+
         keys[c] = contacts[c].key;
     }
 
-    var p = encodeMessage(payLoad,keys);
+    var p = encodeMessage(payLoad,keys, 0);
     var testEncode = decodeMessage(p);
 
     if(!testEncode || testEncode.status != "OK"){
@@ -3074,7 +3105,7 @@ var do_decode = function(message, msgPrepend, thumb, fdate, post_id) {
     return true;
 };
 
-var contacts = {};
+var contacts = {}, cont_groups = [];
 
 var add_contact = function(e) {
     "use strict";
@@ -3086,7 +3117,8 @@ var add_contact = function(e) {
     contacts[rsa_hash] = {
         key: key,
         name: name,
-        hide: 0
+        hide: 0,
+        groups: []
     };
 
     localStorage.setItem('magic_desu_contacts', JSON.stringify(contacts));
@@ -3126,8 +3158,29 @@ var getContactHTML = function(hash, key) {
 
 };
 
+var contactsSelector = function(){
+    "use strict";
+    var code = '<div id="hidbord_contacts_select"><strong>to:</strong>&nbsp;<select id="hidbord_cont_type"><option selected="selected" value="all">All</option><option value="direct">Direct</option><option disabled="disabled">Groups:</option>';
+
+    for (var i = 0; i < cont_groups.length; i++) {
+        code += '<option value="group_'+safe_tags(cont_groups[i])+'">'+safe_tags(cont_groups[i])+'</option>';
+    }
+    
+    code += '</select>&nbsp;<select id="hidbord_cont_direct" style="display: none;">';
+    
+    for (var c in contacts) {
+        code += '<option value="'+c+'">'+safe_tags(contacts[c].name)+'</option>';
+    }
+
+    code += '</select>';
+
+    return code + '</div>';
+};
+
 var render_contact = function() {
     "use strict";
+
+    cont_groups = {};
 
     var code = '<br><a href="data:text/plain;base64,' + strToDataUri(encodeURIComponent(JSON.stringify(contacts))) + 
                '" download="[DDT] Contacts - ' + document.location.host + ' - ' + dateToStr(new Date(), true) + 
@@ -3135,12 +3188,24 @@ var render_contact = function() {
 
     for (var c in contacts) {
         var ren_action = ('hide' in contacts[c] && contacts[c].hide == 1) ? 'enable' : 'disable';
+        var groups_list = '';
+
+        if(contacts[c].groups && $.isArray(contacts[c].groups) && contacts[c].groups.length > 0){
+            groups_list = '<div style="float:right; color: #999;">['+safe_tags(contacts[c].groups.join('; '))+']</div>';
+            for (var i = 0; i < contacts[c].groups.length; i++) {
+                var grp = contacts[c].groups[i].trim().toLowerCase();
+                cont_groups[grp] = grp;
+            }
+        }
+
+
         code += '<div class="hidbord_msg">' +
             '<div class="cont_identi" style="float: left">' + c + '</div>' +
             '<div  style="float: left; padding: 5px;">' + getContactHTML(c) + '<br/><i style="color: #090">' + c + '</i><br/>' +
             '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">delete</a>]</sub> '+
             '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">' + ren_action + '</a>]</sub> '+
-            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">rename</a>]</sub></div><br style="clear: both;"/></div>';
+            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">rename</a>]</sub>'+
+            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">groups</a>]</sub></div>'+groups_list+'<br style="clear: both;"/></div>';
     }
 
     var cont_list = $(code);
@@ -3154,13 +3219,14 @@ var render_contact = function() {
     $('.hidbord_contacts').empty().append(cont_list);
     $('.hidbord_contacts #cont_import_file').on('change', import_contact);
 
+    cont_groups = Object.keys(cont_groups).sort();
 };
 
 var manage_contact = function(e) {
     "use strict";
 
     var action = $(e.target).text(),
-        key = $(e.target).attr('alt'), name;
+        key = $(e.target).attr('alt'), name, prmpt;
     
     if (action == 'delete' && confirm('Really delete?')) {
         delete contacts[key];
@@ -3174,8 +3240,20 @@ var manage_contact = function(e) {
         contacts[key].hide = 0;
     }
 
-    if (action == 'rename') {        
-        contacts[key].name = '' + prompt("Name this contact:", contacts[key].name);
+    if (action == 'rename') {
+        prmpt = prompt("Name this contact:", contacts[key].name);
+        if(prmpt !== null) contacts[key].name = '' + prmpt;
+    }
+
+    if (action == 'groups') {
+        prmpt = prompt("Groups separated by semicolon (;)", $.isArray(contacts[key].groups) ? contacts[key].groups.join('; ') : "");
+        if(prmpt !== null){
+            if(prmpt === ''){
+                contacts[key].groups = [];
+            }else{
+                contacts[key].groups = prmpt.split(';').map(function(s){return s.trim().toLowerCase();}).sort();
+            }
+        }
     }
 
     localStorage.setItem('magic_desu_contacts', JSON.stringify(contacts));
@@ -3220,9 +3298,9 @@ if (localStorage.getItem('magic_desu_contacts')) {
 //    console.log(contacts);
 }
 
-var CODEC_VERSION = 1;
+var CODEC_VERSION = 1, MESSAGE_NORMAL = 0, MESSAGE_DIRECT = 1;
 
-var encodeMessage = function(message, keys){
+var encodeMessage = function(message, keys, msg_type){
     'use strict';
 
     var i, pwd,salt,iv,preIter, arrTemp, keyshift, rp, p, sig,
@@ -3268,7 +3346,7 @@ var encodeMessage = function(message, keys){
         container[5 + i] = arrTemp[i];
     }
 
-    container[261] = 0; //type of message
+    container[261] = msg_type; //type of message
     container[262] = compressedAt & 255; //coding unix_timestamp
     container[263] = (compressedAt >> 8) & 255;
     container[264] = (compressedAt >> 16) & 255;
@@ -3851,17 +3929,14 @@ var inject_ui = function() {
             '    </div>'+
             '    <div class="hidbord_contacts hidbord_maincontent" style="display: none"></div>'+
             '    <div class="hidbord_config hidbord_maincontent" style="display: none">'+
+            '    <div class="hidbord_msg"><p id="identi" style="text-align: center;"></p>'+
             '        <form name="loginform">'+
-            '            <div style="border: 1px solid #999; background-color: #eee; padding: 5px;">'+
-            '                <div id="identi" style="float: left"></div>'+
-            '                <div style="float: left; padding: 5px;">Password:'+
-            '                    <input name="passwd" type="text" value="" size=10>Magic number:'+
+            '            <p  style="text-align: center;">'+
+            '                    Password: <input name="passwd" type="text" value="" size=10> Magic number:'+
             '                    <input name="magik_num" type="text" value="" size=10>'+
             '                    <input type="button" value="log in" id="do_login">'+
-            '                </div>'+
-            '                <br style="clear: both;" />'+
-            '            </div>'+
-            '        </form>'+
+            '            </p>'+
+            '        </form></div>'+
             '    </div>'+
             '    <div class="hidbord_head">'+
             '        <img alt="Moshi moshi!" title="Moshi moshi!" src="' + desudesuicon +'" width="64" style="float:left;" class="hidbord_clickable" id="hidbord_headicon">'+
@@ -3964,6 +4039,7 @@ var inject_ui = function() {
             rotate: true,
             size: 64
         });
+        $('#identi').append('<br/><br/><i style="color: #090;">'+rsa_hash+'</i>');
         $('#pub_key_info').val(linebrk(rsa.n.toString(16), 64));
     }
 
@@ -4122,7 +4198,7 @@ var push_msg = function(msg, msgPrepend, thumb) {
     person = getContactHTML(msg.keyid, msg.pubkey);
 
     var code = '<div class="hidbord_msg hidbord_msg_new" id="msg_' + msg.id + '">'+
-            '    <div class="hidbord_mnu"><a href="javascript:;" id="hidbord_mnu_info">info</a> <a href="javascript:;" class="hidbord_mnu_reply">reply</a></div>'+
+            '    <div class="hidbord_mnu"><a href="javascript:;" id="hidbord_mnu_info">info</a> <a href="javascript:;" class="hidbord_mnu_replydirect">direct</a> <a href="javascript:;" class="hidbord_mnu_reply">reply</a></div>'+
             '    <div class="hidbord_msg_header hidbord_hidden" >'+
             '        <div style="float:left; width:40px; background: #fff;" class="idntcn">' + msg.keyid + '</div>'+
             '        <div style="float:left;padding-left: 5px;">' + person + ' <i style="color: #999;">(' + msgTimeTxt + ')  <span href="javascript:;" class="hidbord_mnu_reply hidbord_clickable">#'+msg.id.substr(0, 8)+'</span></i>'+
@@ -4153,6 +4229,7 @@ var push_msg = function(msg, msgPrepend, thumb) {
 
     $("#msg_" + msg.id + ' .hidbord_mnu_reply').on('click', replytoMsg);
     $("#msg_" + msg.id + ' .hidbord_usr_reply').on('click', replytoUsr);
+    $("#msg_" + msg.id + ' .hidbord_mnu_replydirect').on('click', replytoMsgDirect);
 
     $("#msg_" + msg.id + ' #hidbord_mnu_info').on('click', function(e){
         var msg_id = $(e.target).closest('.hidbord_msg').first().attr('id');
@@ -4320,6 +4397,30 @@ var replytoMsg = function(e) {
     showReplyform('#msg_' + msg_id, '>>' + msg_id);
 };
 
+var replytoMsgDirect = function(e) {
+    "use strict";
+
+    var msg_id = $(e.target).closest('.hidbord_msg').first().attr('id').replace(/^msg\_/, ''),
+        usr_id = $(e.target).closest('.hidbord_msg').first().find('.hidbord_usr_reply').attr('alt');
+
+    if(rsa_hash == usr_id){
+        alert('So ronery?');
+        return false;
+    }
+
+    if(!(usr_id in contacts)){
+        alert('Unknow contact!');
+        return false;
+    }
+
+    console.log(usr_id);
+    showReplyform('#msg_' + msg_id, '>>' + msg_id);
+    $('#hidbord_cont_type').val('direct').trigger('change');
+    $('#hidbord_cont_direct').val(usr_id);
+};
+
+
+
 var replytoUsr = function(e) {
 	"use strict";
 
@@ -4397,6 +4498,8 @@ var do_imgpreview_popup = function(e) {
 
 };
 
+var prev_to = null, prev_cont = null;
+
 var showReplyform = function(msg_id, textInsert) {
 	"use strict";
 
@@ -4411,6 +4514,7 @@ var showReplyform = function(msg_id, textInsert) {
             '  <div class="hidbord_mnu"><a href="javascript:;" id="hidbordform_hide">hide</a></div>' +
             '  </div>' +
             '  <hr style="clear:both;">' +
+            contactsSelector()+
             '  <div>' +
             '    <div style="margin:  3px;">' +
             '      <div style="width: 590px;">' +
@@ -4436,6 +4540,20 @@ var showReplyform = function(msg_id, textInsert) {
         replyForm = $('#hidbord_replyform');
 
 //        console.log('ddd', $('#hidbord_replyform'));
+
+
+        $('#hidbord_cont_type').on('change',function(){
+            if($('#hidbord_cont_type').val()=='direct'){
+                $('#hidbord_cont_direct').show();
+            }else{
+                $('#hidbord_cont_direct').hide();
+            }
+        });
+
+        if(prev_to !== null){
+            $('#hidbord_cont_type').val(prev_to).trigger('change');
+            $('#hidbord_cont_direct').val(prev_cont);
+        }
 
         $('#hidbord_replyform .idntcn').identicon5({
             rotate: true,
