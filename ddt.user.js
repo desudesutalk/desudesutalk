@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.1.20
+// @version      0.1.21
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/res/*
 // @include      http://dobrochan.ru/*/res/*
@@ -3722,17 +3722,13 @@ var getURLasAB = function(URL, cb) {
     }
 
     /*jshint newcap: false  */
-    if (typeof GM_xmlhttpRequest === "function") {
+    if (typeof GM_xmlhttpRequest === "function" && !navigator.userAgent.match(/Firefox\/([\d.]+)/)) {
         GM_xmlhttpRequest({
             method: "GET",
-            responseType: 'blob',
+            responseType: 'arraybuffer',
             url: URL,
             onload: function(oEvent) {
-                var fileReader = new FileReader();
-                fileReader.onload = function() {
-                    cb(this.result, new Date(0));
-                };
-                fileReader.readAsArrayBuffer(oEvent.response);      
+                cb(oEvent.response, new Date(0));
             }
         });
         return true;
