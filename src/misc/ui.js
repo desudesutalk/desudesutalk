@@ -134,6 +134,10 @@ var inject_ui = function() {
     }
 
     $('#hidbord_btn_reply').on('click', function() {
+        $('.hidbord_maincontent').hide();
+        $('.hidbord_thread').show();
+        $('.hidbord_nav div').removeClass('active');
+        $('#hidbord_show_msgs').addClass('active');
         showReplyform('#hidbord_reply_button');
     });
 

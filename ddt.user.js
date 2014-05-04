@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.1.21
+// @version      0.1.23
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/res/*
 // @include      http://dobrochan.ru/*/res/*
@@ -3722,13 +3722,19 @@ var getURLasAB = function(URL, cb) {
     }
 
     /*jshint newcap: false  */
-    if (typeof GM_xmlhttpRequest === "function" && !navigator.userAgent.match(/Firefox\/([\d.]+)/)) {
+    if (typeof GM_xmlhttpRequest === "function") {
         GM_xmlhttpRequest({
             method: "GET",
             responseType: 'arraybuffer',
             url: URL,
+            overrideMimeType: "text/plain; charset=x-user-defined",
             onload: function(oEvent) {
-                cb(oEvent.response, new Date(0));
+                if(navigator.userAgent.match(/Firefox\/([\d.]+)/) && !("response" in oEvent)){
+                    var ff_buffer = stringToByteArray(oEvent.responseText);
+                    cb(ff_buffer.buffer, new Date(0));
+                }else{
+                    cb(oEvent.response, new Date(0));
+                }
             }
         });
         return true;
@@ -4065,6 +4071,10 @@ var inject_ui = function() {
     }
 
     $('#hidbord_btn_reply').on('click', function() {
+        $('.hidbord_maincontent').hide();
+        $('.hidbord_thread').show();
+        $('.hidbord_nav div').removeClass('active');
+        $('#hidbord_show_msgs').addClass('active');
         showReplyform('#hidbord_reply_button');
     });
 

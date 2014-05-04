@@ -193,13 +193,19 @@ var getURLasAB = function(URL, cb) {
     }
 
     /*jshint newcap: false  */
-    if (typeof GM_xmlhttpRequest === "function" && !navigator.userAgent.match(/Firefox\/([\d.]+)/)) {
+    if (typeof GM_xmlhttpRequest === "function") {
         GM_xmlhttpRequest({
             method: "GET",
             responseType: 'arraybuffer',
             url: URL,
+            overrideMimeType: "text/plain; charset=x-user-defined",
             onload: function(oEvent) {
-                cb(oEvent.response, new Date(0));
+                if(navigator.userAgent.match(/Firefox\/([\d.]+)/) && !("response" in oEvent)){
+                    var ff_buffer = stringToByteArray(oEvent.responseText);
+                    cb(ff_buffer.buffer, new Date(0));
+                }else{
+                    cb(oEvent.response, new Date(0));
+                }
             }
         });
         return true;
