@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.1.19
+// @version      0.1.20
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/res/*
 // @include      http://dobrochan.ru/*/res/*
@@ -4075,6 +4075,9 @@ var inject_ui = function() {
     $('#hidbord_btn_checknew').on('click', function() {
         $('#de-updater-btn').click();
         $('a#yukiForceUpdate').click();
+        if(is4chan){
+            $('a[data-cmd=update]').first().click();
+        }
     });
 
     $('#do_login').on('click', do_login);
