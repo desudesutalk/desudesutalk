@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.1.23
+// @version      0.1.24
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/res/*
 // @include      http://dobrochan.ru/*/res/*
@@ -3714,44 +3714,42 @@ var ab2Str = function(buffer) {
     return result;
 };
 
-var getURLasAB = function(URL, cb) {
+var getHost = function(url){
+    "use strict";
+    var a = document.createElement('a');
+    a.href = url;
+    return {href: a.href, host: a.host, crossdomain: location.host.toLowerCase() != a.host.toLowerCase()};
+};
+
+
+var getURLasAB = function(rawURL, cb) {
     "use strict";
 
-    if(URL[0]=='/' && URL[1]=='/'){
-        URL = 'http:' + URL;
-    }
+    var url = getHost(rawURL);
 
-    /*jshint newcap: false  */
-    if (typeof GM_xmlhttpRequest === "function") {
-        GM_xmlhttpRequest({
-            method: "GET",
-            responseType: 'arraybuffer',
-            url: URL,
-            overrideMimeType: "text/plain; charset=x-user-defined",
-            onload: function(oEvent) {
-                if(navigator.userAgent.match(/Firefox\/([\d.]+)/) && !("response" in oEvent)){
-                    var ff_buffer = stringToByteArray(oEvent.responseText);
+    if(url.crossdomain){
+        /*jshint newcap: false  */
+        if (typeof GM_xmlhttpRequest === "function") {
+            GM_xmlhttpRequest({
+                method: "GET",
+                url: url.href,
+                overrideMimeType: "text/plain; charset=x-user-defined",
+                onload: function(oEvent) {
+                    var ff_buffer = stringToByteArray(oEvent.responseText || oEvent.response);
                     cb(ff_buffer.buffer, new Date(0));
-                }else{
-                    cb(oEvent.response, new Date(0));
                 }
-            }
-        });
-        return true;
-    }
-
-    var oReq = new XMLHttpRequest();
-
-    oReq.open("GET", URL, true);
-    oReq.responseType = "arraybuffer";
-    oReq.onload = function(oEvent) {
-        var arrayBuffer = oReq.response; // Note: not oReq.responseText
-        var byteArray = new Uint8Array(arrayBuffer);
-        if (arrayBuffer) {
-            cb(arrayBuffer, new Date(oEvent.target.getResponseHeader('Last-Modified')));
+            });
         }
-    };
-    oReq.send(null);
+    }else{
+        var oReq = new XMLHttpRequest();
+
+        oReq.open("GET", url.href, true);
+        oReq.responseType = "arraybuffer";
+        oReq.onload = function(oEvent) {
+            cb(oReq.response, new Date(oEvent.target.getResponseHeader('Last-Modified')));
+        };
+        oReq.send(null);        
+    }
 };
 
 var jpegClean = function(origAB) {
