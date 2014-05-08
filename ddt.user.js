@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.1.24
+// @version      0.1.25
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/res/*
 // @include      http://dobrochan.ru/*/res/*
@@ -2864,6 +2864,43 @@ var Hanabira={URL:ParseUrl()};
 
 var sendBoardForm = function(file) {
     "use strict";
+    replyForm.find("#do_encode").val('..Working...').attr("disabled", "disabled");
+
+    if ($('form[name*="postcontrols"]').length !==0) {
+        $.ajax({
+            url: location.href,
+            type: 'GET',
+            processData: false,
+            contentType: false,
+            success: function(data, textStatus, jqXHR) {
+                var doc = document.implementation.createHTMLDocument('');
+                doc.documentElement.innerHTML = data;
+
+                var l = $("form[action*=post]", doc).serializeArray();
+                l = l.filter(function(a){
+                    if(["name","email","subject","post","spoiler","body","file","file_url","password","thread","board"].indexOf(a.name) > -1) return false;
+                    return true;
+                });
+
+                l.push({"name": "post", "value": $('#de-pform input[type=submit]').val()});
+
+                console.log("fresh post form: ", l);
+                
+                _sendBoardForm(file, l);  
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert('failed to get fresh form. Try again!');
+                replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
+                upload_handler = (new Date()).getTime() * 10000;
+            }
+        });
+    }else{
+        _sendBoardForm(file, []);        
+    }
+};
+
+var _sendBoardForm = function(file, formAddon) {
+    "use strict";
     
     var formData, fileInputName, formAction,
         fd = new FormData();
@@ -2895,6 +2932,13 @@ var sendBoardForm = function(file) {
         formAction = forForm[0].action; 
     }
 
+    if(formAddon.length > 0){
+        formData = formData.filter(function(a){
+            if(["name","email","subject","post","spoiler","body","file","file_url","password","thread","board"].indexOf(a.name) > -1) return true;
+            return false;
+        });
+        formData.push.apply(formData, formAddon);
+    }
 
     for (var i = 0; i < formData.length; i++) {
         if (formData[i].name != fileInputName) {
@@ -2902,16 +2946,11 @@ var sendBoardForm = function(file) {
         }
     }
 
-
-    if ($('form[name*="postcontrols"]').length !==0) {
-        fd.append('post', $('#de-pform input[type=submit]').val());
-    }
-
     var fnme = Math.floor((new Date()).getTime() / 10 - Math.random() * 100000000) + '.jpg';
 
     fd.append(fileInputName, uint8toBlob(file, 'image/jpeg'), fnme);
 
-    replyForm.find("#do_encode").val('..Working...').attr("disabled", "disabled");
+    
 
     $.ajax({
         url: formAction,
@@ -2967,17 +3006,12 @@ var sendBoardForm = function(file) {
                 container_data = null;
 
             } else {
-//                replyForm.find("input[type=submit]").attr("disabled", null);
                 alert('Can\'t post. Wrong capch? Fucked up imageboard software?.');
                 replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
-//                console.log(data, textStatus, jqXHR, doc, doc.find('#delform, form[name="delform"]'));
             }
-
             upload_handler = (new Date()).getTime() * 10000;
-
         },
         error: function(jqXHR, textStatus, errorThrown) {
-//            console.log(jqXHR, textStatus, errorThrown);
             alert('Error while posting. Something in network or so.');
             replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
             upload_handler = (new Date()).getTime() * 10000;
@@ -3229,7 +3263,7 @@ var render_contact = function() {
             '<div  style="float: left; padding: 5px;">' + getContactHTML(c) + '<br/><i style="color: #090">' + c + '</i><br/>' +
             '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">delete</a>]</sub> '+
             '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">' + ren_action + '</a>]</sub> '+
-            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">rename</a>]</sub>'+
+            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">rename</a>]</sub> '+
             '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">groups</a>]</sub></div>'+groups_list+'<br style="clear: both;"/></div>';
     }
 
