@@ -28,7 +28,7 @@ var sendBoardForm = function(file) {
 
                 l.push({"name": "post", "value": $('#de-pform input[type=submit]').val()});
 
-                console.log("fresh post form: ", l);
+                //console.log("fresh post form: ", l);
                 
                 _sendBoardForm(file, l);  
             },

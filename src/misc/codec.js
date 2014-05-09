@@ -79,7 +79,7 @@ var do_encode = function() {
     keys[rsa_hash] = rsaProfile.n;
 
     for (var c in contacts) {
-        console.log(to_group, contacts[c].groups);
+        //console.log(to_group, contacts[c].groups);
 
         if(prev_to == 'direct' && c == prev_cont){
             keys[c] = contacts[c].key;

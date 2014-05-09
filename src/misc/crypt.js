@@ -4,8 +4,8 @@ var encodeMessage = function(message, keys, msg_type){
     'use strict';
 
     var i, pwd,salt,iv,preIter, arrTemp, keyshift, rp, p, sig,
-        deflate = new Zlib.RawDeflate(strToUTF8Arr(JSON.stringify(message))),
-        compressed = deflate.compress(),
+        //deflate = new Zlib.RawDeflate(strToUTF8Arr(JSON.stringify(message))),
+        compressed = pako.deflateRaw(strToUTF8Arr(JSON.stringify(message))),
         compressedAt = Math.floor((new Date()).getTime() / 1000),
         finalLength = 316 + 148 * Object.keys(keys).length + compressed.byteLength + 8,
         containerAB = new ArrayBuffer(finalLength),
@@ -191,12 +191,13 @@ var decodeMessage = function(data){
     try {
         var password = rsa.decrypt(keys[rsa_hash]);
         var om = sjcl.decrypt(password, aesmsg);
-        var inflate = new Zlib.RawInflate(om);
-        var plain = inflate.decompress();
+        //var inflate = new Zlib.RawInflate(om);
+        var plain = pako.inflateRaw(om);
         container.status = 'OK';
         container.message = JSON.parse(utf8ArrToStr(plain));
         return container;
     } catch (e) {
+        console.log(e);
         return false;
     }
 
