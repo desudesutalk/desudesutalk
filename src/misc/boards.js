@@ -67,8 +67,8 @@ var _sendBoardForm = function(file, formAddon) {
 
     if(is4chan){
         var forForm = $('form[name=post]');
-        if($('form[name=qrPost]').length !==0){
-            forForm = $('form[name=qrPost]');
+        if($('form[name=qrPost], div#qr form').length !==0){
+            forForm = $('form[name=qrPost], div#qr form');
         }
 
         formData = forForm.serializeArray();

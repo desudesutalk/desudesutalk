@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.1.26
+// @version      0.1.27
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/res/*
 // @include      http://dobrochan.ru/*/res/*
@@ -2887,8 +2887,8 @@ var _sendBoardForm = function(file, formAddon) {
 
     if(is4chan){
         var forForm = $('form[name=post]');
-        if($('form[name=qrPost]').length !==0){
-            forForm = $('form[name=qrPost]');
+        if($('form[name=qrPost], div#qr form').length !==0){
+            forForm = $('form[name=qrPost], div#qr form');
         }
 
         formData = forForm.serializeArray();
