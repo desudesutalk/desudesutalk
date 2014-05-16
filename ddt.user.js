@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.1.27
+// @version      0.1.29
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/res/*
 // @include      http://dobrochan.ru/*/res/*
@@ -3977,7 +3977,7 @@ var inject_ui = function() {
             '    </div>'+
                 '<div style="position: absolute;left: 0;right: 0;bottom: 0;background-color: rgb(217,225,229);border-top: 1px solid #fff;  box-shadow: 0 0 10px #000;height: 27px;text-align: center;padding: 0 5px;">'+
                 '<input type="button" value="Write reply" style="font-weight: bold;float: left;font-size: 12px;" id="hidbord_btn_reply">'+
-                '<input type="button" value="Get old messages" style="font-size: 12px;" id="hidbord_btn_getold">'+
+                '<input type="button" value="Get old messages" style="font-size: 12px;" id="hidbord_btn_getold">&nbsp;<label><input type="checkbox" id="hidboard_option_autofetch" style="vertical-align:middle;" checked>autoscan</label>'+
                 '<a href="javascript:;" style="float: right;line-height: 27px;" id="hidbord_btn_checknew">check for new</a>'+
                 '</div>'+
             '</div>'+
@@ -3986,7 +3986,8 @@ var inject_ui = function() {
             '<span id="hidbord_notify_counter" class="hidbord_clickable" style="position: absolute;background: #f00;z-index: 100;bottom: 4px;right: 4px;font-weight: bold;padding: 2px 7px;border-radius: 30px; color: #fff;box-shadow: 0 0 1px #f00;font-size: 15px;display: none;">1</span>'+
             '</div>';
     
-    injectCSS('.hidbord_notifer{font-size: smaller !important;padding: 0;font-family: calibri;position: fixed;bottom: 25px;right: 25px;box-shadow: 0 0 10px #999;display: block;border: 3px solid #fff;border-radius: 5px;background-color: rgb(217,225,229);overflow: hidden;} '+
+    injectCSS('#hidbord_popup a, .hidbord_main a {color: #ff6600 !important;} #hidbord_popup a:hover, .hidbord_main a:hover {color: #0066ff !important;}'+
+            '.hidbord_notifer{font-size: smaller !important;padding: 0;font-family: calibri;position: fixed;bottom: 25px;right: 25px;box-shadow: 0 0 10px #999;display: block;border: 3px solid #fff;border-radius: 5px;background-color: rgb(217,225,229);overflow: hidden;} '+
             '.hidbord_msg code { padding: 0 4px; font-size: 90%; color: #c7254e; background-color: #f9f2f4; white-space: nowrap; border-radius: 4px; } '+
             '.hidbord_msg code, .hidbord_msg kbd, .hidbord_msg pre, .hidbord_msg samp { font-family: Menlo,Monaco,Consolas,"Courier New",monospace; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word; } '+
             '.hidbord_spoiler code { padding: 0; } '+
@@ -4014,8 +4015,7 @@ var inject_ui = function() {
             '.hidbord_mnu a:hover { background: #fe8; border: 1px solid #db4; } '+
             '.hidbord_clickable { cursor: pointer; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: -moz-none; -ms-user-select: none; user-select: none; }'+
             '.hidbord_hidden { display: none; } '+
-            '#hidbord_popup {font-size: medium !important; font-family: calibri; color: #800000 !important;}'+
-            '#hidbord_popup a, .hidbord_main a {color: #ff6600 !important;} #hidbord_popup a:hover, .hidbord_main a:hover {color: #0066ff !important;}');
+            '#hidbord_popup {font-size: medium !important; font-family: calibri; color: #800000 !important;}');
     
     //Highlight.js
     injectCSS('.hljs { display: block; padding: 0.5em; background: #002b36; color: #839496; } .hljs-comment, .hljs-template_comment, .diff .hljs-header, .hljs-doctype, .hljs-pi, .lisp .hljs-string, .hljs-javadoc { color: #586e75; }  .hljs-keyword, .hljs-winutils, .method, .hljs-addition, .css .hljs-tag, .hljs-request, .hljs-status, .nginx .hljs-title { color: #859900; }  .hljs-number, .hljs-command, .hljs-string, .hljs-tag .hljs-value, .hljs-rules .hljs-value, .hljs-phpdoc, .tex .hljs-formula, .hljs-regexp, .hljs-hexcolor, .hljs-link_url { color: #2aa198; }  .hljs-title, .hljs-localvars, .hljs-chunk, .hljs-decorator, .hljs-built_in, .hljs-identifier, .vhdl .hljs-literal, .hljs-id, .css .hljs-function { color: #268bd2; }  .hljs-attribute, .hljs-variable, .lisp .hljs-body, .smalltalk .hljs-number, .hljs-constant, .hljs-class .hljs-title, .hljs-parent, .haskell .hljs-type, .hljs-link_reference { color: #b58900; }  .hljs-preprocessor, .hljs-preprocessor .hljs-keyword, .hljs-pragma, .hljs-shebang, .hljs-symbol, .hljs-symbol .hljs-string, .diff .hljs-change, .hljs-special, .hljs-attr_selector, .hljs-subst, .hljs-cdata, .clojure .hljs-title, .css .hljs-pseudo, .hljs-header { color: #cb4b16; }  .hljs-deletion, .hljs-important { color: #dc322f; }  .hljs-link_label { color: #6c71c4; } .tex .hljs-formula { background: #073642; } ');
@@ -4056,6 +4056,10 @@ var inject_ui = function() {
         $('.hidbord_config').show();
         $('.hidbord_nav div').removeClass('active');
         $('#hidbord_show_cfg').addClass('active');
+    });
+
+    $('#hidboard_option_autofetch').on('change', function() {
+        autoscanNewJpegs = $('#hidboard_option_autofetch').attr('checked');
     });
 
     if ("n" in rsaProfile) {
@@ -4217,7 +4221,7 @@ var push_msg = function(msg, msgPrepend, thumb) {
     if (msg.status == 'OK') {
         txt = wkbmrk(msg.txt.msg);        
     } else {
-        txt = '<p><strong style="color: #f00; font-size: x-large;">NO KEY! CAN NOT DECODE!</strong></p>';
+        txt = '<p><strong style="color: #f00; font-size: x-large;">NOT FOR YOU! CAN\'T BE DECODED!</strong></p>';
     }
 
     for (i = 0; i < msg.to.length; i++) {
@@ -5067,8 +5071,13 @@ var parseOneLineTags = function(match, tag, str) {
 var isDobro = !!document.URL.match(/\/dobrochan\.[comrgu]+\//);
 var is4chan = !!document.URL.match(/\/boards\.4chan\.org\//);
 
+var autoscanNewJpegs = true;
+
 var jpegInserted = function(event) {
     "use strict";
+
+    if(!autoscanNewJpegs) return false;
+
     if (event.animationName == 'hidbordNodeInserted') {
         var jpgURL = $(event.target).closest('a').attr('href');
         var thumbURL = $(event.target).attr('src');

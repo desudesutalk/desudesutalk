@@ -1,8 +1,13 @@
 var isDobro = !!document.URL.match(/\/dobrochan\.[comrgu]+\//);
 var is4chan = !!document.URL.match(/\/boards\.4chan\.org\//);
 
+var autoscanNewJpegs = true;
+
 var jpegInserted = function(event) {
     "use strict";
+
+    if(!autoscanNewJpegs) return false;
+
     if (event.animationName == 'hidbordNodeInserted') {
         var jpgURL = $(event.target).closest('a').attr('href');
         var thumbURL = $(event.target).attr('src');
