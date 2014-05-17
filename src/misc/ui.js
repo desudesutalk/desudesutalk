@@ -306,6 +306,7 @@ var push_msg = function(msg, msgPrepend, thumb) {
             '            <br/><i style="color: #090; font-size: x-small;" class="hidbord_clickable hidbord_usr_reply" alt="'+msg.keyid+'">' + msg.keyid + '</i>'+
             '        </div>'+
             '        <div style="clear: both; padding: 5px;"><strong>Sent to:</strong> ' + recipients + '</div>'+
+            '        [<a href="javascript:;" class="hidbord_get_clean">get clean image</a>]'+
             '    </div>'+
             '    <div style="overflow: hidden" class="hidbord_msg_header" >'+ 
             '<span style="background: #fff;" class="idntcn2">' + msg.keyid + '</span>&nbsp;' + person +
@@ -371,6 +372,24 @@ var push_msg = function(msg, msgPrepend, thumb) {
         rotate: true,
         size: 18
     });
+
+    $("#msg_" + msg.id + ' .hidbord_get_clean').on('click', null, {thumb: thumb}, function(e){
+        console.log(e);
+        var imgname = e.data.thumb.replace(/.+?\/([^\/]+)$/, '$1');
+        var container = $('a img[src*="' + imgname + '"]').closest('a').attr('href');
+
+        getURLasAB(container, function(arrayBuffer, date) {
+            var cleanFile = jpegClean(arrayBuffer);
+            var a = document.createElement('a');
+            a.download = container.replace(/.+?\/([^\/]+)$/, '$1');
+            a.href = "data:image/jpeg;base64," + arrayBufferDataUri(cleanFile);
+            a.target = "_blank";            
+            $(a).click();
+            console.log($(a));
+        });
+        return false;
+    });
+
 
     new_messages++;
     $('#hidbord_notify_counter').text(new_messages).show();
