@@ -8,6 +8,8 @@
 
 После чего ставим скрипт [по ссылке](https://github.com/desudesutalk/desudesutalk/raw/master/ddt.user.js) и наслаждаемся.
 
+О том, как пользоваться скриптом, можно [почитать в wiki](https://github.com/desudesutalk/desudesutalk/wiki/%D0%9A%D0%B0%D0%BA-%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D1%8C%D1%81%D1%8F).
+
 ### Используемые библиотеки
 1. [RSA and jsbn](http://www-cs-students.stanford.edu/~tjw/jsbn/)
 2. [sjcl](http://bitwiseshiftleft.github.io/sjcl/)
