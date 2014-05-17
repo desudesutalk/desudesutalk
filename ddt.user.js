@@ -2891,9 +2891,29 @@ var _sendBoardForm = function(file, formAddon) {
             forForm = $('form[name=qrPost], div#qr form');
         }
 
-        formData = forForm.serializeArray();
         fileInputName = forForm.find("input[type=file]")[0].name;
         formAction = forForm[0].action; 
+
+        formData = forForm.serializeArray();
+
+        if($('div#qr form').length !==0){
+            formData.push({"name": "recaptcha_response_field", "value": $('div#qr .captcha-input.field').val()});
+            formData.push({"name": "recaptcha_challenge_field", "value": $('div#qr .captcha-img img').attr('alt')});
+            formData.push({"name": "com", "value": $('div#qr textarea').val()});
+
+            formData.push({"name": "MAX_FILE_SIZE", "value": $('form[name=post] input[name=MAX_FILE_SIZE]').val()});
+            formData.push({"name": "mode", "value": $('form[name=post] input[name=mode]').val()});
+            formData.push({"name": "pwd", "value": $('form[name=post] input[name=pwd]').val()});
+            formData.push({"name": "resto", "value": $('form[name=post] input[name=resto]').val()});
+
+            formData.push({"name": "recaptcha_response_field", "value": $('div#qr .captcha-input.field').val()});
+            formAction = $('form[name=post]')[0].action; 
+            fileInputName = $("form[name=post] input[type=file]")[0].name;
+        }
+
+        console.log(formData);
+
+        
     }
 
     if(formAddon.length > 0){
@@ -2914,8 +2934,6 @@ var _sendBoardForm = function(file, formAddon) {
 
     fd.append(fileInputName, uint8toBlob(file, 'image/jpeg'), fnme);
 
-    
-
     $.ajax({
         url: formAction,
         type: 'POST',
@@ -2926,8 +2944,6 @@ var _sendBoardForm = function(file, formAddon) {
             var doc = document.implementation.createHTMLDocument(''),
                 p;
             doc.documentElement.innerHTML = data;
-
-//            console.log(data, textStatus, jqXHR);
 
             if (jqXHR.status === 200 && jqXHR.readyState === 4) {
                 p = $('form[action*="delete"]', doc).length +
@@ -2957,12 +2973,15 @@ var _sendBoardForm = function(file, formAddon) {
                 $('#de-thrupdbtn').click();
                 $('a#yukiForceUpdate').click();
                 if(is4chan){
-                    setTimeout(function() {$('a[data-cmd=update]').first().click();}, 2500);                    
+                    setTimeout(function() {$('a[data-cmd=update]').first().click(); $('.thread-refresh-shortcut.fa.fa-refresh').first().click();}, 2500);                    
                     $('#qrCapField').val('');
                     $('#recaptcha_response_field').val('');
                     $('#recaptcha_challenge_image').click();
                     $('#qrCaptcha').click();
-                    $('textarea[name=com]').val('');
+                    $('textarea[name=com]').val('');                    
+                    $('div#qr .captcha-input.field').val('');
+                    $('div#qr .captcha-img img').click();
+                    $('div#qr textarea').val('');
                 }
                 replyForm.remove();
                 replyForm = null;
@@ -3064,8 +3083,6 @@ var do_encode = function() {
     keys[rsa_hash] = rsaProfile.n;
 
     for (var c in contacts) {
-        //console.log(to_group, contacts[c].groups);
-
         if(prev_to == 'direct' && c == prev_cont){
             keys[c] = contacts[c].key;
             continue;
@@ -3073,12 +3090,6 @@ var do_encode = function() {
         
         if('hide' in contacts[c] && contacts[c].hide == 1){
             continue;
-        }
-
-        console.log(to_group !== null , contacts[c].groups , $.isArray(contacts[c].groups) );
-
-        if(to_group !== null && contacts[c].groups && $.isArray(contacts[c].groups) ){
-            console.log('use', to_group in contacts[c].groups);
         }
 
         if(to_group !== null && contacts[c].groups && $.isArray(contacts[c].groups) && contacts[c].groups.indexOf(to_group) != -1){

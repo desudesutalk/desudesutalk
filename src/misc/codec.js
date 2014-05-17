@@ -79,8 +79,6 @@ var do_encode = function() {
     keys[rsa_hash] = rsaProfile.n;
 
     for (var c in contacts) {
-        //console.log(to_group, contacts[c].groups);
-
         if(prev_to == 'direct' && c == prev_cont){
             keys[c] = contacts[c].key;
             continue;
@@ -88,12 +86,6 @@ var do_encode = function() {
         
         if('hide' in contacts[c] && contacts[c].hide == 1){
             continue;
-        }
-
-        console.log(to_group !== null , contacts[c].groups , $.isArray(contacts[c].groups) );
-
-        if(to_group !== null && contacts[c].groups && $.isArray(contacts[c].groups) ){
-            console.log('use', to_group in contacts[c].groups);
         }
 
         if(to_group !== null && contacts[c].groups && $.isArray(contacts[c].groups) && contacts[c].groups.indexOf(to_group) != -1){
