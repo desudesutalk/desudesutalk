@@ -44,6 +44,7 @@ var do_login = function() {
         rotate: true,
         size: 64
     });
+    $('#identi').append('<br/><br/><i style="color: #090;">'+rsa_hash+'</i>');
     $('#pub_key_info').val(linebrk(rsa.n.toString(16), 64));
     lf.magik_num.value = lf.passwd.value = '';
 };
