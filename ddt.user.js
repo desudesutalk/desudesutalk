@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.1.31
+// @version      0.2.0
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/res/*
 // @include      http://dobrochan.ru/*/res/*
@@ -30,6 +30,8 @@
 (function(){
 //fix for % escaping.
 var _spoilerTag = '%' + '%';
+
+var boardHostName = location.hostname.toLowerCase();
 
 // Copyright (c) 2005  Tom Wu
 // All Rights Reserved.
@@ -2818,726 +2820,36 @@ Usage with options: $('li').identicon5({rotate:true, size:100});
 !function(t){this.pako=t()}(function(){return function t(e,a,i){function n(s,o){if(!a[s]){if(!e[s]){var l="function"==typeof require&&require;if(!o&&l)return l(s,!0);if(r)return r(s,!0);throw new Error("Cannot find module '"+s+"'")}var h=a[s]={exports:{}};e[s][0].call(h.exports,function(t){var a=e[s][1][t];return n(a?a:t)},h,h.exports,t,e,a,i)}return a[s].exports}for(var r="function"==typeof require&&require,s=0;s<i.length;s++)n(i[s]);return n}({1:[function(t,e){"use strict";var a=t("./lib/utils/common").assign,i=t("./lib/deflate"),n=t("./lib/inflate"),r=t("./lib/zlib/constants"),s={};a(s,i,n,r),e.exports=s},{"./lib/deflate":2,"./lib/inflate":3,"./lib/utils/common":4,"./lib/zlib/constants":7}],2:[function(t,e,a){"use strict";function i(t,e){var a=new w(e);if(a.push(t,!0),a.err)throw a.msg;return a.result}function n(t,e){return e=e||{},e.raw=!0,i(t,e)}function r(t,e){return e=e||{},e.gzip=!0,i(t,e)}var s=t("./zlib/deflate.js"),o=t("./utils/common"),l=t("./utils/strings"),h=t("./zlib/messages"),d=t("./zlib/zstream"),f=0,_=4,u=0,c=1,b=-1,g=0,m=8,w=function(t){this.options=o.assign({level:b,method:m,chunkSize:16384,windowBits:15,memLevel:8,strategy:g,to:""},t||{});var e=this.options;e.raw&&e.windowBits>0?e.windowBits=-e.windowBits:e.gzip&&e.windowBits>0&&e.windowBits<16&&(e.windowBits+=16),this.err=0,this.msg="",this.ended=!1,this.chunks=[],this.strm=new d,this.strm.avail_out=0;var a=s.deflateInit2(this.strm,e.level,e.method,e.windowBits,e.memLevel,e.strategy);if(a!==u)throw new Error(h[a]);e.header&&s.deflateSetHeader(this.strm,e.header)};w.prototype.push=function(t,e){var a,i,n=this.strm,r=this.options.chunkSize;if(this.ended)return!1;i=e===~~e?e:e===!0?_:f,n.input="string"==typeof t?l.string2buf(t):t,n.next_in=0,n.avail_in=n.input.length;do{if(0===n.avail_out&&(n.output=new o.Buf8(r),n.next_out=0,n.avail_out=r),a=s.deflate(n,i),a!==c&&a!==u)return this.onEnd(a),this.ended=!0,!1;(0===n.avail_out||0===n.avail_in&&i===_)&&this.onData("string"===this.options.to?l.buf2binstring(o.shrinkBuf(n.output,n.next_out)):o.shrinkBuf(n.output,n.next_out))}while((n.avail_in>0||0===n.avail_out)&&a!==c);return i===_?(a=s.deflateEnd(this.strm),this.onEnd(a),this.ended=!0,a===u):!0},w.prototype.onData=function(t){this.chunks.push(t)},w.prototype.onEnd=function(t){t===u&&(this.result="string"===this.options.to?this.chunks.join(""):o.flattenChunks(this.chunks)),this.chunks=[],this.err=t,this.msg=this.strm.msg},a.Deflate=w,a.deflate=i,a.deflateRaw=n,a.gzip=r},{"./utils/common":4,"./utils/strings":5,"./zlib/deflate.js":9,"./zlib/messages":14,"./zlib/zstream":16}],3:[function(t,e,a){"use strict";function i(t,e){var a=new _(e);if(a.push(t,!0),a.err)throw a.msg;return a.result}function n(t,e){return e=e||{},e.raw=!0,i(t,e)}var r=t("./zlib/inflate.js"),s=t("./utils/common"),o=t("./utils/strings"),l=t("./zlib/constants"),h=t("./zlib/messages"),d=t("./zlib/zstream"),f=t("./zlib/gzheader"),_=function(t){this.options=s.assign({chunkSize:16384,windowBits:0,to:""},t||{});var e=this.options;e.raw&&e.windowBits>=0&&e.windowBits<16&&(e.windowBits=-e.windowBits,0===e.windowBits&&(e.windowBits=-15)),!(e.windowBits>=0&&e.windowBits<16)||t&&t.windowBits||(e.windowBits+=32),e.windowBits>15&&e.windowBits<48&&0===(15&e.windowBits)&&(e.windowBits|=15),this.err=0,this.msg="",this.ended=!1,this.chunks=[],this.strm=new d,this.strm.avail_out=0;var a=r.inflateInit2(this.strm,e.windowBits);if(a!==l.Z_OK)throw new Error(h[a]);this.header=new f,r.inflateGetHeader(this.strm,this.header)};_.prototype.push=function(t,e){var a,i,n,h,d,f=this.strm,_=this.options.chunkSize;if(this.ended)return!1;i=e===~~e?e:e===!0?l.Z_FINISH:l.Z_NO_FLUSH,f.input="string"==typeof t?o.binstring2buf(t):t,f.next_in=0,f.avail_in=f.input.length;do{if(0===f.avail_out&&(f.output=new s.Buf8(_),f.next_out=0,f.avail_out=_),a=r.inflate(f,l.Z_NO_FLUSH),a!==l.Z_STREAM_END&&a!==l.Z_OK)return this.onEnd(a),this.ended=!0,!1;f.next_out&&(0===f.avail_out||a===l.Z_STREAM_END||0===f.avail_in&&i===l.Z_FINISH)&&("string"===this.options.to?(n=o.utf8border(f.output,f.next_out),h=f.next_out-n,d=o.buf2string(f.output,n),f.next_out=h,f.avail_out=_-h,h&&s.arraySet(f.output,f.output,n,h,0),this.onData(d)):this.onData(s.shrinkBuf(f.output,f.next_out)))}while((f.avail_in>0||0===f.avail_out)&&a!==l.Z_STREAM_END);return a===l.Z_STREAM_END&&(i=l.Z_FINISH),i===l.Z_FINISH?(a=r.inflateEnd(this.strm),this.onEnd(a),this.ended=!0,a===l.Z_OK):!0},_.prototype.onData=function(t){this.chunks.push(t)},_.prototype.onEnd=function(t){t===l.Z_OK&&(this.result="string"===this.options.to?this.chunks.join(""):s.flattenChunks(this.chunks)),this.chunks=[],this.err=t,this.msg=this.strm.msg},a.Inflate=_,a.inflate=i,a.inflateRaw=n,a.ungzip=i},{"./utils/common":4,"./utils/strings":5,"./zlib/constants":7,"./zlib/gzheader":10,"./zlib/inflate.js":12,"./zlib/messages":14,"./zlib/zstream":16}],4:[function(t,e,a){"use strict";var i="undefined"!=typeof Uint8Array&&"undefined"!=typeof Uint16Array&&"undefined"!=typeof Int32Array;a.assign=function(t){for(var e=Array.prototype.slice.call(arguments,1);e.length;){var a=e.shift();if(a){if("object"!=typeof a)throw new TypeError(a+"must be non-object");for(var i in a)a.hasOwnProperty(i)&&(t[i]=a[i])}}return t},a.shrinkBuf=function(t,e){return t.length===e?t:t.subarray?t.subarray(0,e):(t.length=e,t)};var n={arraySet:function(t,e,a,i,n){if(e.subarray&&t.subarray)return void t.set(e.subarray(a,a+i),n);for(var r=0;i>r;r++)t[n+r]=e[a+r]},flattenChunks:function(t){var e,a,i,n,r,s;for(i=0,e=0,a=t.length;a>e;e++)i+=t[e].length;for(s=new Uint8Array(i),n=0,e=0,a=t.length;a>e;e++)r=t[e],s.set(r,n),n+=r.length;return s}},r={arraySet:function(t,e,a,i,n){for(var r=0;i>r;r++)t[n+r]=e[a+r]},flattenChunks:function(t){return[].concat.apply([],t)}};a.setTyped=function(t){t?(a.Buf8=Uint8Array,a.Buf16=Uint16Array,a.Buf32=Int32Array,a.assign(a,n)):(a.Buf8=Array,a.Buf16=Array,a.Buf32=Array,a.assign(a,r))},a.setTyped(i)},{}],5:[function(t,e,a){"use strict";var i=t("./common"),n=!0;try{String.fromCharCode.apply(null,[0])}catch(r){n=!1}for(var s=new i.Buf8(256),o=0;256>o;o++)s[o]=o>=252?6:o>=248?5:o>=240?4:o>=224?3:o>=192?2:1;s[254]=s[254]=1,a.string2buf=function(t){var e,a,n,r,s,o=t.length,l=0;for(r=0;o>r;r++)a=t.charCodeAt(r),55296===(64512&a)&&o>r+1&&(n=t.charCodeAt(r+1),56320===(64512&n)&&(a=65536+(a-55296<<10)+(n-56320),r++)),l+=128>a?1:2048>a?2:65536>a?3:4;for(e=new i.Buf8(l),s=0,r=0;l>s;r++)a=t.charCodeAt(r),55296===(64512&a)&&o>r+1&&(n=t.charCodeAt(r+1),56320===(64512&n)&&(a=65536+(a-55296<<10)+(n-56320),r++)),128>a?e[s++]=a:2048>a?(e[s++]=192|a>>>6,e[s++]=128|63&a):65536>a?(e[s++]=224|a>>>12,e[s++]=128|a>>>6&63,e[s++]=128|63&a):(e[s++]=240|a>>>18,e[s++]=128|a>>>12&63,e[s++]=128|a>>>6&63,e[s++]=128|63&a);return e},a.buf2binstring=function(t){if(n&&t.length<65537)return String.fromCharCode.apply(null,t);for(var e="",a=0,i=t.length;i>a;a++)e+=String.fromCharCode(t[a]);return e},a.binstring2buf=function(t){for(var e=new i.Buf8(t.length),a=0,n=e.length;n>a;a++)e[a]=t.charCodeAt(a);return e},a.buf2string=function(t,e){var a,r,o,l,h,d=e||t.length,f=new Array(2*d);for(o=0,r=0;d>r;)if(l=t[r++],128>l)f[o++]=l;else if(h=s[l],h>4)f[o++]=65533,r+=h-1;else{for(l&=2===h?31:3===h?15:7;h>1&&d>r;)l=l<<6|63&t[r++],h--;h>1?f[o++]=65533:65536>l?f[o++]=l:(l-=65536,f[o++]=55296|l>>10&1023,f[o++]=56320|1023&l)}if(n)return String.fromCharCode.apply(null,i.shrinkBuf(f,o));for(a="",r=0,d=o;d>r;r++)a+=String.fromCharCode(f[r]);return a},a.utf8border=function(t,e){var a;for(e=e||t.length,e>t.length&&(e=t.length),a=e-1;a>=0&&128===(192&t[a]);)a--;return 0>a?e:0===a?e:a+s[t[a]]>e?a:e}},{"./common":4}],6:[function(t,e){"use strict";function a(t,e,a,i){for(var n=65535&t|0,r=t>>>16&65535|0,s=0;0!==a;){s=a>2e3?2e3:a,a-=s;do n=n+e[i++]|0,r=r+n|0;while(--s);n%=65521,r%=65521}return n|r<<16|0}e.exports=a},{}],7:[function(t,e){e.exports={Z_NO_FLUSH:0,Z_PARTIAL_FLUSH:1,Z_SYNC_FLUSH:2,Z_FULL_FLUSH:3,Z_FINISH:4,Z_BLOCK:5,Z_TREES:6,Z_OK:0,Z_STREAM_END:1,Z_NEED_DICT:2,Z_ERRNO:-1,Z_STREAM_ERROR:-2,Z_DATA_ERROR:-3,Z_BUF_ERROR:-5,Z_NO_COMPRESSION:0,Z_BEST_SPEED:1,Z_BEST_COMPRESSION:9,Z_DEFAULT_COMPRESSION:-1,Z_FILTERED:1,Z_HUFFMAN_ONLY:2,Z_RLE:3,Z_FIXED:4,Z_DEFAULT_STRATEGY:0,Z_BINARY:0,Z_TEXT:1,Z_UNKNOWN:2,Z_DEFLATED:8}},{}],8:[function(t,e){"use strict";function a(){for(var t,e=[],a=0;256>a;a++){t=a;for(var i=0;8>i;i++)t=1&t?3988292384^t>>>1:t>>>1;e[a]=t}return e}function i(t,e,a,i){var r=n,s=i+a;t=-1^t;for(var o=i;s>o;o++)t=t>>>8^r[255&(t^e[o])];return-1^t}var n=a();e.exports=i},{}],9:[function(t,e,a){"use strict";function i(t,e){return t.msg=I[e],e}function n(t){return(t<<1)-(t>4?9:0)}function r(t){for(var e=t.length;--e>=0;)t[e]=0}function s(t){var e=t.state,a=e.pending;a>t.avail_out&&(a=t.avail_out),0!==a&&(A.arraySet(t.output,e.pending_buf,e.pending_out,a,t.next_out),t.next_out+=a,e.pending_out+=a,t.total_out+=a,t.avail_out-=a,e.pending-=a,0===e.pending&&(e.pending_out=0))}function o(t,e){Z._tr_flush_block(t,t.block_start>=0?t.block_start:-1,t.strstart-t.block_start,e),t.block_start=t.strstart,s(t.strm)}function l(t,e){t.pending_buf[t.pending++]=e}function h(t,e){t.pending_buf[t.pending++]=e>>>8&255,t.pending_buf[t.pending++]=255&e}function d(t,e,a,i){var n=t.avail_in;return n>i&&(n=i),0===n?0:(t.avail_in-=n,A.arraySet(e,t.input,t.next_in,n,a),1===t.state.wrap?t.adler=R(t.adler,e,n,a):2===t.state.wrap&&(t.adler=C(t.adler,e,n,a)),t.next_in+=n,t.total_in+=n,n)}function f(t,e){var a,i,n=t.max_chain_length,r=t.strstart,s=t.prev_length,o=t.nice_match,l=t.strstart>t.w_size-he?t.strstart-(t.w_size-he):0,h=t.window,d=t.w_mask,f=t.prev,_=t.strstart+le,u=h[r+s-1],c=h[r+s];t.prev_length>=t.good_match&&(n>>=2),o>t.lookahead&&(o=t.lookahead);do if(a=e,h[a+s]===c&&h[a+s-1]===u&&h[a]===h[r]&&h[++a]===h[r+1]){r+=2,a++;do;while(h[++r]===h[++a]&&h[++r]===h[++a]&&h[++r]===h[++a]&&h[++r]===h[++a]&&h[++r]===h[++a]&&h[++r]===h[++a]&&h[++r]===h[++a]&&h[++r]===h[++a]&&_>r);if(i=le-(_-r),r=_-le,i>s){if(t.match_start=e,s=i,i>=o)break;u=h[r+s-1],c=h[r+s]}}while((e=f[e&d])>l&&0!==--n);return s<=t.lookahead?s:t.lookahead}function _(t){var e,a,i,n,r,s=t.w_size;do{if(n=t.window_size-t.lookahead-t.strstart,t.strstart>=s+(s-he)){A.arraySet(t.window,t.window,s,s,0),t.match_start-=s,t.strstart-=s,t.block_start-=s,a=t.hash_size,e=a;do i=t.head[--e],t.head[e]=i>=s?i-s:0;while(--a);a=s,e=a;do i=t.prev[--e],t.prev[e]=i>=s?i-s:0;while(--a);n+=s}if(0===t.strm.avail_in)break;if(a=d(t.strm,t.window,t.strstart+t.lookahead,n),t.lookahead+=a,t.lookahead+t.insert>=oe)for(r=t.strstart-t.insert,t.ins_h=t.window[r],t.ins_h=(t.ins_h<<t.hash_shift^t.window[r+1])&t.hash_mask;t.insert&&(t.ins_h=(t.ins_h<<t.hash_shift^t.window[r+oe-1])&t.hash_mask,t.prev[r&t.w_mask]=t.head[t.ins_h],t.head[t.ins_h]=r,r++,t.insert--,!(t.lookahead+t.insert<oe)););}while(t.lookahead<he&&0!==t.strm.avail_in)}function u(t,e){var a=65535;for(a>t.pending_buf_size-5&&(a=t.pending_buf_size-5);;){if(t.lookahead<=1){if(_(t),0===t.lookahead&&e===N)return we;if(0===t.lookahead)break}t.strstart+=t.lookahead,t.lookahead=0;var i=t.block_start+a;if((0===t.strstart||t.strstart>=i)&&(t.lookahead=t.strstart-i,t.strstart=i,o(t,!1),0===t.strm.avail_out))return we;if(t.strstart-t.block_start>=t.w_size-he&&(o(t,!1),0===t.strm.avail_out))return we}return t.insert=0,e===D?(o(t,!0),0===t.strm.avail_out?ve:ke):t.strstart>t.block_start&&(o(t,!1),0===t.strm.avail_out)?we:we}function c(t,e){for(var a,i;;){if(t.lookahead<he){if(_(t),t.lookahead<he&&e===N)return we;if(0===t.lookahead)break}if(a=0,t.lookahead>=oe&&(t.ins_h=(t.ins_h<<t.hash_shift^t.window[t.strstart+oe-1])&t.hash_mask,a=t.prev[t.strstart&t.w_mask]=t.head[t.ins_h],t.head[t.ins_h]=t.strstart),0!==a&&t.strstart-a<=t.w_size-he&&(t.match_length=f(t,a)),t.match_length>=oe)if(i=Z._tr_tally(t,t.strstart-t.match_start,t.match_length-oe),t.lookahead-=t.match_length,t.match_length<=t.max_lazy_match&&t.lookahead>=oe){t.match_length--;do t.strstart++,t.ins_h=(t.ins_h<<t.hash_shift^t.window[t.strstart+oe-1])&t.hash_mask,a=t.prev[t.strstart&t.w_mask]=t.head[t.ins_h],t.head[t.ins_h]=t.strstart;while(0!==--t.match_length);t.strstart++}else t.strstart+=t.match_length,t.match_length=0,t.ins_h=t.window[t.strstart],t.ins_h=(t.ins_h<<t.hash_shift^t.window[t.strstart+1])&t.hash_mask;else i=Z._tr_tally(t,0,t.window[t.strstart]),t.lookahead--,t.strstart++;if(i&&(o(t,!1),0===t.strm.avail_out))return we}return t.insert=t.strstart<oe-1?t.strstart:oe-1,e===D?(o(t,!0),0===t.strm.avail_out?ve:ke):t.last_lit&&(o(t,!1),0===t.strm.avail_out)?we:pe}function b(t,e){for(var a,i,n;;){if(t.lookahead<he){if(_(t),t.lookahead<he&&e===N)return we;if(0===t.lookahead)break}if(a=0,t.lookahead>=oe&&(t.ins_h=(t.ins_h<<t.hash_shift^t.window[t.strstart+oe-1])&t.hash_mask,a=t.prev[t.strstart&t.w_mask]=t.head[t.ins_h],t.head[t.ins_h]=t.strstart),t.prev_length=t.match_length,t.prev_match=t.match_start,t.match_length=oe-1,0!==a&&t.prev_length<t.max_lazy_match&&t.strstart-a<=t.w_size-he&&(t.match_length=f(t,a),t.match_length<=5&&(t.strategy===P||t.match_length===oe&&t.strstart-t.match_start>4096)&&(t.match_length=oe-1)),t.prev_length>=oe&&t.match_length<=t.prev_length){n=t.strstart+t.lookahead-oe,i=Z._tr_tally(t,t.strstart-1-t.prev_match,t.prev_length-oe),t.lookahead-=t.prev_length-1,t.prev_length-=2;do++t.strstart<=n&&(t.ins_h=(t.ins_h<<t.hash_shift^t.window[t.strstart+oe-1])&t.hash_mask,a=t.prev[t.strstart&t.w_mask]=t.head[t.ins_h],t.head[t.ins_h]=t.strstart);while(0!==--t.prev_length);if(t.match_available=0,t.match_length=oe-1,t.strstart++,i&&(o(t,!1),0===t.strm.avail_out))return we}else if(t.match_available){if(i=Z._tr_tally(t,0,t.window[t.strstart-1]),i&&o(t,!1),t.strstart++,t.lookahead--,0===t.strm.avail_out)return we}else t.match_available=1,t.strstart++,t.lookahead--}return t.match_available&&(i=Z._tr_tally(t,0,t.window[t.strstart-1]),t.match_available=0),t.insert=t.strstart<oe-1?t.strstart:oe-1,e===D?(o(t,!0),0===t.strm.avail_out?ve:ke):t.last_lit&&(o(t,!1),0===t.strm.avail_out)?we:pe}function g(t,e){for(var a,i,n,r,s=t.window;;){if(t.lookahead<=le){if(_(t),t.lookahead<=le&&e===N)return we;if(0===t.lookahead)break}if(t.match_length=0,t.lookahead>=oe&&t.strstart>0&&(n=t.strstart-1,i=s[n],i===s[++n]&&i===s[++n]&&i===s[++n])){r=t.strstart+le;do;while(i===s[++n]&&i===s[++n]&&i===s[++n]&&i===s[++n]&&i===s[++n]&&i===s[++n]&&i===s[++n]&&i===s[++n]&&r>n);t.match_length=le-(r-n),t.match_length>t.lookahead&&(t.match_length=t.lookahead)}if(t.match_length>=oe?(a=Z._tr_tally(t,1,t.match_length-oe),t.lookahead-=t.match_length,t.strstart+=t.match_length,t.match_length=0):(a=Z._tr_tally(t,0,t.window[t.strstart]),t.lookahead--,t.strstart++),a&&(o(t,!1),0===t.strm.avail_out))return we}return t.insert=0,e===D?(o(t,!0),0===t.strm.avail_out?ve:ke):t.last_lit&&(o(t,!1),0===t.strm.avail_out)?we:pe}function m(t,e){for(var a;;){if(0===t.lookahead&&(_(t),0===t.lookahead)){if(e===N)return we;break}if(t.match_length=0,a=Z._tr_tally(t,0,t.window[t.strstart]),t.lookahead--,t.strstart++,a&&(o(t,!1),0===t.strm.avail_out))return we}return t.insert=0,e===D?(o(t,!0),0===t.strm.avail_out?ve:ke):t.last_lit&&(o(t,!1),0===t.strm.avail_out)?we:pe}function w(t){t.window_size=2*t.w_size,r(t.head),t.max_lazy_match=E[t.level].max_lazy,t.good_match=E[t.level].good_length,t.nice_match=E[t.level].nice_length,t.max_chain_length=E[t.level].max_chain,t.strstart=0,t.block_start=0,t.lookahead=0,t.insert=0,t.match_length=t.prev_length=oe-1,t.match_available=0,t.ins_h=0}function p(){this.strm=null,this.status=0,this.pending_buf=null,this.pending_buf_size=0,this.pending_out=0,this.pending=0,this.wrap=0,this.gzhead=null,this.gzindex=0,this.method=J,this.last_flush=-1,this.w_size=0,this.w_bits=0,this.w_mask=0,this.window=null,this.window_size=0,this.prev=null,this.head=null,this.ins_h=0,this.hash_size=0,this.hash_bits=0,this.hash_mask=0,this.hash_shift=0,this.block_start=0,this.match_length=0,this.prev_match=0,this.match_available=0,this.strstart=0,this.match_start=0,this.lookahead=0,this.prev_length=0,this.max_chain_length=0,this.max_lazy_match=0,this.level=0,this.strategy=0,this.good_match=0,this.nice_match=0,this.dyn_ltree=new A.Buf16(2*re),this.dyn_dtree=new A.Buf16(2*(2*ie+1)),this.bl_tree=new A.Buf16(2*(2*ne+1)),r(this.dyn_ltree),r(this.dyn_dtree),r(this.bl_tree),this.l_desc=null,this.d_desc=null,this.bl_desc=null,this.bl_count=new A.Buf16(se+1),this.heap=new A.Buf16(2*ae+1),r(this.heap),this.heap_len=0,this.heap_max=0,this.depth=new A.Buf16(2*ae+1),r(this.depth),this.l_buf=0,this.lit_bufsize=0,this.last_lit=0,this.d_buf=0,this.opt_len=0,this.static_len=0,this.matches=0,this.insert=0,this.bi_buf=0,this.bi_valid=0}function v(t){var e;return t&&t.state?(t.total_in=t.total_out=0,t.data_type=W,e=t.state,e.pending=0,e.pending_out=0,e.wrap<0&&(e.wrap=-e.wrap),e.status=e.wrap?fe:ge,t.adler=2===e.wrap?0:1,e.last_flush=N,Z._tr_init(e),L):i(t,H)}function k(t){var e=v(t);return e===L&&w(t.state),e}function x(t,e){return t&&t.state?2!==t.state.wrap?H:(t.state.gzhead=e,L):H}function z(t,e,a,n,r,s){if(!t)return H;var o=1;if(e===K&&(e=6),0>n?(o=0,n=-n):n>15&&(o=2,n-=16),1>r||r>Q||a!==J||8>n||n>15||0>e||e>9||0>s||s>G)return i(t,H);8===n&&(n=9);var l=new p;return t.state=l,l.strm=t,l.wrap=o,l.gzhead=null,l.w_bits=n,l.w_size=1<<l.w_bits,l.w_mask=l.w_size-1,l.hash_bits=r+7,l.hash_size=1<<l.hash_bits,l.hash_mask=l.hash_size-1,l.hash_shift=~~((l.hash_bits+oe-1)/oe),l.window=new A.Buf8(2*l.w_size),l.head=new A.Buf16(l.hash_size),l.prev=new A.Buf16(l.w_size),l.lit_bufsize=1<<r+6,l.pending_buf_size=4*l.lit_bufsize,l.pending_buf=new A.Buf8(l.pending_buf_size),l.d_buf=l.lit_bufsize>>1,l.l_buf=3*l.lit_bufsize,l.level=e,l.strategy=s,l.method=a,k(t)}function y(t,e){return z(t,e,J,V,$,X)}function B(t,e){var a,o,d,f;if(!t||!t.state||e>F||0>e)return t?i(t,H):H;if(o=t.state,!t.output||!t.input&&0!==t.avail_in||o.status===me&&e!==D)return i(t,0===t.avail_out?M:H);if(o.strm=t,a=o.last_flush,o.last_flush=e,o.status===fe)if(2===o.wrap)t.adler=0,l(o,31),l(o,139),l(o,8),o.gzhead?(l(o,(o.gzhead.text?1:0)+(o.gzhead.hcrc?2:0)+(o.gzhead.extra?4:0)+(o.gzhead.name?8:0)+(o.gzhead.comment?16:0)),l(o,255&o.gzhead.time),l(o,o.gzhead.time>>8&255),l(o,o.gzhead.time>>16&255),l(o,o.gzhead.time>>24&255),l(o,9===o.level?2:o.strategy>=q||o.level<2?4:0),l(o,255&o.gzhead.os),o.gzhead.extra&&o.gzhead.extra.length&&(l(o,255&o.gzhead.extra.length),l(o,o.gzhead.extra.length>>8&255)),o.gzhead.hcrc&&(t.adler=C(t.adler,o.pending_buf,o.pending,0)),o.gzindex=0,o.status=_e):(l(o,0),l(o,0),l(o,0),l(o,0),l(o,0),l(o,9===o.level?2:o.strategy>=q||o.level<2?4:0),l(o,xe),o.status=ge);else{var _=J+(o.w_bits-8<<4)<<8,u=-1;u=o.strategy>=q||o.level<2?0:o.level<6?1:6===o.level?2:3,_|=u<<6,0!==o.strstart&&(_|=de),_+=31-_%31,o.status=ge,h(o,_),0!==o.strstart&&(h(o,t.adler>>>16),h(o,65535&t.adler)),t.adler=1}if(o.status===_e)if(o.gzhead.extra){for(d=o.pending;o.gzindex<(65535&o.gzhead.extra.length)&&(o.pending!==o.pending_buf_size||(o.gzhead.hcrc&&o.pending>d&&(t.adler=C(t.adler,o.pending_buf,o.pending-d,d)),s(t),d=o.pending,o.pending!==o.pending_buf_size));)l(o,255&o.gzhead.extra[o.gzindex]),o.gzindex++;o.gzhead.hcrc&&o.pending>d&&(t.adler=C(t.adler,o.pending_buf,o.pending-d,d)),o.gzindex===o.gzhead.extra.length&&(o.gzindex=0,o.status=ue)}else o.status=ue;if(o.status===ue)if(o.gzhead.name){d=o.pending;do{if(o.pending===o.pending_buf_size&&(o.gzhead.hcrc&&o.pending>d&&(t.adler=C(t.adler,o.pending_buf,o.pending-d,d)),s(t),d=o.pending,o.pending===o.pending_buf_size)){f=1;break}f=o.gzindex<o.gzhead.name.length?255&o.gzhead.name.charCodeAt(o.gzindex++):0,l(o,f)}while(0!==f);o.gzhead.hcrc&&o.pending>d&&(t.adler=C(t.adler,o.pending_buf,o.pending-d,d)),0===f&&(o.gzindex=0,o.status=ce)}else o.status=ce;if(o.status===ce)if(o.gzhead.comment){d=o.pending;do{if(o.pending===o.pending_buf_size&&(o.gzhead.hcrc&&o.pending>d&&(t.adler=C(t.adler,o.pending_buf,o.pending-d,d)),s(t),d=o.pending,o.pending===o.pending_buf_size)){f=1;break}f=o.gzindex<o.gzhead.comment.length?255&o.gzhead.comment.charCodeAt(o.gzindex++):0,l(o,f)}while(0!==f);o.gzhead.hcrc&&o.pending>d&&(t.adler=C(t.adler,o.pending_buf,o.pending-d,d)),0===f&&(o.status=be)}else o.status=be;if(o.status===be&&(o.gzhead.hcrc?(o.pending+2>o.pending_buf_size&&s(t),o.pending+2<=o.pending_buf_size&&(l(o,255&t.adler),l(o,t.adler>>8&255),t.adler=0,o.status=ge)):o.status=ge),0!==o.pending){if(s(t),0===t.avail_out)return o.last_flush=-1,L}else if(0===t.avail_in&&n(e)<=n(a)&&e!==D)return i(t,M);if(o.status===me&&0!==t.avail_in)return i(t,M);if(0!==t.avail_in||0!==o.lookahead||e!==N&&o.status!==me){var c=o.strategy===q?m(o,e):o.strategy===Y?g(o,e):E[o.level].func(o,e);if((c===ve||c===ke)&&(o.status=me),c===we||c===ve)return 0===t.avail_out&&(o.last_flush=-1),L;if(c===pe&&(e===O?Z._tr_align(o):e!==F&&(Z._tr_stored_block(o,0,0,!1),e===T&&(r(o.head),0===o.lookahead&&(o.strstart=0,o.block_start=0,o.insert=0))),s(t),0===t.avail_out))return o.last_flush=-1,L}return e!==D?L:o.wrap<=0?U:(2===o.wrap?(l(o,255&t.adler),l(o,t.adler>>8&255),l(o,t.adler>>16&255),l(o,t.adler>>24&255),l(o,255&t.total_in),l(o,t.total_in>>8&255),l(o,t.total_in>>16&255),l(o,t.total_in>>24&255)):(h(o,t.adler>>>16),h(o,65535&t.adler)),s(t),o.wrap>0&&(o.wrap=-o.wrap),0!==o.pending?L:U)}function S(t){var e;return t&&t.state?(e=t.state.status,e!==fe&&e!==_e&&e!==ue&&e!==ce&&e!==be&&e!==ge&&e!==me?i(t,H):(t.state=null,e===ge?i(t,j):L)):H}var E,A=t("../utils/common"),Z=t("./trees"),R=t("./adler32"),C=t("./crc32"),I=t("./messages"),N=0,O=1,T=3,D=4,F=5,L=0,U=1,H=-2,j=-3,M=-5,K=-1,P=1,q=2,Y=3,G=4,X=0,W=2,J=8,Q=9,V=15,$=8,te=29,ee=256,ae=ee+1+te,ie=30,ne=19,re=2*ae+1,se=15,oe=3,le=258,he=le+oe+1,de=32,fe=42,_e=69,ue=73,ce=91,be=103,ge=113,me=666,we=1,pe=2,ve=3,ke=4,xe=3,ze=function(t,e,a,i,n){this.good_length=t,this.max_lazy=e,this.nice_length=a,this.max_chain=i,this.func=n};E=[new ze(0,0,0,0,u),new ze(4,4,8,4,c),new ze(4,5,16,8,c),new ze(4,6,32,32,c),new ze(4,4,16,16,b),new ze(8,16,32,32,b),new ze(8,16,128,128,b),new ze(8,32,128,256,b),new ze(32,128,258,1024,b),new ze(32,258,258,4096,b)],a.deflateInit=y,a.deflateInit2=z,a.deflateReset=k,a.deflateResetKeep=v,a.deflateSetHeader=x,a.deflate=B,a.deflateEnd=S,a.deflateInfo="pako deflate (from Nodeca project)"},{"../utils/common":4,"./adler32":6,"./crc32":8,"./messages":14,"./trees":15}],10:[function(t,e){"use strict";function a(){this.text=0,this.time=0,this.xflags=0,this.os=0,this.extra=null,this.extra_len=0,this.name="",this.comment="",this.hcrc=0,this.done=!1}e.exports=a},{}],11:[function(t,e){"use strict";var a=30,i=12;e.exports=function(t,e){var n,r,s,o,l,h,d,f,_,u,c,b,g,m,w,p,v,k,x,z,y,B,S,E,A;n=t.state,r=t.next_in,E=t.input,s=r+(t.avail_in-5),o=t.next_out,A=t.output,l=o-(e-t.avail_out),h=o+(t.avail_out-257),d=n.dmax,f=n.wsize,_=n.whave,u=n.wnext,c=n.window,b=n.hold,g=n.bits,m=n.lencode,w=n.distcode,p=(1<<n.lenbits)-1,v=(1<<n.distbits)-1;t:do{15>g&&(b+=E[r++]<<g,g+=8,b+=E[r++]<<g,g+=8),k=m[b&p];e:for(;;){if(x=k>>>24,b>>>=x,g-=x,x=k>>>16&255,0===x)A[o++]=65535&k;else{if(!(16&x)){if(0===(64&x)){k=m[(65535&k)+(b&(1<<x)-1)];continue e}if(32&x){n.mode=i;break t}t.msg="invalid literal/length code",n.mode=a;break t}z=65535&k,x&=15,x&&(x>g&&(b+=E[r++]<<g,g+=8),z+=b&(1<<x)-1,b>>>=x,g-=x),15>g&&(b+=E[r++]<<g,g+=8,b+=E[r++]<<g,g+=8),k=w[b&v];a:for(;;){if(x=k>>>24,b>>>=x,g-=x,x=k>>>16&255,!(16&x)){if(0===(64&x)){k=w[(65535&k)+(b&(1<<x)-1)];continue a}t.msg="invalid distance code",n.mode=a;break t}if(y=65535&k,x&=15,x>g&&(b+=E[r++]<<g,g+=8,x>g&&(b+=E[r++]<<g,g+=8)),y+=b&(1<<x)-1,y>d){t.msg="invalid distance too far back",n.mode=a;break t}if(b>>>=x,g-=x,x=o-l,y>x){if(x=y-x,x>_&&n.sane){t.msg="invalid distance too far back",n.mode=a;break t}if(B=0,S=c,0===u){if(B+=f-x,z>x){z-=x;do A[o++]=c[B++];while(--x);B=o-y,S=A}}else if(x>u){if(B+=f+u-x,x-=u,z>x){z-=x;do A[o++]=c[B++];while(--x);if(B=0,z>u){x=u,z-=x;do A[o++]=c[B++];while(--x);B=o-y,S=A}}}else if(B+=u-x,z>x){z-=x;do A[o++]=c[B++];while(--x);B=o-y,S=A}for(;z>2;)A[o++]=S[B++],A[o++]=S[B++],A[o++]=S[B++],z-=3;z&&(A[o++]=S[B++],z>1&&(A[o++]=S[B++]))}else{B=o-y;do A[o++]=A[B++],A[o++]=A[B++],A[o++]=A[B++],z-=3;while(z>2);z&&(A[o++]=A[B++],z>1&&(A[o++]=A[B++]))}break}}break}}while(s>r&&h>o);z=g>>3,r-=z,g-=z<<3,b&=(1<<g)-1,t.next_in=r,t.next_out=o,t.avail_in=s>r?5+(s-r):5-(r-s),t.avail_out=h>o?257+(h-o):257-(o-h),n.hold=b,n.bits=g}},{}],12:[function(t,e,a){"use strict";function i(t){return(t>>>24&255)+(t>>>8&65280)+((65280&t)<<8)+((255&t)<<24)}function n(){this.mode=0,this.last=!1,this.wrap=0,this.havedict=!1,this.flags=0,this.dmax=0,this.check=0,this.total=0,this.head=null,this.wbits=0,this.wsize=0,this.whave=0,this.wnext=0,this.window=null,this.hold=0,this.bits=0,this.length=0,this.offset=0,this.extra=0,this.lencode=null,this.distcode=null,this.lenbits=0,this.distbits=0,this.ncode=0,this.nlen=0,this.ndist=0,this.have=0,this.next=null,this.lens=new m.Buf16(320),this.work=new m.Buf16(288),this.lendyn=null,this.distdyn=null,this.sane=0,this.back=0,this.was=0}function r(t){var e;return t&&t.state?(e=t.state,t.total_in=t.total_out=e.total=0,t.msg="",e.wrap&&(t.adler=1&e.wrap),e.mode=D,e.last=0,e.havedict=0,e.dmax=32768,e.head=null,e.hold=0,e.bits=0,e.lencode=e.lendyn=new m.Buf32(ce),e.distcode=e.distdyn=new m.Buf32(be),e.sane=1,e.back=-1,A):C}function s(t){var e;return t&&t.state?(e=t.state,e.wsize=0,e.whave=0,e.wnext=0,r(t)):C}function o(t,e){var a,i;return t&&t.state?(i=t.state,0>e?(a=0,e=-e):(a=(e>>4)+1,48>e&&(e&=15)),e&&(8>e||e>15)?C:(null!==i.window&&i.wbits!==e&&(i.window=null),i.wrap=a,i.wbits=e,s(t))):C}function l(t,e){var a,i;return t?(i=new n,t.state=i,i.window=null,a=o(t,e),a!==A&&(t.state=null),a):C}function h(t){return l(t,me)}function d(t){if(we){var e;for(b=new m.Buf32(512),g=new m.Buf32(32),e=0;144>e;)t.lens[e++]=8;for(;256>e;)t.lens[e++]=9;for(;280>e;)t.lens[e++]=7;for(;288>e;)t.lens[e++]=8;for(k(z,t.lens,0,288,b,0,t.work,{bits:9}),e=0;32>e;)t.lens[e++]=5;k(y,t.lens,0,32,g,0,t.work,{bits:5}),we=!1}t.lencode=b,t.lenbits=9,t.distcode=g,t.distbits=5}function f(t,e,a,i){var n,r=t.state;return null===r.window&&(r.wsize=1<<r.wbits,r.wnext=0,r.whave=0,r.window=new m.Buf8(r.wsize)),i>=r.wsize?(m.arraySet(r.window,e,a-r.wsize,r.wsize,0),r.wnext=0,r.whave=r.wsize):(n=r.wsize-r.wnext,n>i&&(n=i),m.arraySet(r.window,e,a-i,n,r.wnext),i-=n,i?(m.arraySet(r.window,e,a-i,i,0),r.wnext=i,r.whave=r.wsize):(r.wnext+=n,r.wnext===r.wsize&&(r.wnext=0),r.whave<r.wsize&&(r.whave+=n))),0}function _(t,e){var a,n,r,s,o,l,h,_,u,c,b,g,ce,be,ge,me,we,pe,ve,ke,xe,ze,ye,Be,Se=0,Ee=new m.Buf8(4),Ae=[16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];if(!t||!t.state||!t.output||!t.input&&0!==t.avail_in)return C;a=t.state,a.mode===G&&(a.mode=X),o=t.next_out,r=t.output,h=t.avail_out,s=t.next_in,n=t.input,l=t.avail_in,_=a.hold,u=a.bits,c=l,b=h,ze=A;t:for(;;)switch(a.mode){case D:if(0===a.wrap){a.mode=X;break}for(;16>u;){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}if(2&a.wrap&&35615===_){a.check=0,Ee[0]=255&_,Ee[1]=_>>>8&255,a.check=p(a.check,Ee,2,0),_=0,u=0,a.mode=F;break}if(a.flags=0,a.head&&(a.head.done=!1),!(1&a.wrap)||(((255&_)<<8)+(_>>8))%31){t.msg="incorrect header check",a.mode=fe;break}if((15&_)!==T){t.msg="unknown compression method",a.mode=fe;break}if(_>>>=4,u-=4,xe=(15&_)+8,0===a.wbits)a.wbits=xe;else if(xe>a.wbits){t.msg="invalid window size",a.mode=fe;break}a.dmax=1<<xe,t.adler=a.check=1,a.mode=512&_?q:G,_=0,u=0;break;case F:for(;16>u;){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}if(a.flags=_,(255&a.flags)!==T){t.msg="unknown compression method",a.mode=fe;break}if(57344&a.flags){t.msg="unknown header flags set",a.mode=fe;break}a.head&&(a.head.text=_>>8&1),512&a.flags&&(Ee[0]=255&_,Ee[1]=_>>>8&255,a.check=p(a.check,Ee,2,0)),_=0,u=0,a.mode=L;case L:for(;32>u;){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}a.head&&(a.head.time=_),512&a.flags&&(Ee[0]=255&_,Ee[1]=_>>>8&255,Ee[2]=_>>>16&255,Ee[3]=_>>>24&255,a.check=p(a.check,Ee,4,0)),_=0,u=0,a.mode=U;case U:for(;16>u;){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}a.head&&(a.head.xflags=255&_,a.head.os=_>>8),512&a.flags&&(Ee[0]=255&_,Ee[1]=_>>>8&255,a.check=p(a.check,Ee,2,0)),_=0,u=0,a.mode=H;case H:if(1024&a.flags){for(;16>u;){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}a.length=_,a.head&&(a.head.extra_len=_),512&a.flags&&(Ee[0]=255&_,Ee[1]=_>>>8&255,a.check=p(a.check,Ee,2,0)),_=0,u=0}else a.head&&(a.head.extra=null);a.mode=j;case j:if(1024&a.flags&&(g=a.length,g>l&&(g=l),g&&(a.head&&(xe=a.head.extra_len-a.length,a.head.extra||(a.head.extra=new Array(a.head.extra_len)),m.arraySet(a.head.extra,n,s,g,xe)),512&a.flags&&(a.check=p(a.check,n,g,s)),l-=g,s+=g,a.length-=g),a.length))break t;a.length=0,a.mode=M;case M:if(2048&a.flags){if(0===l)break t;g=0;do xe=n[s+g++],a.head&&xe&&a.length<65536&&(a.head.name+=String.fromCharCode(xe));while(xe&&l>g);if(512&a.flags&&(a.check=p(a.check,n,g,s)),l-=g,s+=g,xe)break t}else a.head&&(a.head.name=null);a.length=0,a.mode=K;case K:if(4096&a.flags){if(0===l)break t;g=0;do xe=n[s+g++],a.head&&xe&&a.length<65536&&(a.head.comment+=String.fromCharCode(xe));while(xe&&l>g);if(512&a.flags&&(a.check=p(a.check,n,g,s)),l-=g,s+=g,xe)break t}else a.head&&(a.head.comment=null);a.mode=P;case P:if(512&a.flags){for(;16>u;){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}if(_!==(65535&a.check)){t.msg="header crc mismatch",a.mode=fe;break}_=0,u=0}a.head&&(a.head.hcrc=a.flags>>9&1,a.head.done=!0),t.adler=a.check=0,a.mode=G;break;case q:for(;32>u;){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}t.adler=a.check=i(_),_=0,u=0,a.mode=Y;case Y:if(0===a.havedict)return t.next_out=o,t.avail_out=h,t.next_in=s,t.avail_in=l,a.hold=_,a.bits=u,R;t.adler=a.check=1,a.mode=G;case G:if(e===S||e===E)break t;case X:if(a.last){_>>>=7&u,u-=7&u,a.mode=le;break}for(;3>u;){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}switch(a.last=1&_,_>>>=1,u-=1,3&_){case 0:a.mode=W;break;case 1:if(d(a),a.mode=ee,e===E){_>>>=2,u-=2;break t}break;case 2:a.mode=V;break;case 3:t.msg="invalid block type",a.mode=fe}_>>>=2,u-=2;break;case W:for(_>>>=7&u,u-=7&u;32>u;){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}if((65535&_)!==(_>>>16^65535)){t.msg="invalid stored block lengths",a.mode=fe;break}if(a.length=65535&_,_=0,u=0,a.mode=J,e===E)break t;case J:a.mode=Q;case Q:if(g=a.length){if(g>l&&(g=l),g>h&&(g=h),0===g)break t;m.arraySet(r,n,s,g,o),l-=g,s+=g,h-=g,o+=g,a.length-=g;break}a.mode=G;break;case V:for(;14>u;){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}if(a.nlen=(31&_)+257,_>>>=5,u-=5,a.ndist=(31&_)+1,_>>>=5,u-=5,a.ncode=(15&_)+4,_>>>=4,u-=4,a.nlen>286||a.ndist>30){t.msg="too many length or distance symbols",a.mode=fe;break}a.have=0,a.mode=$;case $:for(;a.have<a.ncode;){for(;3>u;){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}a.lens[Ae[a.have++]]=7&_,_>>>=3,u-=3}for(;a.have<19;)a.lens[Ae[a.have++]]=0;if(a.lencode=a.lendyn,a.lenbits=7,ye={bits:a.lenbits},ze=k(x,a.lens,0,19,a.lencode,0,a.work,ye),a.lenbits=ye.bits,ze){t.msg="invalid code lengths set",a.mode=fe;break}a.have=0,a.mode=te;case te:for(;a.have<a.nlen+a.ndist;){for(;Se=a.lencode[_&(1<<a.lenbits)-1],ge=Se>>>24,me=Se>>>16&255,we=65535&Se,!(u>=ge);){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}if(16>we)_>>>=ge,u-=ge,a.lens[a.have++]=we;else{if(16===we){for(Be=ge+2;Be>u;){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}if(_>>>=ge,u-=ge,0===a.have){t.msg="invalid bit length repeat",a.mode=fe;break}xe=a.lens[a.have-1],g=3+(3&_),_>>>=2,u-=2}else if(17===we){for(Be=ge+3;Be>u;){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}_>>>=ge,u-=ge,xe=0,g=3+(7&_),_>>>=3,u-=3}else{for(Be=ge+7;Be>u;){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}_>>>=ge,u-=ge,xe=0,g=11+(127&_),_>>>=7,u-=7}if(a.have+g>a.nlen+a.ndist){t.msg="invalid bit length repeat",a.mode=fe;break}for(;g--;)a.lens[a.have++]=xe}}if(a.mode===fe)break;if(0===a.lens[256]){t.msg="invalid code -- missing end-of-block",a.mode=fe;break}if(a.lenbits=9,ye={bits:a.lenbits},ze=k(z,a.lens,0,a.nlen,a.lencode,0,a.work,ye),a.lenbits=ye.bits,ze){t.msg="invalid literal/lengths set",a.mode=fe;break}if(a.distbits=6,a.distcode=a.distdyn,ye={bits:a.distbits},ze=k(y,a.lens,a.nlen,a.ndist,a.distcode,0,a.work,ye),a.distbits=ye.bits,ze){t.msg="invalid distances set",a.mode=fe;
 break}if(a.mode=ee,e===E)break t;case ee:a.mode=ae;case ae:if(l>=6&&h>=258){t.next_out=o,t.avail_out=h,t.next_in=s,t.avail_in=l,a.hold=_,a.bits=u,v(t,b),o=t.next_out,r=t.output,h=t.avail_out,s=t.next_in,n=t.input,l=t.avail_in,_=a.hold,u=a.bits,a.mode===G&&(a.back=-1);break}for(a.back=0;Se=a.lencode[_&(1<<a.lenbits)-1],ge=Se>>>24,me=Se>>>16&255,we=65535&Se,!(u>=ge);){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}if(me&&0===(240&me)){for(pe=ge,ve=me,ke=we;Se=a.lencode[ke+((_&(1<<pe+ve)-1)>>pe)],ge=Se>>>24,me=Se>>>16&255,we=65535&Se,!(u>=pe+ge);){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}_>>>=pe,u-=pe,a.back+=pe}if(_>>>=ge,u-=ge,a.back+=ge,a.length=we,0===me){a.mode=oe;break}if(32&me){a.back=-1,a.mode=G;break}if(64&me){t.msg="invalid literal/length code",a.mode=fe;break}a.extra=15&me,a.mode=ie;case ie:if(a.extra){for(Be=a.extra;Be>u;){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}a.length+=_&(1<<a.extra)-1,_>>>=a.extra,u-=a.extra,a.back+=a.extra}a.was=a.length,a.mode=ne;case ne:for(;Se=a.distcode[_&(1<<a.distbits)-1],ge=Se>>>24,me=Se>>>16&255,we=65535&Se,!(u>=ge);){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}if(0===(240&me)){for(pe=ge,ve=me,ke=we;Se=a.distcode[ke+((_&(1<<pe+ve)-1)>>pe)],ge=Se>>>24,me=Se>>>16&255,we=65535&Se,!(u>=pe+ge);){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}_>>>=pe,u-=pe,a.back+=pe}if(_>>>=ge,u-=ge,a.back+=ge,64&me){t.msg="invalid distance code",a.mode=fe;break}a.offset=we,a.extra=15&me,a.mode=re;case re:if(a.extra){for(Be=a.extra;Be>u;){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}a.offset+=_&(1<<a.extra)-1,_>>>=a.extra,u-=a.extra,a.back+=a.extra}if(a.offset>a.dmax){t.msg="invalid distance too far back",a.mode=fe;break}a.mode=se;case se:if(0===h)break t;if(g=b-h,a.offset>g){if(g=a.offset-g,g>a.whave&&a.sane){t.msg="invalid distance too far back",a.mode=fe;break}g>a.wnext?(g-=a.wnext,ce=a.wsize-g):ce=a.wnext-g,g>a.length&&(g=a.length),be=a.window}else be=r,ce=o-a.offset,g=a.length;g>h&&(g=h),h-=g,a.length-=g;do r[o++]=be[ce++];while(--g);0===a.length&&(a.mode=ae);break;case oe:if(0===h)break t;r[o++]=a.length,h--,a.mode=ae;break;case le:if(a.wrap){for(;32>u;){if(0===l)break t;l--,_|=n[s++]<<u,u+=8}if(b-=h,t.total_out+=b,a.total+=b,b&&(t.adler=a.check=a.flags?p(a.check,r,b,o-b):w(a.check,r,b,o-b)),b=h,(a.flags?_:i(_))!==a.check){t.msg="incorrect data check",a.mode=fe;break}_=0,u=0}a.mode=he;case he:if(a.wrap&&a.flags){for(;32>u;){if(0===l)break t;l--,_+=n[s++]<<u,u+=8}if(_!==(4294967295&a.total)){t.msg="incorrect length check",a.mode=fe;break}_=0,u=0}a.mode=de;case de:ze=Z;break t;case fe:ze=I;break t;case _e:return N;case ue:default:return C}return t.next_out=o,t.avail_out=h,t.next_in=s,t.avail_in=l,a.hold=_,a.bits=u,(a.wsize||b!==t.avail_out&&a.mode<fe&&(a.mode<le||e!==B))&&f(t,t.output,t.next_out,b-t.avail_out)?(a.mode=_e,N):(c-=t.avail_in,b-=t.avail_out,t.total_in+=c,t.total_out+=b,a.total+=b,a.wrap&&b&&(t.adler=a.check=a.flags?p(a.check,r,b,t.next_out-b):w(a.check,r,b,t.next_out-b)),t.data_type=a.bits+(a.last?64:0)+(a.mode===G?128:0)+(a.mode===ee||a.mode===J?256:0),(0===c&&0===b||e===B)&&ze===A&&(ze=O),ze)}function u(t){if(!t||!t.state)return C;var e=t.state;return e.window&&(e.window=null),t.state=null,A}function c(t,e){var a;return t&&t.state?(a=t.state,0===(2&a.wrap)?C:(a.head=e,e.done=!1,A)):C}var b,g,m=t("../utils/common"),w=t("./adler32"),p=t("./crc32"),v=t("./inffast"),k=t("./inftrees"),x=0,z=1,y=2,B=4,S=5,E=6,A=0,Z=1,R=2,C=-2,I=-3,N=-4,O=-5,T=8,D=1,F=2,L=3,U=4,H=5,j=6,M=7,K=8,P=9,q=10,Y=11,G=12,X=13,W=14,J=15,Q=16,V=17,$=18,te=19,ee=20,ae=21,ie=22,ne=23,re=24,se=25,oe=26,le=27,he=28,de=29,fe=30,_e=31,ue=32,ce=852,be=592,ge=15,me=ge,we=!0;a.inflateReset=s,a.inflateReset2=o,a.inflateResetKeep=r,a.inflateInit=h,a.inflateInit2=l,a.inflate=_,a.inflateEnd=u,a.inflateGetHeader=c,a.inflateInfo="pako inflate (from Nodeca project)"},{"../utils/common":4,"./adler32":6,"./crc32":8,"./inffast":11,"./inftrees":13}],13:[function(t,e){"use strict";var a=t("../utils/common"),i=15,n=852,r=592,s=0,o=1,l=2,h=[3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258,0,0],d=[16,16,16,16,16,16,16,16,17,17,17,17,18,18,18,18,19,19,19,19,20,20,20,20,21,21,21,21,16,72,78],f=[1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577,0,0],_=[16,16,16,16,17,17,18,18,19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,27,27,28,28,29,29,64,64];e.exports=function(t,e,u,c,b,g,m,w){var p,v,k,x,z,y,B,S,E,A=w.bits,Z=0,R=0,C=0,I=0,N=0,O=0,T=0,D=0,F=0,L=0,U=null,H=0,j=new a.Buf16(i+1),M=new a.Buf16(i+1),K=null,P=0;for(Z=0;i>=Z;Z++)j[Z]=0;for(R=0;c>R;R++)j[e[u+R]]++;for(N=A,I=i;I>=1&&0===j[I];I--);if(N>I&&(N=I),0===I)return b[g++]=20971520,b[g++]=20971520,w.bits=1,0;for(C=1;I>C&&0===j[C];C++);for(C>N&&(N=C),D=1,Z=1;i>=Z;Z++)if(D<<=1,D-=j[Z],0>D)return-1;if(D>0&&(t===s||1!==I))return-1;for(M[1]=0,Z=1;i>Z;Z++)M[Z+1]=M[Z]+j[Z];for(R=0;c>R;R++)0!==e[u+R]&&(m[M[e[u+R]]++]=R);switch(t){case s:U=K=m,y=19;break;case o:U=h,H-=257,K=d,P-=257,y=256;break;default:U=f,K=_,y=-1}if(L=0,R=0,Z=C,z=g,O=N,T=0,k=-1,F=1<<N,x=F-1,t===o&&F>n||t===l&&F>r)return 1;for(var q=0;;){q++,B=Z-T,m[R]<y?(S=0,E=m[R]):m[R]>y?(S=K[P+m[R]],E=U[H+m[R]]):(S=96,E=0),p=1<<Z-T,v=1<<O,C=v;do v-=p,b[z+(L>>T)+v]=B<<24|S<<16|E|0;while(0!==v);for(p=1<<Z-1;L&p;)p>>=1;if(0!==p?(L&=p-1,L+=p):L=0,R++,0===--j[Z]){if(Z===I)break;Z=e[u+m[R]]}if(Z>N&&(L&x)!==k){for(0===T&&(T=N),z+=C,O=Z-T,D=1<<O;I>O+T&&(D-=j[O+T],!(0>=D));)O++,D<<=1;if(F+=1<<O,t===o&&F>n||t===l&&F>r)return 1;k=L&x,b[k]=N<<24|O<<16|z-g|0}}return 0!==L&&(b[z+L]=Z-T<<24|64<<16|0),w.bits=N,0}},{"../utils/common":4}],14:[function(t,e){"use strict";e.exports={2:"need dictionary",1:"stream end",0:"","-1":"file error","-2":"stream error","-3":"data error","-4":"insufficient memory","-5":"buffer error","-6":"incompatible version"}},{}],15:[function(t,e,a){"use strict";function i(t){for(var e=t.length;--e>=0;)t[e]=0}function n(t){return 256>t?se[t]:se[256+(t>>>7)]}function r(t,e){t.pending_buf[t.pending++]=255&e,t.pending_buf[t.pending++]=e>>>8&255}function s(t,e,a){t.bi_valid>G-a?(t.bi_buf|=e<<t.bi_valid&65535,r(t,t.bi_buf),t.bi_buf=e>>G-t.bi_valid,t.bi_valid+=a-G):(t.bi_buf|=e<<t.bi_valid&65535,t.bi_valid+=a)}function o(t,e,a){s(t,a[2*e],a[2*e+1])}function l(t,e){var a=0;do a|=1&t,t>>>=1,a<<=1;while(--e>0);return a>>>1}function h(t){16===t.bi_valid?(r(t,t.bi_buf),t.bi_buf=0,t.bi_valid=0):t.bi_valid>=8&&(t.pending_buf[t.pending++]=255&t.bi_buf,t.bi_buf>>=8,t.bi_valid-=8)}function d(t,e){var a,i,n,r,s,o,l=e.dyn_tree,h=e.max_code,d=e.stat_desc.static_tree,f=e.stat_desc.has_stree,_=e.stat_desc.extra_bits,u=e.stat_desc.extra_base,c=e.stat_desc.max_length,b=0;for(r=0;Y>=r;r++)t.bl_count[r]=0;for(l[2*t.heap[t.heap_max]+1]=0,a=t.heap_max+1;q>a;a++)i=t.heap[a],r=l[2*l[2*i+1]+1]+1,r>c&&(r=c,b++),l[2*i+1]=r,i>h||(t.bl_count[r]++,s=0,i>=u&&(s=_[i-u]),o=l[2*i],t.opt_len+=o*(r+s),f&&(t.static_len+=o*(d[2*i+1]+s)));if(0!==b){do{for(r=c-1;0===t.bl_count[r];)r--;t.bl_count[r]--,t.bl_count[r+1]+=2,t.bl_count[c]--,b-=2}while(b>0);for(r=c;0!==r;r--)for(i=t.bl_count[r];0!==i;)n=t.heap[--a],n>h||(l[2*n+1]!==r&&(t.opt_len+=(r-l[2*n+1])*l[2*n],l[2*n+1]=r),i--)}}function f(t,e,a){var i,n,r=new Array(Y+1),s=0;for(i=1;Y>=i;i++)r[i]=s=s+a[i-1]<<1;for(n=0;e>=n;n++){var o=t[2*n+1];0!==o&&(t[2*n]=l(r[o]++,o))}}function _(){var t,e,a,i,n,r=new Array(Y+1);for(a=0,i=0;H-1>i;i++)for(le[i]=a,t=0;t<1<<$[i];t++)oe[a++]=i;for(oe[a-1]=i,n=0,i=0;16>i;i++)for(he[i]=n,t=0;t<1<<te[i];t++)se[n++]=i;for(n>>=7;K>i;i++)for(he[i]=n<<7,t=0;t<1<<te[i]-7;t++)se[256+n++]=i;for(e=0;Y>=e;e++)r[e]=0;for(t=0;143>=t;)ne[2*t+1]=8,t++,r[8]++;for(;255>=t;)ne[2*t+1]=9,t++,r[9]++;for(;279>=t;)ne[2*t+1]=7,t++,r[7]++;for(;287>=t;)ne[2*t+1]=8,t++,r[8]++;for(f(ne,M+1,r),t=0;K>t;t++)re[2*t+1]=5,re[2*t]=l(t,5);de=new ue(ne,$,j+1,M,Y),fe=new ue(re,te,0,K,Y),_e=new ue(new Array(0),ee,0,P,X)}function u(t){var e;for(e=0;M>e;e++)t.dyn_ltree[2*e]=0;for(e=0;K>e;e++)t.dyn_dtree[2*e]=0;for(e=0;P>e;e++)t.bl_tree[2*e]=0;t.dyn_ltree[2*W]=1,t.opt_len=t.static_len=0,t.last_lit=t.matches=0}function c(t){t.bi_valid>8?r(t,t.bi_buf):t.bi_valid>0&&(t.pending_buf[t.pending++]=t.bi_buf),t.bi_buf=0,t.bi_valid=0}function b(t,e,a,i){c(t),i&&(r(t,a),r(t,~a)),R.arraySet(t.pending_buf,t.window,e,a,t.pending),t.pending+=a}function g(t,e,a,i){var n=2*e,r=2*a;return t[n]<t[r]||t[n]===t[r]&&i[e]<=i[a]}function m(t,e,a){for(var i=t.heap[a],n=a<<1;n<=t.heap_len&&(n<t.heap_len&&g(e,t.heap[n+1],t.heap[n],t.depth)&&n++,!g(e,i,t.heap[n],t.depth));)t.heap[a]=t.heap[n],a=n,n<<=1;t.heap[a]=i}function w(t,e,a){var i,r,l,h,d=0;if(0!==t.last_lit)do i=t.pending_buf[t.d_buf+2*d]<<8|t.pending_buf[t.d_buf+2*d+1],r=t.pending_buf[t.l_buf+d],d++,0===i?o(t,r,e):(l=oe[r],o(t,l+j+1,e),h=$[l],0!==h&&(r-=le[l],s(t,r,h)),i--,l=n(i),o(t,l,a),h=te[l],0!==h&&(i-=he[l],s(t,i,h)));while(d<t.last_lit);o(t,W,e)}function p(t,e){var a,i,n,r=e.dyn_tree,s=e.stat_desc.static_tree,o=e.stat_desc.has_stree,l=e.stat_desc.elems,h=-1;for(t.heap_len=0,t.heap_max=q,a=0;l>a;a++)0!==r[2*a]?(t.heap[++t.heap_len]=h=a,t.depth[a]=0):r[2*a+1]=0;for(;t.heap_len<2;)n=t.heap[++t.heap_len]=2>h?++h:0,r[2*n]=1,t.depth[n]=0,t.opt_len--,o&&(t.static_len-=s[2*n+1]);for(e.max_code=h,a=t.heap_len>>1;a>=1;a--)m(t,r,a);n=l;do a=t.heap[1],t.heap[1]=t.heap[t.heap_len--],m(t,r,1),i=t.heap[1],t.heap[--t.heap_max]=a,t.heap[--t.heap_max]=i,r[2*n]=r[2*a]+r[2*i],t.depth[n]=(t.depth[a]>=t.depth[i]?t.depth[a]:t.depth[i])+1,r[2*a+1]=r[2*i+1]=n,t.heap[1]=n++,m(t,r,1);while(t.heap_len>=2);t.heap[--t.heap_max]=t.heap[1],d(t,e),f(r,h,t.bl_count)}function v(t,e,a){var i,n,r=-1,s=e[1],o=0,l=7,h=4;for(0===s&&(l=138,h=3),e[2*(a+1)+1]=65535,i=0;a>=i;i++)n=s,s=e[2*(i+1)+1],++o<l&&n===s||(h>o?t.bl_tree[2*n]+=o:0!==n?(n!==r&&t.bl_tree[2*n]++,t.bl_tree[2*J]++):10>=o?t.bl_tree[2*Q]++:t.bl_tree[2*V]++,o=0,r=n,0===s?(l=138,h=3):n===s?(l=6,h=3):(l=7,h=4))}function k(t,e,a){var i,n,r=-1,l=e[1],h=0,d=7,f=4;for(0===l&&(d=138,f=3),i=0;a>=i;i++)if(n=l,l=e[2*(i+1)+1],!(++h<d&&n===l)){if(f>h){do o(t,n,t.bl_tree);while(0!==--h)}else 0!==n?(n!==r&&(o(t,n,t.bl_tree),h--),o(t,J,t.bl_tree),s(t,h-3,2)):10>=h?(o(t,Q,t.bl_tree),s(t,h-3,3)):(o(t,V,t.bl_tree),s(t,h-11,7));h=0,r=n,0===l?(d=138,f=3):n===l?(d=6,f=3):(d=7,f=4)}}function x(t){var e;for(v(t,t.dyn_ltree,t.l_desc.max_code),v(t,t.dyn_dtree,t.d_desc.max_code),p(t,t.bl_desc),e=P-1;e>=3&&0===t.bl_tree[2*ae[e]+1];e--);return t.opt_len+=3*(e+1)+5+5+4,e}function z(t,e,a,i){var n;for(s(t,e-257,5),s(t,a-1,5),s(t,i-4,4),n=0;i>n;n++)s(t,t.bl_tree[2*ae[n]+1],3);k(t,t.dyn_ltree,e-1),k(t,t.dyn_dtree,a-1)}function y(t){var e,a=4093624447;for(e=0;31>=e;e++,a>>>=1)if(1&a&&0!==t.dyn_ltree[2*e])return I;if(0!==t.dyn_ltree[18]||0!==t.dyn_ltree[20]||0!==t.dyn_ltree[26])return N;for(e=32;j>e;e++)if(0!==t.dyn_ltree[2*e])return N;return I}function B(t){be||(_(),be=!0),t.l_desc=new ce(t.dyn_ltree,de),t.d_desc=new ce(t.dyn_dtree,fe),t.bl_desc=new ce(t.bl_tree,_e),t.bi_buf=0,t.bi_valid=0,u(t)}function S(t,e,a,i){s(t,(T<<1)+(i?1:0),3),b(t,e,a,!0)}function E(t){s(t,D<<1,3),o(t,W,ne),h(t)}function A(t,e,a,i){var n,r,o=0;t.level>0?(t.strm.data_type===O&&(t.strm.data_type=y(t)),p(t,t.l_desc),p(t,t.d_desc),o=x(t),n=t.opt_len+3+7>>>3,r=t.static_len+3+7>>>3,n>=r&&(n=r)):n=r=a+5,n>=a+4&&-1!==e?S(t,e,a,i):t.strategy===C||r===n?(s(t,(D<<1)+(i?1:0),3),w(t,ne,re)):(s(t,(F<<1)+(i?1:0),3),z(t,t.l_desc.max_code+1,t.d_desc.max_code+1,o+1),w(t,t.dyn_ltree,t.dyn_dtree)),u(t),i&&c(t)}function Z(t,e,a){return t.pending_buf[t.d_buf+2*t.last_lit]=e>>>8&255,t.pending_buf[t.d_buf+2*t.last_lit+1]=255&e,t.pending_buf[t.l_buf+t.last_lit]=255&a,t.last_lit++,0===e?t.dyn_ltree[2*a]++:(t.matches++,e--,t.dyn_ltree[2*(oe[a]+j+1)]++,t.dyn_dtree[2*n(e)]++),t.last_lit===t.lit_bufsize-1}var R=t("../utils/common"),C=4,I=0,N=1,O=2,T=0,D=1,F=2,L=3,U=258,H=29,j=256,M=j+1+H,K=30,P=19,q=2*M+1,Y=15,G=16,X=7,W=256,J=16,Q=17,V=18,$=[0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0],te=[0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13],ee=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,3,7],ae=[16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15],ie=512,ne=new Array(2*(M+2));i(ne);var re=new Array(2*K);i(re);var se=new Array(ie);i(se);var oe=new Array(U-L+1);i(oe);var le=new Array(H);i(le);var he=new Array(K);i(he);var de,fe,_e,ue=function(t,e,a,i,n){this.static_tree=t,this.extra_bits=e,this.extra_base=a,this.elems=i,this.max_length=n,this.has_stree=t&&t.length},ce=function(t,e){this.dyn_tree=t,this.max_code=0,this.stat_desc=e},be=!1;a._tr_init=B,a._tr_stored_block=S,a._tr_flush_block=A,a._tr_tally=Z,a._tr_align=E},{"../utils/common":4}],16:[function(t,e){"use strict";function a(){this.input=null,this.next_in=0,this.avail_in=0,this.total_in=0,this.output=null,this.next_out=0,this.avail_out=0,this.total_out=0,this.msg="",this.state=null,this.data_type=2,this.adler=0}e.exports=a},{}]},{},[1])(1)});
 var hljs=new function(){function j(v){return v.replace(/&/gm,"&amp;").replace(/</gm,"&lt;").replace(/>/gm,"&gt;")}function t(v){return v.nodeName.toLowerCase()}function h(w,x){var v=w&&w.exec(x);return v&&v.index==0}function r(w){var v=(w.className+" "+(w.parentNode?w.parentNode.className:"")).split(/\s+/);v=v.map(function(x){return x.replace(/^lang(uage)?-/,"")});return v.filter(function(x){return i(x)||x=="no-highlight"})[0]}function o(x,y){var v={};for(var w in x){v[w]=x[w]}if(y){for(var w in y){v[w]=y[w]}}return v}function u(x){var v=[];(function w(y,z){for(var A=y.firstChild;A;A=A.nextSibling){if(A.nodeType==3){z+=A.nodeValue.length}else{if(t(A)=="br"){z+=1}else{if(A.nodeType==1){v.push({event:"start",offset:z,node:A});z=w(A,z);v.push({event:"stop",offset:z,node:A})}}}}return z})(x,0);return v}function q(w,y,C){var x=0;var F="";var z=[];function B(){if(!w.length||!y.length){return w.length?w:y}if(w[0].offset!=y[0].offset){return(w[0].offset<y[0].offset)?w:y}return y[0].event=="start"?w:y}function A(H){function G(I){return" "+I.nodeName+'="'+j(I.value)+'"'}F+="<"+t(H)+Array.prototype.map.call(H.attributes,G).join("")+">"}function E(G){F+="</"+t(G)+">"}function v(G){(G.event=="start"?A:E)(G.node)}while(w.length||y.length){var D=B();F+=j(C.substr(x,D[0].offset-x));x=D[0].offset;if(D==w){z.reverse().forEach(E);do{v(D.splice(0,1)[0]);D=B()}while(D==w&&D.length&&D[0].offset==x);z.reverse().forEach(A)}else{if(D[0].event=="start"){z.push(D[0].node)}else{z.pop()}v(D.splice(0,1)[0])}}return F+j(C.substr(x))}function m(y){function v(z){return(z&&z.source)||z}function w(A,z){return RegExp(v(A),"m"+(y.cI?"i":"")+(z?"g":""))}function x(D,C){if(D.compiled){return}D.compiled=true;D.k=D.k||D.bK;if(D.k){var z={};function E(G,F){if(y.cI){F=F.toLowerCase()}F.split(" ").forEach(function(H){var I=H.split("|");z[I[0]]=[G,I[1]?Number(I[1]):1]})}if(typeof D.k=="string"){E("keyword",D.k)}else{Object.keys(D.k).forEach(function(F){E(F,D.k[F])})}D.k=z}D.lR=w(D.l||/\b[A-Za-z0-9_]+\b/,true);if(C){if(D.bK){D.b="\\b("+D.bK.split(" ").join("|")+")\\b"}if(!D.b){D.b=/\B|\b/}D.bR=w(D.b);if(!D.e&&!D.eW){D.e=/\B|\b/}if(D.e){D.eR=w(D.e)}D.tE=v(D.e)||"";if(D.eW&&C.tE){D.tE+=(D.e?"|":"")+C.tE}}if(D.i){D.iR=w(D.i)}if(D.r===undefined){D.r=1}if(!D.c){D.c=[]}var B=[];D.c.forEach(function(F){if(F.v){F.v.forEach(function(G){B.push(o(F,G))})}else{B.push(F=="self"?D:F)}});D.c=B;D.c.forEach(function(F){x(F,D)});if(D.starts){x(D.starts,C)}var A=D.c.map(function(F){return F.bK?"\\.?("+F.b+")\\.?":F.b}).concat([D.tE,D.i]).map(v).filter(Boolean);D.t=A.length?w(A.join("|"),true):{exec:function(F){return null}};D.continuation={}}x(y)}function c(S,L,J,R){function v(U,V){for(var T=0;T<V.c.length;T++){if(h(V.c[T].bR,U)){return V.c[T]}}}function z(U,T){if(h(U.eR,T)){return U}if(U.eW){return z(U.parent,T)}}function A(T,U){return !J&&h(U.iR,T)}function E(V,T){var U=M.cI?T[0].toLowerCase():T[0];return V.k.hasOwnProperty(U)&&V.k[U]}function w(Z,X,W,V){var T=V?"":b.classPrefix,U='<span class="'+T,Y=W?"":"</span>";U+=Z+'">';return U+X+Y}function N(){if(!I.k){return j(C)}var T="";var W=0;I.lR.lastIndex=0;var U=I.lR.exec(C);while(U){T+=j(C.substr(W,U.index-W));var V=E(I,U);if(V){H+=V[1];T+=w(V[0],j(U[0]))}else{T+=j(U[0])}W=I.lR.lastIndex;U=I.lR.exec(C)}return T+j(C.substr(W))}function F(){if(I.sL&&!f[I.sL]){return j(C)}var T=I.sL?c(I.sL,C,true,I.continuation.top):e(C);if(I.r>0){H+=T.r}if(I.subLanguageMode=="continuous"){I.continuation.top=T.top}return w(T.language,T.value,false,true)}function Q(){return I.sL!==undefined?F():N()}function P(V,U){var T=V.cN?w(V.cN,"",true):"";if(V.rB){D+=T;C=""}else{if(V.eB){D+=j(U)+T;C=""}else{D+=T;C=U}}I=Object.create(V,{parent:{value:I}})}function G(T,X){C+=T;if(X===undefined){D+=Q();return 0}var V=v(X,I);if(V){D+=Q();P(V,X);return V.rB?0:X.length}var W=z(I,X);if(W){var U=I;if(!(U.rE||U.eE)){C+=X}D+=Q();do{if(I.cN){D+="</span>"}H+=I.r;I=I.parent}while(I!=W.parent);if(U.eE){D+=j(X)}C="";if(W.starts){P(W.starts,"")}return U.rE?0:X.length}if(A(X,I)){throw new Error('Illegal lexeme "'+X+'" for mode "'+(I.cN||"<unnamed>")+'"')}C+=X;return X.length||1}var M=i(S);if(!M){throw new Error('Unknown language: "'+S+'"')}m(M);var I=R||M;var D="";for(var K=I;K!=M;K=K.parent){if(K.cN){D+=w(K.cN,D,true)}}var C="";var H=0;try{var B,y,x=0;while(true){I.t.lastIndex=x;B=I.t.exec(L);if(!B){break}y=G(L.substr(x,B.index-x),B[0]);x=B.index+y}G(L.substr(x));for(var K=I;K.parent;K=K.parent){if(K.cN){D+="</span>"}}return{r:H,value:D,language:S,top:I}}catch(O){if(O.message.indexOf("Illegal")!=-1){return{r:0,value:j(L)}}else{throw O}}}function e(y,x){x=x||b.languages||Object.keys(f);var v={r:0,value:j(y)};var w=v;x.forEach(function(z){if(!i(z)){return}var A=c(z,y,false);A.language=z;if(A.r>w.r){w=A}if(A.r>v.r){w=v;v=A}});if(w.language){v.second_best=w}return v}function g(v){if(b.tabReplace){v=v.replace(/^((<[^>]+>|\t)+)/gm,function(w,z,y,x){return z.replace(/\t/g,b.tabReplace)})}if(b.useBR){v=v.replace(/\n/g,"<br>")}return v}function p(z){var y=b.useBR?z.innerHTML.replace(/\n/g,"").replace(/<br>|<br [^>]*>/g,"\n").replace(/<[^>]*>/g,""):z.textContent;var A=r(z);if(A=="no-highlight"){return}var v=A?c(A,y,true):e(y);var w=u(z);if(w.length){var x=document.createElementNS("http://www.w3.org/1999/xhtml","pre");x.innerHTML=v.value;v.value=q(w,u(x),y)}v.value=g(v.value);z.innerHTML=v.value;z.className+=" hljs "+(!A&&v.language||"");z.result={language:v.language,re:v.r};if(v.second_best){z.second_best={language:v.second_best.language,re:v.second_best.r}}}var b={classPrefix:"hljs-",tabReplace:null,useBR:false,languages:undefined};function s(v){b=o(b,v)}function l(){if(l.called){return}l.called=true;var v=document.querySelectorAll("pre code");Array.prototype.forEach.call(v,p)}function a(){addEventListener("DOMContentLoaded",l,false);addEventListener("load",l,false)}var f={};var n={};function d(v,x){var w=f[v]=x(this);if(w.aliases){w.aliases.forEach(function(y){n[y]=v})}}function k(){return Object.keys(f)}function i(v){return f[v]||f[n[v]]}this.highlight=c;this.highlightAuto=e;this.fixMarkup=g;this.highlightBlock=p;this.configure=s;this.initHighlighting=l;this.initHighlightingOnLoad=a;this.registerLanguage=d;this.listLanguages=k;this.getLanguage=i;this.inherit=o;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="(\\b0[xX][a-fA-F0-9]+|(\\b\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|-|-=|/=|/|:|;|<<|<<=|<=|<|===|==|=|>>>=|>>=|>=|>>>|>>|>|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.BE={b:"\\\\[\\s\\S]",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE]};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE]};this.PWM={b:/\b(a|an|the|are|I|I'm|isn't|don't|doesn't|won't|but|just|should|pretty|simply|enough|gonna|going|wtf|so|such)\b/};this.CLCM={cN:"comment",b:"//",e:"$",c:[this.PWM]};this.CBCM={cN:"comment",b:"/\\*",e:"\\*/",c:[this.PWM]};this.HCM={cN:"comment",b:"#",e:"$",c:[this.PWM]};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.CSSNM={cN:"number",b:this.NR+"(%|em|ex|ch|rem|vw|vh|vmin|vmax|cm|mm|in|pt|pc|px|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx)?",r:0};this.RM={cN:"regexp",b:/\//,e:/\/[gim]*/,i:/\n/,c:[this.BE,{b:/\[/,e:/\]/,r:0,c:[this.BE]}]};this.TM={cN:"title",b:this.IR,r:0};this.UTM={cN:"title",b:this.UIR,r:0}}();hljs.registerLanguage("bash",function(b){var a={cN:"variable",v:[{b:/\$[\w\d#@][\w\d_]*/},{b:/\$\{(.*?)\}/}]};var d={cN:"string",b:/"/,e:/"/,c:[b.BE,a,{cN:"variable",b:/\$\(/,e:/\)/,c:[b.BE]}]};var c={cN:"string",b:/'/,e:/'/};return{aliases:["sh","zsh"],l:/-?[a-z\.]+/,k:{keyword:"if then else elif fi for break continue while in do done exit return set declare case esac export exec",literal:"true false",built_in:"printf echo read cd pwd pushd popd dirs let eval unset typeset readonly getopts source shopt caller type hash bind help sudo",operator:"-ne -eq -lt -gt -f -d -e -s -l -a"},c:[{cN:"shebang",b:/^#![^\n]+sh\s*$/,r:10},{cN:"function",b:/\w[\w\d_]*\s*\(\s*\)\s*\{/,rB:true,c:[b.inherit(b.TM,{b:/\w[\w\d_]*/})],r:0},b.HCM,b.NM,d,c,a]}});hljs.registerLanguage("brainfuck",function(b){var a={cN:"literal",b:"[\\+\\-]",r:0};return{aliases:["bf"],c:[{cN:"comment",b:"[^\\[\\]\\.,\\+\\-<> \r\n]",rE:true,e:"[\\[\\]\\.,\\+\\-<> \r\n]",r:0},{cN:"title",b:"[\\[\\]]",r:0},{cN:"string",b:"[\\.,]",r:0},{b:/\+\+|\-\-/,rB:true,c:[a]},a]}});hljs.registerLanguage("clojure",function(l){var e={built_in:"def cond apply if-not if-let if not not= = &lt; < > &lt;= <= >= == + / * - rem quot neg? pos? delay? symbol? keyword? true? false? integer? empty? coll? list? set? ifn? fn? associative? sequential? sorted? counted? reversible? number? decimal? class? distinct? isa? float? rational? reduced? ratio? odd? even? char? seq? vector? string? map? nil? contains? zero? instance? not-every? not-any? libspec? -> ->> .. . inc compare do dotimes mapcat take remove take-while drop letfn drop-last take-last drop-while while intern condp case reduced cycle split-at split-with repeat replicate iterate range merge zipmap declare line-seq sort comparator sort-by dorun doall nthnext nthrest partition eval doseq await await-for let agent atom send send-off release-pending-sends add-watch mapv filterv remove-watch agent-error restart-agent set-error-handler error-handler set-error-mode! error-mode shutdown-agents quote var fn loop recur throw try monitor-enter monitor-exit defmacro defn defn- macroexpand macroexpand-1 for dosync and or when when-not when-let comp juxt partial sequence memoize constantly complement identity assert peek pop doto proxy defstruct first rest cons defprotocol cast coll deftype defrecord last butlast sigs reify second ffirst fnext nfirst nnext defmulti defmethod meta with-meta ns in-ns create-ns import refer keys select-keys vals key val rseq name namespace promise into transient persistent! conj! assoc! dissoc! pop! disj! use class type num float double short byte boolean bigint biginteger bigdec print-method print-dup throw-if printf format load compile get-in update-in pr pr-on newline flush read slurp read-line subvec with-open memfn time re-find re-groups rand-int rand mod locking assert-valid-fdecl alias resolve ref deref refset swap! reset! set-validator! compare-and-set! alter-meta! reset-meta! commute get-validator alter ref-set ref-history-count ref-min-history ref-max-history ensure sync io! new next conj set! to-array future future-call into-array aset gen-class reduce map filter find empty hash-map hash-set sorted-map sorted-map-by sorted-set sorted-set-by vec vector seq flatten reverse assoc dissoc list disj get union difference intersection extend extend-type extend-protocol int nth delay count concat chunk chunk-buffer chunk-append chunk-first chunk-rest max min dec unchecked-inc-int unchecked-inc unchecked-dec-inc unchecked-dec unchecked-negate unchecked-add-int unchecked-add unchecked-subtract-int unchecked-subtract chunk-next chunk-cons chunked-seq? prn vary-meta lazy-seq spread list* str find-keyword keyword symbol gensym force rationalize"};var f="[a-zA-Z_0-9\\!\\.\\?\\-\\+\\*\\/\\<\\=\\>\\&\\#\\$';]+";var a="[\\s:\\(\\{]+\\d+(\\.\\d+)?";var d={cN:"number",b:a,r:0};var j=l.inherit(l.QSM,{i:null});var o={cN:"comment",b:";",e:"$",r:0};var n={cN:"collection",b:"[\\[\\{]",e:"[\\]\\}]"};var c={cN:"comment",b:"\\^"+f};var b={cN:"comment",b:"\\^\\{",e:"\\}"};var h={cN:"attribute",b:"[:]"+f};var m={cN:"list",b:"\\(",e:"\\)"};var g={eW:true,k:{literal:"true false nil"},r:0};var i={k:e,l:f,cN:"title",b:f,starts:g};m.c=[{cN:"comment",b:"comment"},i,g];g.c=[m,j,c,b,o,h,n,d];n.c=[m,j,c,o,h,n,d];return{aliases:["clj"],i:/\S/,c:[o,m,{cN:"prompt",b:/^=> /,starts:{e:/\n\n|\Z/}}]}});hljs.registerLanguage("coffeescript",function(c){var b={keyword:"in if for while finally new do return else break catch instanceof throw try this switch continue typeof delete debugger super then unless until loop of by when and or is isnt not",literal:"true false null undefined yes no on off",reserved:"case default function var void with const let enum export import native __hasProp __extends __slice __bind __indexOf",built_in:"npm require console print module global window document"};var a="[A-Za-z$_][0-9A-Za-z$_]*";var f=c.inherit(c.TM,{b:a});var e={cN:"subst",b:/#\{/,e:/}/,k:b};var d=[c.BNM,c.inherit(c.CNM,{starts:{e:"(\\s*/)?",r:0}}),{cN:"string",v:[{b:/'''/,e:/'''/,c:[c.BE]},{b:/'/,e:/'/,c:[c.BE]},{b:/"""/,e:/"""/,c:[c.BE,e]},{b:/"/,e:/"/,c:[c.BE,e]}]},{cN:"regexp",v:[{b:"///",e:"///",c:[e,c.HCM]},{b:"//[gim]*",r:0},{b:"/\\S(\\\\.|[^\\n])*?/[gim]*(?=\\s|\\W|$)"}]},{cN:"property",b:"@"+a},{b:"`",e:"`",eB:true,eE:true,sL:"javascript"}];e.c=d;return{aliases:["coffee","cson","iced"],k:b,c:d.concat([{cN:"comment",b:"###",e:"###"},c.HCM,{cN:"function",b:"("+a+"\\s*=\\s*)?(\\(.*\\))?\\s*\\B[-=]>",e:"[-=]>",rB:true,c:[f,{cN:"params",b:"\\(",rB:true,c:[{b:/\(/,e:/\)/,k:b,c:["self"].concat(d)}]}]},{cN:"class",bK:"class",e:"$",i:/[:="\[\]]/,c:[{bK:"extends",eW:true,i:/[:="\[\]]/,c:[f]},f]},{cN:"attribute",b:a+":",e:":",rB:true,eE:true,r:0}])}});hljs.registerLanguage("cpp",function(a){var b={keyword:"false int float while private char catch export virtual operator sizeof dynamic_cast|10 typedef const_cast|10 const struct for static_cast|10 union namespace unsigned long throw volatile static protected bool template mutable if public friend do return goto auto void enum else break new extern using true class asm case typeid short reinterpret_cast|10 default double register explicit signed typename try this switch continue wchar_t inline delete alignof char16_t char32_t constexpr decltype noexcept nullptr static_assert thread_local restrict _Bool complex _Complex _Imaginary",built_in:"std string cin cout cerr clog stringstream istringstream ostringstream auto_ptr deque list queue stack vector map set bitset multiset multimap unordered_set unordered_map unordered_multiset unordered_multimap array shared_ptr abort abs acos asin atan2 atan calloc ceil cosh cos exit exp fabs floor fmod fprintf fputs free frexp fscanf isalnum isalpha iscntrl isdigit isgraph islower isprint ispunct isspace isupper isxdigit tolower toupper labs ldexp log10 log malloc memchr memcmp memcpy memset modf pow printf putchar puts scanf sinh sin snprintf sprintf sqrt sscanf strcat strchr strcmp strcpy strcspn strlen strncat strncmp strncpy strpbrk strrchr strspn strstr tanh tan vfprintf vprintf vsprintf"};return{aliases:["c","h","c++","h++"],k:b,i:"</",c:[a.CLCM,a.CBCM,a.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},a.CNM,{cN:"preprocessor",b:"#",e:"$",k:"if else elif endif define undef warning error line pragma",c:[{b:'include\\s*[<"]',e:'[>"]',k:"include",i:"\\n"},a.CLCM]},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:b,c:["self"]},{b:a.IR+"::"}]}});hljs.registerLanguage("cs",function(b){var a="abstract as base bool break byte case catch char checked const continue decimal default delegate do double else enum event explicit extern false finally fixed float for foreach goto if implicit in int interface internal is lock long new null object operator out override params private protected public readonly ref return sbyte sealed short sizeof stackalloc static string struct switch this throw true try typeof uint ulong unchecked unsafe ushort using virtual volatile void while async await ascending descending from get group into join let orderby partial select set value var where yield";return{k:a,i:/::/,c:[{cN:"comment",b:"///",e:"$",rB:true,c:[{cN:"xmlDocTag",v:[{b:"///",r:0},{b:"<!--|-->"},{b:"</?",e:">"}]}]},b.CLCM,b.CBCM,{cN:"preprocessor",b:"#",e:"$",k:"if else elif endif define undef warning error line region endregion pragma checksum"},{cN:"string",b:'@"',e:'"',c:[{b:'""'}]},b.ASM,b.QSM,b.CNM,{bK:"protected public private internal",e:/[{;=]/,k:a,c:[{bK:"class namespace interface",starts:{c:[b.TM]}},{b:b.IR+"\\s*\\(",rB:true,c:[b.TM]}]}]}});hljs.registerLanguage("css",function(a){var b="[a-zA-Z-][a-zA-Z0-9_-]*";var c={cN:"function",b:b+"\\(",rB:true,eE:true,e:"\\("};return{cI:true,i:"[=/|']",c:[a.CBCM,{cN:"id",b:"\\#[A-Za-z0-9_-]+"},{cN:"class",b:"\\.[A-Za-z0-9_-]+",r:0},{cN:"attr_selector",b:"\\[",e:"\\]",i:"$"},{cN:"pseudo",b:":(:)?[a-zA-Z0-9\\_\\-\\+\\(\\)\\\"\\']+"},{cN:"at_rule",b:"@(font-face|page)",l:"[a-z-]+",k:"font-face page"},{cN:"at_rule",b:"@",e:"[{;]",c:[{cN:"keyword",b:/\S+/},{b:/\s/,eW:true,eE:true,r:0,c:[c,a.ASM,a.QSM,a.CSSNM]}]},{cN:"tag",b:b,r:0},{cN:"rules",b:"{",e:"}",i:"[^\\s]",r:0,c:[a.CBCM,{cN:"rule",b:"[^\\s]",rB:true,e:";",eW:true,c:[{cN:"attribute",b:"[A-Z\\_\\.\\-]+",e:":",eE:true,i:"[^\\s]",starts:{cN:"value",eW:true,eE:true,c:[c,a.CSSNM,a.QSM,a.ASM,a.CBCM,{cN:"hexcolor",b:"#[0-9A-Fa-f]+"},{cN:"important",b:"!important"}]}}]}]}]}});hljs.registerLanguage("delphi",function(b){var a="exports register file shl array record property for mod while set ally label uses raise not stored class safecall var interface or private static exit index inherited to else stdcall override shr asm far resourcestring finalization packed virtual out and protected library do xorwrite goto near function end div overload object unit begin string on inline repeat until destructor write message program with read initialization except default nil if case cdecl in downto threadvar of try pascal const external constructor type public then implementation finally published procedure";var e={cN:"comment",v:[{b:/\{/,e:/\}/,r:0},{b:/\(\*/,e:/\*\)/,r:10}]};var c={cN:"string",b:/'/,e:/'/,c:[{b:/''/}]};var d={cN:"string",b:/(#\d+)+/};var f={b:b.IR+"\\s*=\\s*class\\s*\\(",rB:true,c:[b.TM]};var g={cN:"function",bK:"function constructor destructor procedure",e:/[:;]/,k:"function constructor|10 destructor|10 procedure|10",c:[b.TM,{cN:"params",b:/\(/,e:/\)/,k:a,c:[c,d]},e]};return{cI:true,k:a,i:/("|\$[G-Zg-z]|\/\*|<\/)/,c:[e,b.CLCM,c,d,b.NM,f,g]}});hljs.registerLanguage("diff",function(a){return{aliases:["patch"],c:[{cN:"chunk",r:10,v:[{b:/^\@\@ +\-\d+,\d+ +\+\d+,\d+ +\@\@$/},{b:/^\*\*\* +\d+,\d+ +\*\*\*\*$/},{b:/^\-\-\- +\d+,\d+ +\-\-\-\-$/}]},{cN:"header",v:[{b:/Index: /,e:/$/},{b:/=====/,e:/=====$/},{b:/^\-\-\-/,e:/$/},{b:/^\*{3} /,e:/$/},{b:/^\+\+\+/,e:/$/},{b:/\*{5}/,e:/\*{5}$/}]},{cN:"addition",b:"^\\+",e:"$"},{cN:"deletion",b:"^\\-",e:"$"},{cN:"change",b:"^\\!",e:"$"}]}});hljs.registerLanguage("erlang-repl",function(a){return{k:{special_functions:"spawn spawn_link self",reserved:"after and andalso|10 band begin bnot bor bsl bsr bxor case catch cond div end fun if let not of or orelse|10 query receive rem try when xor"},c:[{cN:"prompt",b:"^[0-9]+> ",r:10},{cN:"comment",b:"%",e:"$"},{cN:"number",b:"\\b(\\d+#[a-fA-F0-9]+|\\d+(\\.\\d+)?([eE][-+]?\\d+)?)",r:0},a.ASM,a.QSM,{cN:"constant",b:"\\?(::)?([A-Z]\\w*(::)?)+"},{cN:"arrow",b:"->"},{cN:"ok",b:"ok"},{cN:"exclamation_mark",b:"!"},{cN:"function_or_atom",b:"(\\b[a-z'][a-zA-Z0-9_']*:[a-z'][a-zA-Z0-9_']*)|(\\b[a-z'][a-zA-Z0-9_']*)",r:0},{cN:"variable",b:"[A-Z][a-zA-Z0-9_']*",r:0}]}});hljs.registerLanguage("erlang",function(i){var c="[a-z'][a-zA-Z0-9_']*";var o="("+c+":"+c+"|"+c+")";var f={keyword:"after and andalso|10 band begin bnot bor bsl bzr bxor case catch cond div end fun let not of orelse|10 query receive rem try when xor",literal:"false true"};var l={cN:"comment",b:"%",e:"$"};var e={cN:"number",b:"\\b(\\d+#[a-fA-F0-9]+|\\d+(\\.\\d+)?([eE][-+]?\\d+)?)",r:0};var g={b:"fun\\s+"+c+"/\\d+"};var n={b:o+"\\(",e:"\\)",rB:true,r:0,c:[{cN:"function_name",b:o,r:0},{b:"\\(",e:"\\)",eW:true,rE:true,r:0}]};var h={cN:"tuple",b:"{",e:"}",r:0};var a={cN:"variable",b:"\\b_([A-Z][A-Za-z0-9_]*)?",r:0};var m={cN:"variable",b:"[A-Z][a-zA-Z0-9_]*",r:0};var b={b:"#"+i.UIR,r:0,rB:true,c:[{cN:"record_name",b:"#"+i.UIR,r:0},{b:"{",e:"}",r:0}]};var k={bK:"fun receive if try case",e:"end",k:f};k.c=[l,g,i.inherit(i.ASM,{cN:""}),k,n,i.QSM,e,h,a,m,b];var j=[l,g,k,n,i.QSM,e,h,a,m,b];n.c[1].c=j;h.c=j;b.c[1].c=j;var d={cN:"params",b:"\\(",e:"\\)",c:j};return{aliases:["erl"],k:f,i:"(</|\\*=|\\+=|-=|/=|/\\*|\\*/|\\(\\*|\\*\\))",c:[{cN:"function",b:"^"+c+"\\s*\\(",e:"->",rB:true,i:"\\(|#|//|/\\*|\\\\|:|;",c:[d,i.inherit(i.TM,{b:c})],starts:{e:";|\\.",k:f,c:j}},l,{cN:"pp",b:"^-",e:"\\.",r:0,eE:true,rB:true,l:"-"+i.IR,k:"-module -record -undef -export -ifdef -ifndef -author -copyright -doc -vsn -import -include -include_lib -compile -define -else -endif -file -behaviour -behavior -spec",c:[d]},e,i.QSM,b,a,m,h,{b:/\.$/}]}});hljs.registerLanguage("haskell",function(f){var g={cN:"comment",v:[{b:"--",e:"$"},{b:"{-",e:"-}",c:["self"]}]};var e={cN:"pragma",b:"{-#",e:"#-}"};var b={cN:"preprocessor",b:"^#",e:"$"};var d={cN:"type",b:"\\b[A-Z][\\w']*",r:0};var c={cN:"container",b:"\\(",e:"\\)",i:'"',c:[e,g,b,{cN:"type",b:"\\b[A-Z][\\w]*(\\((\\.\\.|,|\\w+)\\))?"},f.inherit(f.TM,{b:"[_a-z][\\w']*"})]};var a={cN:"container",b:"{",e:"}",c:c.c};return{aliases:["hs"],k:"let in if then else case of where do module import hiding qualified type data newtype deriving class instance as default infix infixl infixr foreign export ccall stdcall cplusplus jvm dotnet safe unsafe family forall mdo proc rec",c:[{cN:"module",b:"\\bmodule\\b",e:"where",k:"module where",c:[c,g],i:"\\W\\.|;"},{cN:"import",b:"\\bimport\\b",e:"$",k:"import|0 qualified as hiding",c:[c,g],i:"\\W\\.|;"},{cN:"class",b:"^(\\s*)?(class|instance)\\b",e:"where",k:"class family instance where",c:[d,c,g]},{cN:"typedef",b:"\\b(data|(new)?type)\\b",e:"$",k:"data family type newtype deriving",c:[e,g,d,c,a]},{cN:"default",bK:"default",e:"$",c:[d,c,g]},{cN:"infix",bK:"infix infixl infixr",e:"$",c:[f.CNM,g]},{cN:"foreign",b:"\\bforeign\\b",e:"$",k:"foreign import export ccall stdcall cplusplus jvm dotnet safe unsafe",c:[d,f.QSM,g]},{cN:"shebang",b:"#!\\/usr\\/bin\\/env runhaskell",e:"$"},e,g,b,f.QSM,f.CNM,d,f.inherit(f.TM,{b:"^[_a-z][\\w']*"}),{b:"->|<-"}]}});hljs.registerLanguage("http",function(a){return{i:"\\S",c:[{cN:"status",b:"^HTTP/[0-9\\.]+",e:"$",c:[{cN:"number",b:"\\b\\d{3}\\b"}]},{cN:"request",b:"^[A-Z]+ (.*?) HTTP/[0-9\\.]+$",rB:true,e:"$",c:[{cN:"string",b:" ",e:" ",eB:true,eE:true}]},{cN:"attribute",b:"^\\w",e:": ",eE:true,i:"\\n|\\s|=",starts:{cN:"string",e:"$"}},{b:"\\n\\n",starts:{sL:"",eW:true}}]}});hljs.registerLanguage("ini",function(a){return{cI:true,i:/\S/,c:[{cN:"comment",b:";",e:"$"},{cN:"title",b:"^\\[",e:"\\]"},{cN:"setting",b:"^[a-z0-9\\[\\]_-]+[ \\t]*=[ \\t]*",e:"$",c:[{cN:"value",eW:true,k:"on off true false yes no",c:[a.QSM,a.NM],r:0}]}]}});hljs.registerLanguage("java",function(b){var a="false synchronized int abstract float private char boolean static null if const for true while long throw strictfp finally protected import native final return void enum else break transient new catch instanceof byte super volatile case assert short package default double public try this switch continue throws";return{aliases:["jsp"],k:a,i:/<\//,c:[{cN:"javadoc",b:"/\\*\\*",e:"\\*/",c:[{cN:"javadoctag",b:"(^|\\s)@[A-Za-z]+"}],r:10},b.CLCM,b.CBCM,b.ASM,b.QSM,{bK:"protected public private",e:/[{;=]/,k:a,c:[{cN:"class",bK:"class interface",eW:true,eE:true,i:/[:"<>]/,c:[{bK:"extends implements",r:10},b.UTM]},{b:b.UIR+"\\s*\\(",rB:true,c:[b.UTM]}]},b.CNM,{cN:"annotation",b:"@[A-Za-z]+"}]}});hljs.registerLanguage("javascript",function(a){return{aliases:["js"],k:{keyword:"in if for while finally var new function do return void else break catch instanceof with throw case default try this switch continue typeof delete let yield const class",literal:"true false null undefined NaN Infinity",built_in:"eval isFinite isNaN parseFloat parseInt decodeURI decodeURIComponent encodeURI encodeURIComponent escape unescape Object Function Boolean Error EvalError InternalError RangeError ReferenceError StopIteration SyntaxError TypeError URIError Number Math Date String RegExp Array Float32Array Float64Array Int16Array Int32Array Int8Array Uint16Array Uint32Array Uint8Array Uint8ClampedArray ArrayBuffer DataView JSON Intl arguments require module console window document"},c:[{cN:"pi",b:/^\s*('|")use strict('|")/,r:10},a.ASM,a.QSM,a.CLCM,a.CBCM,a.CNM,{b:"("+a.RSR+"|\\b(case|return|throw)\\b)\\s*",k:"return throw case",c:[a.CLCM,a.CBCM,a.RM,{b:/</,e:/>;/,r:0,sL:"xml"}],r:0},{cN:"function",bK:"function",e:/\{/,eE:true,c:[a.inherit(a.TM,{b:/[A-Za-z$_][0-9A-Za-z$_]*/}),{cN:"params",b:/\(/,e:/\)/,c:[a.CLCM,a.CBCM],i:/["'\(]/}],i:/\[|%/},{b:/\$[(.]/},{b:"\\."+a.IR,r:0}]}});hljs.registerLanguage("json",function(a){var e={literal:"true false null"};var d=[a.QSM,a.CNM];var c={cN:"value",e:",",eW:true,eE:true,c:d,k:e};var b={b:"{",e:"}",c:[{cN:"attribute",b:'\\s*"',e:'"\\s*:\\s*',eB:true,eE:true,c:[a.BE],i:"\\n",starts:c}],i:"\\S"};var f={b:"\\[",e:"\\]",c:[a.inherit(c,{cN:null})],i:"\\S"};d.splice(d.length,0,b,f);return{c:d,k:e,i:"\\S"}});hljs.registerLanguage("lisp",function(i){var l="[a-zA-Z_\\-\\+\\*\\/\\<\\=\\>\\&\\#][a-zA-Z0-9_\\-\\+\\*\\/\\<\\=\\>\\&\\#!]*";var m="(\\-|\\+)?\\d+(\\.\\d+|\\/\\d+)?((d|e|f|l|s)(\\+|\\-)?\\d+)?";var k={cN:"shebang",b:"^#!",e:"$"};var b={cN:"literal",b:"\\b(t{1}|nil)\\b"};var e={cN:"number",v:[{b:m,r:0},{b:"#b[0-1]+(/[0-1]+)?"},{b:"#o[0-7]+(/[0-7]+)?"},{b:"#x[0-9a-f]+(/[0-9a-f]+)?"},{b:"#c\\("+m+" +"+m,e:"\\)"}]};var h=i.inherit(i.QSM,{i:null});var n={cN:"comment",b:";",e:"$"};var g={cN:"variable",b:"\\*",e:"\\*"};var o={cN:"keyword",b:"[:&]"+l};var d={b:"\\(",e:"\\)",c:["self",b,h,e]};var a={cN:"quoted",c:[e,h,g,o,d],v:[{b:"['`]\\(",e:"\\)"},{b:"\\(quote ",e:"\\)",k:{title:"quote"}}]};var c={cN:"quoted",b:"'"+l};var j={cN:"list",b:"\\(",e:"\\)"};var f={eW:true,r:0};j.c=[{cN:"title",b:l},f];f.c=[a,c,j,b,e,h,n,g,o];return{i:/\S/,c:[e,k,b,h,n,a,c,j]}});hljs.registerLanguage("lua",function(b){var a="\\[=*\\[";var e="\\]=*\\]";var c={b:a,e:e,c:["self"]};var d=[{cN:"comment",b:"--(?!"+a+")",e:"$"},{cN:"comment",b:"--"+a,e:e,c:[c],r:10}];return{l:b.UIR,k:{keyword:"and break do else elseif end false for if in local nil not or repeat return then true until while",built_in:"_G _VERSION assert collectgarbage dofile error getfenv getmetatable ipairs load loadfile loadstring module next pairs pcall print rawequal rawget rawset require select setfenv setmetatable tonumber tostring type unpack xpcall coroutine debug io math os package string table"},c:d.concat([{cN:"function",bK:"function",e:"\\)",c:[b.inherit(b.TM,{b:"([_a-zA-Z]\\w*\\.)*([_a-zA-Z]\\w*:)?[_a-zA-Z]\\w*"}),{cN:"params",b:"\\(",eW:true,c:d}].concat(d)},b.CNM,b.ASM,b.QSM,{cN:"string",b:a,e:e,c:[c],r:10}])}});hljs.registerLanguage("objectivec",function(a){var d={keyword:"int float while char export sizeof typedef const struct for union unsigned long volatile static bool mutable if do return goto void enum else break extern asm case short default double register explicit signed typename this switch continue wchar_t inline readonly assign self synchronized id nonatomic super unichar IBOutlet IBAction strong weak @private @protected @public @try @property @end @throw @catch @finally @synthesize @dynamic @selector @optional @required",literal:"false true FALSE TRUE nil YES NO NULL",built_in:"NSString NSDictionary CGRect CGPoint UIButton UILabel UITextView UIWebView MKMapView UISegmentedControl NSObject UITableViewDelegate UITableViewDataSource NSThread UIActivityIndicator UITabbar UIToolBar UIBarButtonItem UIImageView NSAutoreleasePool UITableView BOOL NSInteger CGFloat NSException NSLog NSMutableString NSMutableArray NSMutableDictionary NSURL NSIndexPath CGSize UITableViewCell UIView UIViewController UINavigationBar UINavigationController UITabBarController UIPopoverController UIPopoverControllerDelegate UIImage NSNumber UISearchBar NSFetchedResultsController NSFetchedResultsChangeType UIScrollView UIScrollViewDelegate UIEdgeInsets UIColor UIFont UIApplication NSNotFound NSNotificationCenter NSNotification UILocalNotification NSBundle NSFileManager NSTimeInterval NSDate NSCalendar NSUserDefaults UIWindow NSRange NSArray NSError NSURLRequest NSURLConnection UIInterfaceOrientation MPMoviePlayerController dispatch_once_t dispatch_queue_t dispatch_sync dispatch_async dispatch_once"};var c=/[a-zA-Z@][a-zA-Z0-9_]*/;var b="@interface @class @protocol @implementation";return{aliases:["m","mm","objc","obj-c"],k:d,l:c,i:"</",c:[a.CLCM,a.CBCM,a.CNM,a.QSM,{cN:"string",b:"'",e:"[^\\\\]'",i:"[^\\\\][^']"},{cN:"preprocessor",b:"#import",e:"$",c:[{cN:"title",b:'"',e:'"'},{cN:"title",b:"<",e:">"}]},{cN:"preprocessor",b:"#",e:"$"},{cN:"class",b:"("+b.split(" ").join("|")+")\\b",e:"({|$)",eE:true,k:b,l:c,c:[a.UTM]},{cN:"variable",b:"\\."+a.UIR,r:0}]}});hljs.registerLanguage("perl",function(c){var d="getpwent getservent quotemeta msgrcv scalar kill dbmclose undef lc ma syswrite tr send umask sysopen shmwrite vec qx utime local oct semctl localtime readpipe do return format read sprintf dbmopen pop getpgrp not getpwnam rewinddir qqfileno qw endprotoent wait sethostent bless s|0 opendir continue each sleep endgrent shutdown dump chomp connect getsockname die socketpair close flock exists index shmgetsub for endpwent redo lstat msgctl setpgrp abs exit select print ref gethostbyaddr unshift fcntl syscall goto getnetbyaddr join gmtime symlink semget splice x|0 getpeername recv log setsockopt cos last reverse gethostbyname getgrnam study formline endhostent times chop length gethostent getnetent pack getprotoent getservbyname rand mkdir pos chmod y|0 substr endnetent printf next open msgsnd readdir use unlink getsockopt getpriority rindex wantarray hex system getservbyport endservent int chr untie rmdir prototype tell listen fork shmread ucfirst setprotoent else sysseek link getgrgid shmctl waitpid unpack getnetbyname reset chdir grep split require caller lcfirst until warn while values shift telldir getpwuid my getprotobynumber delete and sort uc defined srand accept package seekdir getprotobyname semop our rename seek if q|0 chroot sysread setpwent no crypt getc chown sqrt write setnetent setpriority foreach tie sin msgget map stat getlogin unless elsif truncate exec keys glob tied closedirioctl socket readlink eval xor readline binmode setservent eof ord bind alarm pipe atan2 getgrent exp time push setgrent gt lt or ne m|0 break given say state when";var f={cN:"subst",b:"[$@]\\{",e:"\\}",k:d};var g={b:"->{",e:"}"};var a={cN:"variable",v:[{b:/\$\d/},{b:/[\$\%\@](\^\w\b|#\w+(\:\:\w+)*|{\w+}|\w+(\:\:\w*)*)/},{b:/[\$\%\@][^\s\w{]/,r:0}]};var e={cN:"comment",b:"^(__END__|__DATA__)",e:"\\n$",r:5};var h=[c.BE,f,a];var b=[a,c.HCM,e,{cN:"comment",b:"^\\=\\w",e:"\\=cut",eW:true},g,{cN:"string",c:h,v:[{b:"q[qwxr]?\\s*\\(",e:"\\)",r:5},{b:"q[qwxr]?\\s*\\[",e:"\\]",r:5},{b:"q[qwxr]?\\s*\\{",e:"\\}",r:5},{b:"q[qwxr]?\\s*\\|",e:"\\|",r:5},{b:"q[qwxr]?\\s*\\<",e:"\\>",r:5},{b:"qw\\s+q",e:"q",r:5},{b:"'",e:"'",c:[c.BE]},{b:'"',e:'"'},{b:"`",e:"`",c:[c.BE]},{b:"{\\w+}",c:[],r:0},{b:"-?\\w+\\s*\\=\\>",c:[],r:0}]},{cN:"number",b:"(\\b0[0-7_]+)|(\\b0x[0-9a-fA-F_]+)|(\\b[1-9][0-9_]*(\\.[0-9_]+)?)|[0_]\\b",r:0},{b:"(\\/\\/|"+c.RSR+"|\\b(split|return|print|reverse|grep)\\b)\\s*",k:"split return print reverse grep",r:0,c:[c.HCM,e,{cN:"regexp",b:"(s|tr|y)/(\\\\.|[^/])*/(\\\\.|[^/])*/[a-z]*",r:10},{cN:"regexp",b:"(m|qr)?/",e:"/[a-z]*",c:[c.BE],r:0}]},{cN:"sub",bK:"sub",e:"(\\s*\\(.*?\\))?[;{]",r:5},{cN:"operator",b:"-\\w\\b",r:0}];f.c=b;g.c=b;return{aliases:["pl"],k:d,c:b}});hljs.registerLanguage("php",function(b){var e={cN:"variable",b:"\\$+[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*"};var a={cN:"preprocessor",b:/<\?(php)?|\?>/};var c={cN:"string",c:[b.BE,a],v:[{b:'b"',e:'"'},{b:"b'",e:"'"},b.inherit(b.ASM,{i:null}),b.inherit(b.QSM,{i:null})]};var d={v:[b.BNM,b.CNM]};return{aliases:["php3","php4","php5","php6"],cI:true,k:"and include_once list abstract global private echo interface as static endswitch array null if endwhile or const for endforeach self var while isset public protected exit foreach throw elseif include __FILE__ empty require_once do xor return parent clone use __CLASS__ __LINE__ else break print eval new catch __METHOD__ case exception default die require __FUNCTION__ enddeclare final try switch continue endfor endif declare unset true false trait goto instanceof insteadof __DIR__ __NAMESPACE__ yield finally",c:[b.CLCM,b.HCM,{cN:"comment",b:"/\\*",e:"\\*/",c:[{cN:"phpdoc",b:"\\s@[A-Za-z]+"},a]},{cN:"comment",b:"__halt_compiler.+?;",eW:true,k:"__halt_compiler",l:b.UIR},{cN:"string",b:"<<<['\"]?\\w+['\"]?$",e:"^\\w+;",c:[b.BE]},a,e,{cN:"function",bK:"function",e:/[;{]/,eE:true,i:"\\$|\\[|%",c:[b.UTM,{cN:"params",b:"\\(",e:"\\)",c:["self",e,b.CBCM,c,d]}]},{cN:"class",bK:"class interface",e:"{",eE:true,i:/[:\(\$"]/,c:[{bK:"extends implements",r:10},b.UTM]},{bK:"namespace",e:";",i:/[\.']/,c:[b.UTM]},{bK:"use",e:";",c:[b.UTM]},{b:"=>"},c,d]}});hljs.registerLanguage("python",function(a){var f={cN:"prompt",b:/^(>>>|\.\.\.) /};var b={cN:"string",c:[a.BE],v:[{b:/(u|b)?r?'''/,e:/'''/,c:[f],r:10},{b:/(u|b)?r?"""/,e:/"""/,c:[f],r:10},{b:/(u|r|ur)'/,e:/'/,r:10},{b:/(u|r|ur)"/,e:/"/,r:10},{b:/(b|br)'/,e:/'/},{b:/(b|br)"/,e:/"/},a.ASM,a.QSM]};var d={cN:"number",r:0,v:[{b:a.BNR+"[lLjJ]?"},{b:"\\b(0o[0-7]+)[lLjJ]?"},{b:a.CNR+"[lLjJ]?"}]};var e={cN:"params",b:/\(/,e:/\)/,c:["self",f,d,b]};var c={e:/:/,i:/[${=;\n]/,c:[a.UTM,e]};return{aliases:["py","gyp"],k:{keyword:"and elif is global as in if from raise for except finally print import pass return exec else break not with class assert yield try while continue del or def lambda nonlocal|10 None True False",built_in:"Ellipsis NotImplemented"},i:/(<\/|->|\?)/,c:[f,d,b,a.HCM,a.inherit(c,{cN:"function",bK:"def",r:10}),a.inherit(c,{cN:"class",bK:"class"}),{cN:"decorator",b:/@/,e:/$/},{b:/\b(print|exec)\(/}]}});hljs.registerLanguage("ruby",function(f){var j="[a-zA-Z_]\\w*[!?=]?|[-+~]\\@|<<|>>|=~|===?|<=>|[<>]=?|\\*\\*|[-/+%^&*~`|]|\\[\\]=?";var i="and false then defined module in return redo if BEGIN retry end for true self when next until do begin unless END rescue nil else break undef not super class case require yield alias while ensure elsif or include attr_reader attr_writer attr_accessor";var b={cN:"yardoctag",b:"@[A-Za-z]+"};var c={cN:"value",b:"#<",e:">"};var k={cN:"comment",v:[{b:"#",e:"$",c:[b]},{b:"^\\=begin",e:"^\\=end",c:[b],r:10},{b:"^__END__",e:"\\n$"}]};var d={cN:"subst",b:"#\\{",e:"}",k:i};var e={cN:"string",c:[f.BE,d],v:[{b:/'/,e:/'/},{b:/"/,e:/"/},{b:"%[qw]?\\(",e:"\\)"},{b:"%[qw]?\\[",e:"\\]"},{b:"%[qw]?{",e:"}"},{b:"%[qw]?<",e:">"},{b:"%[qw]?/",e:"/"},{b:"%[qw]?%",e:"%"},{b:"%[qw]?-",e:"-"},{b:"%[qw]?\\|",e:"\\|"},{b:/\B\?(\\\d{1,3}|\\x[A-Fa-f0-9]{1,2}|\\u[A-Fa-f0-9]{4}|\\?\S)\b/}]};var a={cN:"params",b:"\\(",e:"\\)",k:i};var h=[e,c,k,{cN:"class",bK:"class module",e:"$|;",i:/=/,c:[f.inherit(f.TM,{b:"[A-Za-z_]\\w*(::\\w+)*(\\?|\\!)?"}),{cN:"inheritance",b:"<\\s*",c:[{cN:"parent",b:"("+f.IR+"::)?"+f.IR}]},k]},{cN:"function",bK:"def",e:" |$|;",r:0,c:[f.inherit(f.TM,{b:j}),a,k]},{cN:"constant",b:"(::)?(\\b[A-Z]\\w*(::)?)+",r:0},{cN:"symbol",b:":",c:[e,{b:j}],r:0},{cN:"symbol",b:f.UIR+"(\\!|\\?)?:",r:0},{cN:"number",b:"(\\b0[0-7_]+)|(\\b0x[0-9a-fA-F_]+)|(\\b[1-9][0-9_]*(\\.[0-9_]+)?)|[0_]\\b",r:0},{cN:"variable",b:"(\\$\\W)|((\\$|\\@\\@?)(\\w+))"},{b:"("+f.RSR+")\\s*",c:[c,k,{cN:"regexp",c:[f.BE,d],i:/\n/,v:[{b:"/",e:"/[a-z]*"},{b:"%r{",e:"}[a-z]*"},{b:"%r\\(",e:"\\)[a-z]*"},{b:"%r!",e:"![a-z]*"},{b:"%r\\[",e:"\\][a-z]*"}]}],r:0}];d.c=h;a.c=h;var g=[{r:1,cN:"output",b:"^\\s*=> ",e:"$",rB:true,c:[{cN:"status",b:"^\\s*=>"},{b:" ",e:"$",c:h}]},{r:1,cN:"input",b:"^[^ ][^=>]*>+ ",e:"$",rB:true,c:[{cN:"prompt",b:"^[^ ][^=>]*>+"},{b:" ",e:"$",c:h}]}];return{aliases:["rb","gemspec","podspec","thor","irb"],k:i,c:g.concat(h)}});hljs.registerLanguage("sql",function(a){var b={cN:"comment",b:"--",e:"$"};return{cI:true,i:/[<>]/,c:[{cN:"operator",bK:"begin end start commit rollback savepoint lock alter create drop rename call delete do handler insert load replace select truncate update set show pragma grant merge describe use explain help declare prepare execute deallocate savepoint release unlock purge reset change stop analyze cache flush optimize repair kill install uninstall checksum restore check backup",e:/;/,eW:true,k:{keyword:"abs absolute acos action add adddate addtime aes_decrypt aes_encrypt after aggregate all allocate alter analyze and any are as asc ascii asin assertion at atan atan2 atn2 authorization authors avg backup before begin benchmark between bin binlog bit_and bit_count bit_length bit_or bit_xor both by cache call cascade cascaded case cast catalog ceil ceiling chain change changed char_length character_length charindex charset check checksum checksum_agg choose close coalesce coercibility collate collation collationproperty column columns columns_updated commit compress concat concat_ws concurrent connect connection connection_id consistent constraint constraints continue contributors conv convert convert_tz corresponding cos cot count count_big crc32 create cross cume_dist curdate current current_date current_time current_timestamp current_user cursor curtime data database databases datalength date_add date_format date_sub dateadd datediff datefromparts datename datepart datetime2fromparts datetimeoffsetfromparts day dayname dayofmonth dayofweek dayofyear deallocate declare decode default deferrable deferred degrees delayed delete des_decrypt des_encrypt des_key_file desc describe descriptor diagnostics difference disconnect distinct distinctrow div do domain double drop dumpfile each else elt enclosed encode encrypt end end-exec engine engines eomonth errors escape escaped event eventdata events except exception exec execute exists exp explain export_set extended external extract fast fetch field fields find_in_set first first_value floor flush for force foreign format found found_rows from from_base64 from_days from_unixtime full function get get_format get_lock getdate getutcdate global go goto grant grants greatest group group_concat grouping grouping_id gtid_subset gtid_subtract handler having help hex high_priority hosts hour ident_current ident_incr ident_seed identified identity if ifnull ignore iif ilike immediate in index indicator inet6_aton inet6_ntoa inet_aton inet_ntoa infile initially inner innodb input insert install instr intersect into is is_free_lock is_ipv4 is_ipv4_compat is_ipv4_mapped is_not is_not_null is_used_lock isdate isnull isolation join key kill language last last_day last_insert_id last_value lcase lead leading least leaves left len lenght level like limit lines ln load load_file local localtime localtimestamp locate lock log log10 log2 logfile logs low_priority lower lpad ltrim make_set makedate maketime master master_pos_wait match matched max md5 medium merge microsecond mid min minute mod mode module month monthname mutex name_const names national natural nchar next no no_write_to_binlog not now nullif nvarchar oct octet_length of old_password on only open optimize option optionally or ord order outer outfile output pad parse partial partition password patindex percent_rank percentile_cont percentile_disc period_add period_diff pi plugin position pow power pragma precision prepare preserve primary prior privileges procedure procedure_analyze processlist profile profiles public publishingservername purge quarter query quick quote quotename radians rand read references regexp relative relaylog release release_lock rename repair repeat replace replicate reset restore restrict return returns reverse revoke right rlike rollback rollup round row row_count rows rpad rtrim savepoint schema scroll sec_to_time second section select serializable server session session_user set sha sha1 sha2 share show sign sin size slave sleep smalldatetimefromparts snapshot some soname soundex sounds_like space sql sql_big_result sql_buffer_result sql_cache sql_calc_found_rows sql_no_cache sql_small_result sql_variant_property sqlstate sqrt square start starting status std stddev stddev_pop stddev_samp stdev stdevp stop str str_to_date straight_join strcmp string stuff subdate substr substring subtime subtring_index sum switchoffset sysdate sysdatetime sysdatetimeoffset system_user sysutcdatetime table tables tablespace tan temporary terminated tertiary_weights then time time_format time_to_sec timediff timefromparts timestamp timestampadd timestampdiff timezone_hour timezone_minute to to_base64 to_days to_seconds todatetimeoffset trailing transaction translation trigger trigger_nestlevel triggers trim truncate try_cast try_convert try_parse ucase uncompress uncompressed_length unhex unicode uninstall union unique unix_timestamp unknown unlock update upgrade upped upper usage use user user_resources using utc_date utc_time utc_timestamp uuid uuid_short validate_password_strength value values var var_pop var_samp variables variance varp version view warnings week weekday weekofyear weight_string when whenever where with work write xml xor year yearweek zon",literal:"true false null",built_in:"array bigint binary bit blob boolean char character date dec decimal float int integer interval number numeric real serial smallint varchar varying int8 serial8 text"},c:[{cN:"string",b:"'",e:"'",c:[a.BE,{b:"''"}]},{cN:"string",b:'"',e:'"',c:[a.BE,{b:'""'}]},{cN:"string",b:"`",e:"`",c:[a.BE]},a.CNM,a.CBCM,b]},a.CBCM,b]}});hljs.registerLanguage("tex",function(a){var d={cN:"command",b:"\\\\[a-zA-Zа-яА-я]+[\\*]?"};var c={cN:"command",b:"\\\\[^a-zA-Zа-яА-я0-9]"};var b={cN:"special",b:"[{}\\[\\]\\&#~]",r:0};return{c:[{b:"\\\\[a-zA-Zа-яА-я]+[\\*]? *= *-?\\d*\\.?\\d+(pt|pc|mm|cm|in|dd|cc|ex|em)?",rB:true,c:[d,c,{cN:"number",b:" *=",e:"-?\\d*\\.?\\d+(pt|pc|mm|cm|in|dd|cc|ex|em)?",eB:true}],r:10},d,c,b,{cN:"formula",b:"\\$\\$",e:"\\$\\$",c:[d,c,b],r:0},{cN:"formula",b:"\\$",e:"\\$",c:[d,c,b],r:0},{cN:"comment",b:"%",e:"$",r:0}]}});hljs.registerLanguage("vbnet",function(a){return{aliases:["vb"],cI:true,k:{keyword:"addhandler addressof alias and andalso aggregate ansi as assembly auto binary by byref byval call case catch class compare const continue custom declare default delegate dim distinct do each equals else elseif end enum erase error event exit explicit finally for friend from function get global goto group handles if implements imports in inherits interface into is isfalse isnot istrue join key let lib like loop me mid mod module mustinherit mustoverride mybase myclass namespace narrowing new next not notinheritable notoverridable of off on operator option optional or order orelse overloads overridable overrides paramarray partial preserve private property protected public raiseevent readonly redim rem removehandler resume return select set shadows shared skip static step stop structure strict sub synclock take text then throw to try unicode until using when where while widening with withevents writeonly xor",built_in:"boolean byte cbool cbyte cchar cdate cdec cdbl char cint clng cobj csbyte cshort csng cstr ctype date decimal directcast double gettype getxmlnamespace iif integer long object sbyte short single string trycast typeof uinteger ulong ushort",literal:"true false nothing"},i:"//|{|}|endif|gosub|variant|wend",c:[a.inherit(a.QSM,{c:[{b:'""'}]}),{cN:"comment",b:"'",e:"$",rB:true,c:[{cN:"xmlDocTag",b:"'''|<!--|-->"},{cN:"xmlDocTag",b:"</?",e:">"}]},a.CNM,{cN:"preprocessor",b:"#",e:"$",k:"if else elseif end region externalsource"}]}});hljs.registerLanguage("vbscript",function(a){return{aliases:["vbs"],cI:true,k:{keyword:"call class const dim do loop erase execute executeglobal exit for each next function if then else on error option explicit new private property let get public randomize redim rem select case set stop sub while wend with end to elseif is or xor and not class_initialize class_terminate default preserve in me byval byref step resume goto",built_in:"lcase month vartype instrrev ubound setlocale getobject rgb getref string weekdayname rnd dateadd monthname now day minute isarray cbool round formatcurrency conversions csng timevalue second year space abs clng timeserial fixs len asc isempty maths dateserial atn timer isobject filter weekday datevalue ccur isdate instr datediff formatdatetime replace isnull right sgn array snumeric log cdbl hex chr lbound msgbox ucase getlocale cos cdate cbyte rtrim join hour oct typename trim strcomp int createobject loadpicture tan formatnumber mid scriptenginebuildversion scriptengine split scriptengineminorversion cint sin datepart ltrim sqr scriptenginemajorversion time derived eval date formatpercent exp inputbox left ascw chrw regexp server response request cstr err",literal:"true false null nothing empty"},i:"//",c:[a.inherit(a.QSM,{c:[{b:'""'}]}),{cN:"comment",b:/'/,e:/$/,r:0},a.CNM]}});hljs.registerLanguage("xml",function(a){var c="[A-Za-z0-9\\._:-]+";var d={b:/<\?(php)?(?!\w)/,e:/\?>/,sL:"php",subLanguageMode:"continuous"};var b={eW:true,i:/</,r:0,c:[d,{cN:"attribute",b:c,r:0},{b:"=",r:0,c:[{cN:"value",v:[{b:/"/,e:/"/},{b:/'/,e:/'/},{b:/[^\s\/>]+/}]}]}]};return{aliases:["html","xhtml","rss","atom","xsl","plist"],cI:true,c:[{cN:"doctype",b:"<!DOCTYPE",e:">",r:10,c:[{b:"\\[",e:"\\]"}]},{cN:"comment",b:"<!--",e:"-->",r:10},{cN:"cdata",b:"<\\!\\[CDATA\\[",e:"\\]\\]>",r:10},{cN:"tag",b:"<style(?=\\s|>|$)",e:">",k:{title:"style"},c:[b],starts:{e:"</style>",rE:true,sL:"css"}},{cN:"tag",b:"<script(?=\\s|>|$)",e:">",k:{title:"script"},c:[b],starts:{e:"<\/script>",rE:true,sL:"javascript"}},{b:"<%",e:"%>",sL:"vbscript"},d,{cN:"pi",b:/<\?\w+/,e:/\?>/,r:10},{cN:"tag",b:"</?",e:"/?>",c:[{cN:"title",b:"[^ /><]+",r:0},b]}]}});
-var upload_handler = (new Date()).getTime() * 10000;
-ParseUrl = function(url){
-    "use strict";
-    var m = (url || document.location.href).match( /https?:\/\/([^\/]+)\/([^\/]+)\/((\d+)|res\/(\d+)|\w+)(\.x?html)?(#i?(\d+))?/);
-    return m?{host:m[1], board:m[2], page:m[4], thread:m[5], pointer:m[8]}:{};
-};
-var Hanabira={URL:ParseUrl()};
-
-var sendBoardForm = function(file) {
-    "use strict";
-    replyForm.find("#do_encode").val('..Working...').attr("disabled", "disabled");
-
-    if ($('form[name*="postcontrols"]').length !==0) {
-        $.ajax({
-            url: location.href,
-            type: 'GET',
-            processData: false,
-            contentType: false,
-            success: function(data, textStatus, jqXHR) {
-                var doc = document.implementation.createHTMLDocument('');
-                doc.documentElement.innerHTML = data;
-
-                var l = $("form[action*=post]", doc).serializeArray();
-                l = l.filter(function(a){
-                    if(["name","email","subject","post","spoiler","body","file","file_url","password","thread","board"].indexOf(a.name) > -1) return false;
-                    return true;
-                });
-
-                l.push({"name": "post", "value": $('#de-pform input[type=submit]').val()});
-
-                //console.log("fresh post form: ", l);
-                
-                _sendBoardForm(file, l);  
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                alert('failed to get fresh form. Try again!');
-                replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
-                upload_handler = (new Date()).getTime() * 10000;
-            }
-        });
-    }else{
-        _sendBoardForm(file, []);        
-    }
-};
-
-var _sendBoardForm = function(file, formAddon) {
-    "use strict";
-    
-    var formData, fileInputName, formAction,
-        fd = new FormData();
-
-    if($('a#yukiForceUpdate').length !== 0 && $('form#yukipostform').length === 0){
-        $('a.reply_.icon').last().click();
-        $('form#yukipostform textarea').val('');
-    }
-
-    if($('#de-pform form').length !== 0){
-        formData = $('#de-pform form').serializeArray();
-        fileInputName = $("#de-pform form input[type=file]")[0].name;
-        formAction = $("#de-pform form")[0].action; //+ "?X-Progress-ID=" + upload_handler,
-    }else if(($('form#yukipostform').length !== 0)){
-        formData = $('form#yukipostform').serializeArray();
-        fileInputName = 'file_1';
-        fd.append('file_1_rating', 'SFW'); 
-        formAction = '/' + Hanabira.URL.board + '/post/new.xhtml' + "?X-Progress-ID=" + upload_handler;   
-    }
-
-    if(is4chan){
-        var forForm = $('form[name=post]');
-        if($('form[name=qrPost], div#qr form').length !==0){
-            forForm = $('form[name=qrPost], div#qr form');
-        }
-
-        fileInputName = forForm.find("input[type=file]")[0].name;
-        formAction = forForm[0].action; 
-
-        formData = forForm.serializeArray();
-
-        if($('div#qr form').length !==0){
-            formData.push({"name": "recaptcha_response_field", "value": $('div#qr .captcha-input.field').val()});
-            formData.push({"name": "recaptcha_challenge_field", "value": $('div#qr .captcha-img img').attr('alt')});
-            formData.push({"name": "com", "value": $('div#qr textarea').val()});
-
-            formData.push({"name": "MAX_FILE_SIZE", "value": $('form[name=post] input[name=MAX_FILE_SIZE]').val()});
-            formData.push({"name": "mode", "value": $('form[name=post] input[name=mode]').val()});
-            formData.push({"name": "pwd", "value": $('form[name=post] input[name=pwd]').val()});
-            formData.push({"name": "resto", "value": $('form[name=post] input[name=resto]').val()});
-
-            formData.push({"name": "recaptcha_response_field", "value": $('div#qr .captcha-input.field').val()});
-            formAction = $('form[name=post]')[0].action; 
-            fileInputName = $("form[name=post] input[type=file]")[0].name;
-        }
-
-        console.log(formData);
-
-        
-    }
-
-    if(formAddon.length > 0){
-        formData = formData.filter(function(a){
-            if(["name","email","subject","post","spoiler","body","file","file_url","password","thread","board"].indexOf(a.name) > -1) return true;
-            return false;
-        });
-        formData.push.apply(formData, formAddon);
-    }
-
-    for (var i = 0; i < formData.length; i++) {
-        if (formData[i].name != fileInputName) {
-            fd.append(formData[i].name, formData[i].value);
-        }
-    }
-
-    var fnme = Math.floor((new Date()).getTime() / 10 - Math.random() * 100000000) + '.jpg';
-
-    fd.append(fileInputName, uint8toBlob(file, 'image/jpeg'), fnme);
-
-    $.ajax({
-        url: formAction,
-        type: 'POST',
-        data: fd,
-        processData: false,
-        contentType: false,
-        success: function(data, textStatus, jqXHR) {
-            var doc = document.implementation.createHTMLDocument(''),
-                p;
-            doc.documentElement.innerHTML = data;
-
-            if (jqXHR.status === 200 && jqXHR.readyState === 4) {
-                p = $('form[action*="delete"]', doc).length +
-                    $('form[action*="delete"]', doc).length +
-                    $('#posts_form, #delform', doc).length +
-                    $('form:not([enctype])', doc).length +
-                    $('form[name="postcontrols"]', doc).length +
-                    $('form[name="postcontrols"]', doc).length +
-                    $('#delform, form[name="delform"]', doc).length;
-                    if(isDobro && data.match(/parent\.location\.replace/)){
-                        p = 1;
-                    }
-
-                    if(is4chan && data.indexOf('<title>Post successful!</title>') != -1){
-                        p = 1;
-                    }
-            } else {
-                p = 1;
-            }
-
-            if (p !== 0) {
-                $('#de-pform textarea').val('');
-                $('form#yukipostform textarea').val('');
-                $('#de-pform img[src*=captcha]').click();
-                $('#hidbord_replyform #c_file').val('');
-                $('#de-updater-btn').click();
-                $('#de-thrupdbtn').click();
-                $('a#yukiForceUpdate').click();
-                if(is4chan){
-                    setTimeout(function() {$('a[data-cmd=update]').first().click(); $('.thread-refresh-shortcut.fa.fa-refresh').first().click();}, 2500);                    
-                    $('#qrCapField').val('');
-                    $('#recaptcha_response_field').val('');
-                    $('#recaptcha_challenge_image').click();
-                    $('#qrCaptcha').click();
-                    $('textarea[name=com]').val('');                    
-                    $('div#qr .captcha-input.field').val('');
-                    $('div#qr .captcha-img img').click();
-                    $('div#qr textarea').val('');
-                }
-                replyForm.remove();
-                replyForm = null;
-                container_image = null;
-                container_data = null;
-
-            } else {
-                alert('Can\'t post. Wrong capch? Fucked up imageboard software?.');
-                replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
-            }
-            upload_handler = (new Date()).getTime() * 10000;
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            alert('Error while posting. Something in network or so.');
-            replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
-            upload_handler = (new Date()).getTime() * 10000;
-        }
-    });
-};
-
-var rsaProfile = {},
-    rsa = new RSAKey(),
-    rsa_hash, rsa_hashB64;
-
-var do_login = function() {
-    "use strict";
-
-    var lf = document.loginform;
-
-    rng_state = null;
-
-    var buffer = new ArrayBuffer(256);
-    var int32View = new Int32Array(buffer);
-    var Uint8View = new Uint8Array(buffer);
-
-    var key_from_pass = sjcl.misc.pbkdf2(lf.passwd.value, "salt", 10000, 256 * 8);
-
-    int32View.set(key_from_pass);
-
-    for (var i = 0; i < rng_psize; i++) {
-        rng_pool[i] = Uint8View[i];
-    }
-
-    rng_prefetch = parseInt(lf.magik_num.value);
-
-    rsa.generate(1024, '10001');
-
-    rsaProfile = {
-        n: rsa.n.toString(16),
-        d: rsa.d.toString(16),
-        p: rsa.p.toString(16),
-        q: rsa.q.toString(16),
-        dmp1: rsa.dmp1.toString(16),
-        dmq1: rsa.dmq1.toString(16),
-        coeff: rsa.coeff.toString(16)
-    };
-
-    rsa_hash = hex_sha1(rsaProfile.n);
-    rsa_hashB64 = hex2b64(rsa_hash);
-
-    ssSet('magic_desu_numbers', rsaProfile);
-
-    $('#identi').html(rsa_hash).identicon5({
-        rotate: true,
-        size: 64
-    });
-    $('#identi').append('<br/><br/><i style="color: #090;">'+rsa_hash+'</i>');
-    $('#pub_key_info').val(linebrk(rsa.n.toString(16), 64));
-    lf.magik_num.value = lf.passwd.value = '';
-};
-
-var do_encode = function() {
-    "use strict";
-
-    prev_to = $('#hidbord_cont_type').val();
-    prev_cont = $('#hidbord_cont_direct').val();
-
-    var to_group = null;
-
-    if(prev_to.indexOf('group_') === 0){
-        to_group = prev_to.substring(6);
-    }
-
-    var payLoad = {};
-
-    if(!container_data){
-        alert('Image needed. Please select one.');
-        return false;
-    }
-
-    if(!("n" in rsaProfile)){
-        alert('Please log in.');
-        return false;   
-    }
-
-    payLoad.text = $('#hidbord_reply_text').val();
-    payLoad.ts = Math.floor((new Date()).getTime() / 1000);
-
-    var keys = {};
-    keys[rsa_hash] = rsaProfile.n;
-
-    for (var c in contacts) {
-        if(prev_to == 'direct' && c == prev_cont){
-            keys[c] = contacts[c].key;
-            continue;
-        }
-        
-        if('hide' in contacts[c] && contacts[c].hide == 1){
-            continue;
-        }
-
-        if(to_group !== null && contacts[c].groups && $.isArray(contacts[c].groups) && contacts[c].groups.indexOf(to_group) != -1){
-            keys[c] = contacts[c].key;
-        }
-
-        if(prev_to == 'direct' || to_group !== null){
-            continue;
-        }
-
-        keys[c] = contacts[c].key;
-    }
-
-    var p = encodeMessage(payLoad,keys, 0);
-    var testEncode = decodeMessage(p);
-
-    if(!testEncode || testEncode.status != "OK"){
-        alert('Error in crypt module!');
-        return false;
-    }
-
-    var lastRand = stringToByteArray(String(Math.round(Math.random() * 1e6)));
-
-    var out_file = appendBuffer(jpegEmbed(container_data, p),lastRand);
-    var compressedB64 = arrayBufferDataUri(out_file);
-
-    sendBoardForm(out_file);
-};
-
-var do_decode = function(message, msgPrepend, thumb, fdate, post_id) {
-    "use strict";
-
-    var out_msg = {
-        post_id: post_id,
-        id: message.id,
-        txt: {
-            ts: message.ts,
-            msg: message.message.text
-        },
-        keyid: message.keyhash,
-        pubkey: message.key,
-        status: message.status,
-        to: message.keys,
-    };
-
-    push_msg(out_msg, msgPrepend, thumb);
-    return true;
-};
-
-var contacts = {}, cont_groups = [];
-
-var add_contact = function(e) {
-    "use strict";
-
-    var name = prompt("Name this contact:");
-    var key = $(e.target).attr('alt');
-    var rsa_hash = hex_sha1(key);
-
-    contacts[rsa_hash] = {
-        key: key,
-        name: name,
-        hide: 0,
-        groups: []
-    };
-
-    localStorage.setItem('magic_desu_contacts', JSON.stringify(contacts));
-    render_contact();
-};
-
-function safe_tags(str) {
-    "use strict";
-
-    if(str && typeof str === 'string'){
-        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-
-    return "";
+var scriptStore = window.opera && window.opera.scriptStorage || localStorage,
+    isGM = typeof GM_setValue === 'function';
+
+if(isGM || window.opera && window.opera.scriptStorage){
+	localStorage.removeItem('magic_desu_numbers');
 }
 
-var getContactHTML = function(hash, key) {
-    "use strict";
+var ssGet = function(name)    {
+	"use strict";
 
-    if (hash == rsa_hash) {
-        return '<strong style="color: #090; font-style: italic" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">Me</strong>';
-    }
+	if(isGM){
+		/*jshint newcap: false */
+		if(GM_getValue(name) === undefined) return null;
+		return JSON.parse(GM_getValue(name));
+	}
 
-    if (!(hash in contacts) && key) {
-        return '<em style="color: #00f" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">Unknown</em> [<a href="javascript:;" alt="' + key + '" class="hidbord_addcntct_link">add</a>]';
-    }
-
-    if (!(hash in contacts)) {
-        return '<em style="color: #00f" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">Unknown</em>';
-    }
-
-    if ('hide' in contacts[hash] && contacts[hash].hide == 1) {
-        return '<strike class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">' + safe_tags(contacts[hash].name) + '</strike>';
-    }
-
-    return '<strong class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">' + safe_tags(contacts[hash].name) + '</strong>';
-
+	return JSON.parse(scriptStore.getItem(name));
 };
 
-var contactsSelector = function(){
-    "use strict";
-    var code = '<div id="hidbord_contacts_select"><strong>to:</strong>&nbsp;<select id="hidbord_cont_type"><option selected="selected" value="all">All</option><option value="direct">Direct</option><option disabled="disabled">Groups:</option>';
+var ssSet = function(name, val)    {
+	"use strict";
 
-    for (var i = 0; i < cont_groups.length; i++) {
-        code += '<option value="group_'+safe_tags(cont_groups[i])+'">'+safe_tags(cont_groups[i])+'</option>';
-    }
-    
-    code += '</select>&nbsp;<select id="hidbord_cont_direct" style="display: none;">';
-    
-    for (var c in contacts) {
-        code += '<option value="'+c+'">'+safe_tags(contacts[c].name)+'</option>';
-    }
+	if(isGM){
+		/*jshint newcap: false  */
+		return GM_setValue(name, JSON.stringify(val));
+	}
 
-    code += '</select>';
-
-    return code + '</div>';
+	return scriptStore.setItem(name, JSON.stringify(val));
 };
 
-var render_contact = function() {
-    "use strict";
-
-    cont_groups = {};
-
-    var code = '<br><a href="data:text/plain;base64,' + strToDataUri(encodeURIComponent(JSON.stringify(contacts))) + 
-               '" download="[DDT] Contacts - ' + document.location.host + ' - ' + dateToStr(new Date(), true) + 
-               '.txt">Download contacts as file</a> or import from file: <input type="file" id="cont_import_file" name="cont_import_file"><br/><br/>';
-
-    for (var c in contacts) {
-        var ren_action = ('hide' in contacts[c] && contacts[c].hide == 1) ? 'enable' : 'disable';
-        var groups_list = '';
-
-        if(contacts[c].groups && $.isArray(contacts[c].groups) && contacts[c].groups.length > 0){
-            groups_list = '<div style="float:right; color: #999;">['+safe_tags(contacts[c].groups.join('; '))+']</div>';
-            for (var i = 0; i < contacts[c].groups.length; i++) {
-                var grp = contacts[c].groups[i].trim().toLowerCase();
-                cont_groups[grp] = grp;
-            }
-        }
-
-
-        code += '<div class="hidbord_msg">' +
-            '<div class="cont_identi" style="float: left">' + c + '</div>' +
-            '<div  style="float: left; padding: 5px;">' + getContactHTML(c) + '<br/><i style="color: #090">' + c + '</i><br/>' +
-            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">delete</a>]</sub> '+
-            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">' + ren_action + '</a>]</sub> '+
-            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">rename</a>]</sub> '+
-            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">groups</a>]</sub></div>'+groups_list+'<br style="clear: both;"/></div>';
-    }
-
-    var cont_list = $(code);
-    cont_list.find('.cont_identi').identicon5({
-        rotate: true,
-        size: 48
-    });
-    cont_list.find('a.hidbord_cont_action').on('click', manage_contact);
-    //cont_list.find('#cont_import_file').on('change', import_contact);
-
-    $('.hidbord_contacts').empty().append(cont_list);
-    $('.hidbord_contacts #cont_import_file').on('change', import_contact);
-
-    cont_groups = Object.keys(cont_groups).sort();
-};
-
-var manage_contact = function(e) {
-    "use strict";
-
-    var action = $(e.target).text(),
-        key = $(e.target).attr('alt'), name, prmpt;
-    
-    if (action == 'delete' && confirm('Really delete?')) {
-        delete contacts[key];
-    }
-
-    if (action == 'disable' && confirm('Are you sure?')) {
-        contacts[key].hide = 1;
-    }
-
-    if (action == 'enable' && confirm('Are you sure?')) {
-        contacts[key].hide = 0;
-    }
-
-    if (action == 'rename') {
-        prmpt = prompt("Name this contact:", contacts[key].name);
-        if(prmpt !== null) contacts[key].name = '' + prmpt;
-    }
-
-    if (action == 'groups') {
-        prmpt = prompt("Groups separated by semicolon (;)", $.isArray(contacts[key].groups) ? contacts[key].groups.join('; ') : "");
-        if(prmpt !== null){
-            if(prmpt === ''){
-                contacts[key].groups = [];
-            }else{
-                contacts[key].groups = prmpt.split(';').map(function(s){return s.trim().toLowerCase();}).sort();
-            }
-        }
-    }
-
-    localStorage.setItem('magic_desu_contacts', JSON.stringify(contacts));
-    render_contact();
-};
-
-var import_contact = function(evt) {
-    "use strict";
-    var files = evt.target.files; // FileList object
-
-    if (files[0] && files[0].type.match('text.*')) {
-        var reader = new FileReader();
-
-//        console.log(files[0]);
-
-        reader.onload = (function(theFile) {
-            return function(e) {
-                // result e.target.result;                
-                try{
-//                    console.log(decodeURIComponent(e.target.result));
-                    var in_data = JSON.parse(decodeURIComponent(e.target.result));
-//                    console.log(in_data);
-                    for(var c in in_data){
-                        if(!(c in contacts)){
-                            contacts[c] = in_data[c];
-                        }
-                    }
-                    localStorage.setItem('magic_desu_contacts', JSON.stringify(contacts));
-                    render_contact();
-                }catch(err){
-//                    console.log(err);
-                    alert('Can\'t import!');
-                }
-            };
-        })(files[0]);
-        reader.readAsText(files[0]);
-    }
-};
-
-if (localStorage.getItem('magic_desu_contacts')) {
-    contacts = JSON.parse(localStorage.getItem('magic_desu_contacts'));
-//    console.log(contacts);
-}
-
-var CODEC_VERSION = 1, MESSAGE_NORMAL = 0, MESSAGE_DIRECT = 1;
-
-var encodeMessage = function(message, keys, msg_type){
-    'use strict';
-
-    var i, pwd,salt,iv,preIter, arrTemp, keyshift, rp, p, sig,
-        //deflate = new Zlib.RawDeflate(strToUTF8Arr(JSON.stringify(message))),
-        compressed = pako.deflateRaw(strToUTF8Arr(JSON.stringify(message))),
-        compressedAt = Math.floor((new Date()).getTime() / 1000),
-        finalLength = 316 + 148 * Object.keys(keys).length + compressed.byteLength + 8,
-        containerAB = new ArrayBuffer(finalLength),
-        container = new Uint8Array(containerAB), crypted,
-        signedPart = new Uint8Array(containerAB, 261);
-
-    preIter = Math.random()*20;for (i = 0; i < preIter; i++){sjcl.random.randomWords(8, 0);}
-    pwd = sjcl.codec.hex.fromBits(sjcl.random.randomWords(8, 0));
-    
-    preIter = Math.random()*20;for (i = 0; i < preIter; i++) {sjcl.random.randomWords(8, 0);}
-    salt = sjcl.random.randomWords(8, 0);
-    
-    preIter = Math.random()*20;for (i = 0; i < preIter; i++) {sjcl.random.randomWords(8, 0);}
-    iv = sjcl.random.randomWords(4, 0);
-
-    p = {
-        iv: iv,
-        iter: 1000,
-        mode: "ccm",
-        ts: 64,
-        ks: 256,
-        salt: salt
-    };
-
-    p = sjcl.encrypt(pwd, sjcl.codec.bytes.toBits(compressed), p, rp);
-
-    crypted = sjcl.codec.bytes.fromBits(p.ct);
-
-    container[0] = CODEC_VERSION; // version
-
-    container[1] = finalLength & 255; //data size
-    container[2] = (finalLength >> 8) & 255;
-    container[3] = (finalLength >> 16) & 255;
-    container[4] = (finalLength >> 24) & 255;
-
-    arrTemp = hexToBytes(rsaProfile.n, 128); // our publick key
-    for (i = 0; i < arrTemp.length; i++) {
-        container[5 + i] = arrTemp[i];
-    }
-
-    container[261] = msg_type; //type of message
-    container[262] = compressedAt & 255; //coding unix_timestamp
-    container[263] = (compressedAt >> 8) & 255;
-    container[264] = (compressedAt >> 16) & 255;
-    container[265] = (compressedAt >> 24) & 255;
-
-    arrTemp = sjcl.codec.bytes.fromBits(iv); // iv
-    for (i = 0; i < arrTemp.length; i++) {
-        container[266 + i] = arrTemp[i];
-    }
-    var iv2 = arrayBufferDataUri(arrTemp);
-
-    arrTemp = sjcl.codec.bytes.fromBits(salt); // iv
-    for (i = 0; i < arrTemp.length; i++) {
-        container[282 + i] = arrTemp[i];
-    }
-    var salt2 = arrayBufferDataUri(arrTemp);
-
-    container[314] = Object.keys(keys).length & 255; // number of keys
-    container[315] = (Object.keys(keys).length >> 8) & 255; // number of keys
-
-    keyshift = 0;
-    for (var c in keys) {
-
-        arrTemp = hexToBytes(c, 20); // keyhash
-        for (i = 0; i < arrTemp.length; i++) {
-            container[316 + i + keyshift*148] = arrTemp[i];
-        }
-
-        var testRsa = new RSAKey();
-        testRsa.setPublic(keys[c], '10001');
-
-        arrTemp = hexToBytes(testRsa.encrypt(pwd), 128); // crypted password
-        for (i = 0; i < arrTemp.length; i++) {
-            container[336 + i + keyshift*148] = arrTemp[i];
-        }
-
-        keyshift++;
-    }
-
-    keyshift = 316 + 148 * Object.keys(keys).length;
-    for (i = 0; i < crypted.length; i++) {
-        container[keyshift + i] = crypted[i];
-    }
-
-    sig = rsa.signStringWithSHA256(signedPart);
-
-    arrTemp = hexToBytes(sig, 128); // keyhash
-    for (i = 0; i < arrTemp.length; i++) {
-        container[133 + i] = arrTemp[i];
-    }
-
-    return container;
-};
-
-var decodeMessage = function(data){
-    'use strict';
-
-    if(data[0] != CODEC_VERSION) return false;
-    var msgType = data[261],
-        keyNum = data[314] + data[315] * 256,
-        dataLength = data[1] + data[2] * 256 + data[3] * 65536 + data[4] * 16777216,
-        compressedAt = data[262] + data[263] * 256 + data[264] * 65536 + data[265] * 16777216,
-        cryptedPart = data.subarray(316 + 148 * keyNum),
-        signedPart = data.subarray(261), keys = {}, i, j, message;
-
-    if(dataLength != data.byteLength) return false;
-    if(keyNum * 148 > data.byteLength) return false;
-
-    var key = [], sig = [], iv = [], salt = [];
-
-    for (i = 0; i < 128; i++) {
-        key.push(data[5+i]);
-        sig.push(data[133+i]);
-    }
-
-    key = bytesToHex(key);
-    sig = bytesToHex(sig);
-
-    try{
-        var testRsa = new RSAKey();
-        testRsa.setPublic(key, '10001');
-        if (!testRsa.verifyString(signedPart, sig)) {
-            return false;
-        }
-    } catch (e) {
-        return false;
-    }
-
-    for (i = 0; i < 16; i++) {
-        iv.push(data[266+i]);
-    }
-    
-    for (i = 0; i < 32; i++) {
-        salt.push(data[282+i]);
-    }
-
-    for (j = 0; j < keyNum; j++) {
-        var keyhas = [], keyval = [];
-
-        for (i = 0; i < 20; i++) {
-            keyhas.push(data[316 + i + j*148]);
-        }
-
-        for (i = 0; i < 128; i++) {
-            keyval.push(data[336 + i + j*148]);
-        }
-
-        keyhas = bytesToHex(keyhas);
-        keyval = bytesToHex(keyval);
-
-        keys[keyhas] = keyval;
-    }
-
-
-    var container = {
-        id: SHA256(signedPart),
-        ts: compressedAt,
-        key: key,
-        keyhash: hex_sha1(key),
-        type: msgType,
-        keys: Object.keys(keys),
-        message: {text:""}
-    };
-
-    if (!(rsa_hash in keys)) {
-        container.status = 'NOKEY';
-        return container;
-    }
-
-    var aesmsg = {
-        "iv": sjcl.codec.bytes.toBits(iv),
-        "v": 1,
-        "iter": 1000,
-        "ks": 256,
-        "ts": 64,
-        "mode": "ccm",
-        "cipher": "aes",
-        "salt": sjcl.codec.bytes.toBits(salt),
-        "ct": sjcl.codec.bytes.toBits(cryptedPart)
-    };
-
-    try {
-        var password = rsa.decrypt(keys[rsa_hash]);
-        var om = sjcl.decrypt(password, aesmsg);
-        //var inflate = new Zlib.RawInflate(om);
-        var plain = pako.inflateRaw(om);
-        container.status = 'OK';
-        container.message = JSON.parse(utf8ArrToStr(plain));
-        return container;
-    } catch (e) {
-        console.log(e);
-        return false;
-    }
-
-    return false;
-};
 function repeat(pattern, count) {
     "use strict";
     if (count < 1) return '';
@@ -3763,6 +3075,92 @@ var getURLasAB = function(rawURL, cb) {
     }
 };
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding#Appendix.3A_Decode_a_Base64_string_to_Uint8Array_or_ArrayBuffer
+/* UTF-8 array to DOMString and vice versa */
+
+var utf8ArrToStr = function(aBytes) {
+	"use strict";
+
+	var sView = "";
+
+	for (var nPart, nLen = aBytes.length, nIdx = 0; nIdx < nLen; nIdx++) {
+		nPart = aBytes[nIdx];
+		sView += String.fromCharCode(
+			nPart > 251 && nPart < 254 && nIdx + 5 < nLen ? /* six bytes */
+			/* (nPart - 252 << 32) is not possible in ECMAScript! So...: */
+			(nPart - 252) * 1073741824 + (aBytes[++nIdx] - 128 << 24) + (aBytes[++nIdx] - 128 << 18) + (aBytes[++nIdx] - 128 << 12) + (aBytes[++nIdx] - 128 << 6) + aBytes[++nIdx] - 128
+			: nPart > 247 && nPart < 252 && nIdx + 4 < nLen ? /* five bytes */
+			(nPart - 248 << 24) + (aBytes[++nIdx] - 128 << 18) + (aBytes[++nIdx] - 128 << 12) + (aBytes[++nIdx] - 128 << 6) + aBytes[++nIdx] - 128
+			: nPart > 239 && nPart < 248 && nIdx + 3 < nLen ? /* four bytes */
+			(nPart - 240 << 18) + (aBytes[++nIdx] - 128 << 12) + (aBytes[++nIdx] - 128 << 6) + aBytes[++nIdx] - 128
+			: nPart > 223 && nPart < 240 && nIdx + 2 < nLen ? /* three bytes */
+			(nPart - 224 << 12) + (aBytes[++nIdx] - 128 << 6) + aBytes[++nIdx] - 128
+			: nPart > 191 && nPart < 224 && nIdx + 1 < nLen ? /* two bytes */
+			(nPart - 192 << 6) + aBytes[++nIdx] - 128
+			: /* nPart < 127 ? */ /* one byte */
+			nPart
+			);
+	}
+
+	return sView;
+
+};
+
+var strToUTF8Arr = function(sDOMStr) {
+	"use strict";
+	var aBytes, nChr, nStrLen = sDOMStr.length, nArrLen = 0;
+
+	/* mapping... */
+
+	for (var nMapIdx = 0; nMapIdx < nStrLen; nMapIdx++) {
+		nChr = sDOMStr.charCodeAt(nMapIdx);
+		nArrLen += nChr < 0x80 ? 1 : nChr < 0x800 ? 2 : nChr < 0x10000 ? 3 : nChr < 0x200000 ? 4 : nChr < 0x4000000 ? 5 : 6;
+	}
+
+	aBytes = new Uint8Array(nArrLen);
+
+	/* transcription... */
+
+	for (var nIdx = 0, nChrIdx = 0; nIdx < nArrLen; nChrIdx++) {
+		nChr = sDOMStr.charCodeAt(nChrIdx);
+		if (nChr < 128) {
+			/* one byte */
+			aBytes[nIdx++] = nChr;
+		} else if (nChr < 0x800) {
+			/* two bytes */
+			aBytes[nIdx++] = 192 + (nChr >>> 6);
+			aBytes[nIdx++] = 128 + (nChr & 63);
+		} else if (nChr < 0x10000) {
+			/* three bytes */
+			aBytes[nIdx++] = 224 + (nChr >>> 12);
+			aBytes[nIdx++] = 128 + (nChr >>> 6 & 63);
+			aBytes[nIdx++] = 128 + (nChr & 63);
+		} else if (nChr < 0x200000) {
+			/* four bytes */
+			aBytes[nIdx++] = 240 + (nChr >>> 18);
+			aBytes[nIdx++] = 128 + (nChr >>> 12 & 63);
+			aBytes[nIdx++] = 128 + (nChr >>> 6 & 63);
+			aBytes[nIdx++] = 128 + (nChr & 63);
+		} else if (nChr < 0x4000000) {
+			/* five bytes */
+			aBytes[nIdx++] = 248 + (nChr >>> 24);
+			aBytes[nIdx++] = 128 + (nChr >>> 18 & 63);
+			aBytes[nIdx++] = 128 + (nChr >>> 12 & 63);
+			aBytes[nIdx++] = 128 + (nChr >>> 6 & 63);
+			aBytes[nIdx++] = 128 + (nChr & 63);
+		} else /* if (nChr <= 0x7fffffff) */ {
+			/* six bytes */
+			aBytes[nIdx++] = 252 + /* (nChr >>> 32) is not possible in ECMAScript! So...: */ (nChr / 1073741824);
+			aBytes[nIdx++] = 128 + (nChr >>> 24 & 63);
+			aBytes[nIdx++] = 128 + (nChr >>> 18 & 63);
+			aBytes[nIdx++] = 128 + (nChr >>> 12 & 63);
+			aBytes[nIdx++] = 128 + (nChr >>> 6 & 63);
+			aBytes[nIdx++] = 128 + (nChr & 63);
+		}
+	}
+	return aBytes;
+};
+
 var jpegClean = function(origAB) {
     "use strict";
     var i, l, posO = 2, posT = 2,
@@ -3914,36 +3312,726 @@ var jpegExtract = function(inArBuf) {
     }
 };
 
-var scriptStore = window.opera && window.opera.scriptStorage || localStorage,
-    isGM = typeof GM_setValue === 'function';
+var upload_handler = (new Date()).getTime() * 10000;
+ParseUrl = function(url){
+    "use strict";
+    var m = (url || document.location.href).match( /https?:\/\/([^\/]+)\/([^\/]+)\/((\d+)|res\/(\d+)|\w+)(\.x?html)?(#i?(\d+))?/);
+    return m?{host:m[1], board:m[2], page:m[4], thread:m[5], pointer:m[8]}:{};
+};
+var Hanabira={URL:ParseUrl()};
 
-if(isGM || window.opera && window.opera.scriptStorage){
-	localStorage.removeItem('magic_desu_numbers');
+var sendBoardForm = function(file) {
+    "use strict";
+    replyForm.find("#do_encode").val('..Working...').attr("disabled", "disabled");
+
+    if ($('form[name*="postcontrols"]').length !==0) {
+        $.ajax({
+            url: location.href,
+            type: 'GET',
+            processData: false,
+            contentType: false,
+            success: function(data, textStatus, jqXHR) {
+                var doc = document.implementation.createHTMLDocument('');
+                doc.documentElement.innerHTML = data;
+
+                var l = $("form[action*=post]", doc).serializeArray();
+                l = l.filter(function(a){
+                    if(["name","email","subject","post","spoiler","body","file","file_url","password","thread","board"].indexOf(a.name) > -1) return false;
+                    return true;
+                });
+
+                l.push({"name": "post", "value": $('#de-pform input[type=submit]').val()});
+
+                //console.log("fresh post form: ", l);
+                
+                _sendBoardForm(file, l);  
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert('failed to get fresh form. Try again!');
+                replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
+                upload_handler = (new Date()).getTime() * 10000;
+            }
+        });
+    }else{
+        _sendBoardForm(file, []);        
+    }
+};
+
+var _sendBoardForm = function(file, formAddon) {
+    "use strict";
+    
+    var formData, fileInputName, formAction,
+        fd = new FormData();
+
+    if($('a#yukiForceUpdate').length !== 0 && $('form#yukipostform').length === 0){
+        $('a.reply_.icon').last().click();
+        $('form#yukipostform textarea').val('');
+    }
+
+    if($('#de-pform form').length !== 0){
+        formData = $('#de-pform form').serializeArray();
+        fileInputName = $("#de-pform form input[type=file]")[0].name;
+        formAction = $("#de-pform form")[0].action; //+ "?X-Progress-ID=" + upload_handler,
+    }else if(($('form#yukipostform').length !== 0)){
+        formData = $('form#yukipostform').serializeArray();
+        fileInputName = 'file_1';
+        fd.append('file_1_rating', 'SFW'); 
+        formAction = '/' + Hanabira.URL.board + '/post/new.xhtml' + "?X-Progress-ID=" + upload_handler;   
+    }
+
+    if(is4chan){
+        var forForm = $('form[name=post]');
+        if($('form[name=qrPost], div#qr form').length !==0){
+            forForm = $('form[name=qrPost], div#qr form');
+        }
+
+        fileInputName = forForm.find("input[type=file]")[0].name;
+        formAction = forForm[0].action; 
+
+        formData = forForm.serializeArray();
+
+        if($('div#qr form').length !==0){
+            formData.push({"name": "recaptcha_response_field", "value": $('div#qr .captcha-input.field').val()});
+            formData.push({"name": "recaptcha_challenge_field", "value": $('div#qr .captcha-img img').attr('alt')});
+            formData.push({"name": "com", "value": $('div#qr textarea').val()});
+
+            formData.push({"name": "MAX_FILE_SIZE", "value": $('form[name=post] input[name=MAX_FILE_SIZE]').val()});
+            formData.push({"name": "mode", "value": $('form[name=post] input[name=mode]').val()});
+            formData.push({"name": "pwd", "value": $('form[name=post] input[name=pwd]').val()});
+            formData.push({"name": "resto", "value": $('form[name=post] input[name=resto]').val()});
+
+            formData.push({"name": "recaptcha_response_field", "value": $('div#qr .captcha-input.field').val()});
+            formAction = $('form[name=post]')[0].action; 
+            fileInputName = $("form[name=post] input[type=file]")[0].name;
+        }
+
+        console.log(formData);
+
+        
+    }
+
+    if(formAddon.length > 0){
+        formData = formData.filter(function(a){
+            if(["name","email","subject","post","spoiler","body","file","file_url","password","thread","board"].indexOf(a.name) > -1) return true;
+            return false;
+        });
+        formData.push.apply(formData, formAddon);
+    }
+
+    for (var i = 0; i < formData.length; i++) {
+        if (formData[i].name != fileInputName) {
+            fd.append(formData[i].name, formData[i].value);
+        }
+    }
+
+    var fnme = Math.floor((new Date()).getTime() / 10 - Math.random() * 100000000) + '.jpg';
+
+    fd.append(fileInputName, uint8toBlob(file, 'image/jpeg'), fnme);
+
+    $.ajax({
+        url: formAction,
+        type: 'POST',
+        data: fd,
+        processData: false,
+        contentType: false,
+        success: function(data, textStatus, jqXHR) {
+            var doc = document.implementation.createHTMLDocument(''),
+                p;
+            doc.documentElement.innerHTML = data;
+
+            if (jqXHR.status === 200 && jqXHR.readyState === 4) {
+                p = $('form[action*="delete"]', doc).length +
+                    $('form[action*="delete"]', doc).length +
+                    $('#posts_form, #delform', doc).length +
+                    $('form:not([enctype])', doc).length +
+                    $('form[name="postcontrols"]', doc).length +
+                    $('form[name="postcontrols"]', doc).length +
+                    $('#delform, form[name="delform"]', doc).length;
+                    if(isDobro && data.match(/parent\.location\.replace/)){
+                        p = 1;
+                    }
+
+                    if(is4chan && data.indexOf('<title>Post successful!</title>') != -1){
+                        p = 1;
+                    }
+            } else {
+                p = 1;
+            }
+
+            if (p !== 0) {
+                $('#de-pform textarea').val('');
+                $('form#yukipostform textarea').val('');
+                $('#de-pform img[src*=captcha]').click();
+                $('#hidbord_replyform #c_file').val('');
+                $('#de-updater-btn').click();
+                $('#de-thrupdbtn').click();
+                $('a#yukiForceUpdate').click();
+                if(is4chan){
+                    setTimeout(function() {$('a[data-cmd=update]').first().click(); $('.thread-refresh-shortcut.fa.fa-refresh').first().click();}, 2500);                    
+                    $('#qrCapField').val('');
+                    $('#recaptcha_response_field').val('');
+                    $('#recaptcha_challenge_image').click();
+                    $('#qrCaptcha').click();
+                    $('textarea[name=com]').val('');                    
+                    $('div#qr .captcha-input.field').val('');
+                    $('div#qr .captcha-img img').click();
+                    $('div#qr textarea').val('');
+                }
+                replyForm.remove();
+                replyForm = null;
+                container_image = null;
+                container_data = null;
+
+            } else {
+                alert('Can\'t post. Wrong capch? Fucked up imageboard software?.');
+                replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
+            }
+            upload_handler = (new Date()).getTime() * 10000;
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            alert('Error while posting. Something in network or so.');
+            replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
+            upload_handler = (new Date()).getTime() * 10000;
+        }
+    });
+};
+
+var rsaProfile = {},
+    rsa = new RSAKey(),
+    rsa_hash, rsa_hashB64;
+
+var do_login = function() {
+    "use strict";
+
+    var lf = document.loginform;
+
+    rng_state = null;
+
+    var buffer = new ArrayBuffer(256);
+    var int32View = new Int32Array(buffer);
+    var Uint8View = new Uint8Array(buffer);
+
+    var key_from_pass = sjcl.misc.pbkdf2(lf.passwd.value, parseInt(lf.magik_num.value) + "_salt", 10000, 256 * 8);
+
+    int32View.set(key_from_pass);
+
+    for (var i = 0; i < rng_psize; i++) {
+        rng_pool[i] = Uint8View[i];
+    }
+
+    rng_prefetch = parseInt(lf.magik_num.value);
+
+    rsa.generate(1024, '10001');
+
+    rsaProfile = {
+        n: rsa.n.toString(16),
+        d: rsa.d.toString(16),
+        p: rsa.p.toString(16),
+        q: rsa.q.toString(16),
+        dmp1: rsa.dmp1.toString(16),
+        dmq1: rsa.dmq1.toString(16),
+        coeff: rsa.coeff.toString(16)
+    };
+
+    rsa_hash = hex_sha1(rsaProfile.n);
+    rsa_hashB64 = hex2b64(rsa_hash);
+
+    ssSet(boardHostName + 'magic_desu_numbers', rsaProfile);
+
+    $('#identi').html(rsa_hash).identicon5({
+        rotate: true,
+        size: 64
+    });
+    $('#identi').append('<br/><br/><i style="color: #090;">'+rsa_hash+'</i>');
+    $('#pub_key_info').val(linebrk(rsa.n.toString(16), 64));
+    lf.magik_num.value = lf.passwd.value = '';
+};
+
+var do_encode = function() {
+    "use strict";
+
+    prev_to = $('#hidbord_cont_type').val();
+    prev_cont = $('#hidbord_cont_direct').val();
+
+    var to_group = null;
+
+    if(prev_to.indexOf('group_') === 0){
+        to_group = prev_to.substring(6);
+    }
+
+    var payLoad = {};
+
+    if(!container_data){
+        alert('Image needed. Please select one.');
+        return false;
+    }
+
+    if(!("n" in rsaProfile)){
+        alert('Please log in.');
+        return false;   
+    }
+
+    payLoad.text = $('#hidbord_reply_text').val();
+    payLoad.ts = Math.floor((new Date()).getTime() / 1000);
+
+    var keys = {};
+    keys[rsa_hash] = rsaProfile.n;
+
+    for (var c in contacts) {
+        if(prev_to == 'direct' && c == prev_cont){
+            keys[c] = contacts[c].key;
+            continue;
+        }
+        
+        if('hide' in contacts[c] && contacts[c].hide == 1){
+            continue;
+        }
+
+        if(to_group !== null && contacts[c].groups && $.isArray(contacts[c].groups) && contacts[c].groups.indexOf(to_group) != -1){
+            keys[c] = contacts[c].key;
+        }
+
+        if(prev_to == 'direct' || to_group !== null){
+            continue;
+        }
+
+        keys[c] = contacts[c].key;
+    }
+
+    var p = encodeMessage(payLoad,keys, 0);
+    var testEncode = decodeMessage(p);
+
+    if(!testEncode || testEncode.status != "OK"){
+        alert('Error in crypt module!');
+        return false;
+    }
+
+    var lastRand = stringToByteArray(String(Math.round(Math.random() * 1e6)));
+
+    var out_file = appendBuffer(jpegEmbed(container_data, p),lastRand);
+    var compressedB64 = arrayBufferDataUri(out_file);
+
+    sendBoardForm(out_file);
+};
+
+var do_decode = function(message, msgPrepend, thumb, fdate, post_id) {
+    "use strict";
+
+    var out_msg = {
+        post_id: post_id,
+        id: message.id,
+        txt: {
+            ts: message.ts,
+            msg: message.message.text
+        },
+        keyid: message.keyhash,
+        pubkey: message.key,
+        status: message.status,
+        to: message.keys,
+    };
+
+    push_msg(out_msg, msgPrepend, thumb);
+    return true;
+};
+
+var contacts = {}, cont_groups = [];
+
+var add_contact = function(e) {
+    "use strict";
+
+    var name = prompt("Name this contact:");
+    var key = $(e.target).attr('alt');
+    var rsa_hash = hex_sha1(key);
+
+    contacts[rsa_hash] = {
+        key: key,
+        name: name,
+        hide: 0,
+        groups: []
+    };
+
+    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts));
+    render_contact();
+};
+
+function safe_tags(str) {
+    "use strict";
+
+    if(str && typeof str === 'string'){
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    return "";
 }
 
-var ssGet = function(name)    {
-	"use strict";
+var getContactHTML = function(hash, key) {
+    "use strict";
 
-	if(isGM){
-		/*jshint newcap: false */
-		if(GM_getValue(name) === undefined) return null;
-		return JSON.parse(GM_getValue(name));
-	}
+    if (hash == rsa_hash) {
+        return '<strong style="color: #090; font-style: italic" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">Me</strong>';
+    }
 
-	return JSON.parse(scriptStore.getItem(name));
+    if (!(hash in contacts) && key) {
+        return '<em style="color: #00f" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">Unknown</em> [<a href="javascript:;" alt="' + key + '" class="hidbord_addcntct_link">add</a>]';
+    }
+
+    if (!(hash in contacts)) {
+        return '<em style="color: #00f" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">Unknown</em>';
+    }
+
+    if ('hide' in contacts[hash] && contacts[hash].hide == 1) {
+        return '<strike class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">' + safe_tags(contacts[hash].name) + '</strike>';
+    }
+
+    return '<strong class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">' + safe_tags(contacts[hash].name) + '</strong>';
+
 };
 
-var ssSet = function(name, val)    {
-	"use strict";
+var contactsSelector = function(){
+    "use strict";
+    var code = '<div id="hidbord_contacts_select"><strong>to:</strong>&nbsp;<select id="hidbord_cont_type"><option selected="selected" value="all">All</option><option value="direct">Direct</option><option disabled="disabled">Groups:</option>';
 
-	if(isGM){
-		/*jshint newcap: false  */
-		return GM_setValue(name, JSON.stringify(val));
-	}
+    for (var i = 0; i < cont_groups.length; i++) {
+        code += '<option value="group_'+safe_tags(cont_groups[i])+'">'+safe_tags(cont_groups[i])+'</option>';
+    }
+    
+    code += '</select>&nbsp;<select id="hidbord_cont_direct" style="display: none;">';
+    
+    for (var c in contacts) {
+        code += '<option value="'+c+'">'+safe_tags(contacts[c].name)+'</option>';
+    }
 
-	return scriptStore.setItem(name, JSON.stringify(val));
+    code += '</select>';
+
+    return code + '</div>';
 };
 
+var render_contact = function() {
+    "use strict";
+
+    cont_groups = {};
+
+    var code = '<br><a href="data:text/plain;base64,' + strToDataUri(encodeURIComponent(JSON.stringify(contacts))) + 
+               '" download="[DDT] Contacts - ' + document.location.host + ' - ' + dateToStr(new Date(), true) + 
+               '.txt">Download contacts as file</a> or import from file: <input type="file" id="cont_import_file" name="cont_import_file"><br/><br/>';
+
+    for (var c in contacts) {
+        var ren_action = ('hide' in contacts[c] && contacts[c].hide == 1) ? 'enable' : 'disable';
+        var groups_list = '';
+
+        if(contacts[c].groups && $.isArray(contacts[c].groups) && contacts[c].groups.length > 0){
+            groups_list = '<div style="float:right; color: #999;">['+safe_tags(contacts[c].groups.join('; '))+']</div>';
+            for (var i = 0; i < contacts[c].groups.length; i++) {
+                var grp = contacts[c].groups[i].trim().toLowerCase();
+                cont_groups[grp] = grp;
+            }
+        }
+
+
+        code += '<div class="hidbord_msg">' +
+            '<div class="cont_identi" style="float: left">' + c + '</div>' +
+            '<div  style="float: left; padding: 5px;">' + getContactHTML(c) + '<br/><i style="color: #090">' + c + '</i><br/>' +
+            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">delete</a>]</sub> '+
+            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">' + ren_action + '</a>]</sub> '+
+            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">rename</a>]</sub> '+
+            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">groups</a>]</sub></div>'+groups_list+'<br style="clear: both;"/></div>';
+    }
+
+    var cont_list = $(code);
+    cont_list.find('.cont_identi').identicon5({
+        rotate: true,
+        size: 48
+    });
+    cont_list.find('a.hidbord_cont_action').on('click', manage_contact);
+    //cont_list.find('#cont_import_file').on('change', import_contact);
+
+    $('.hidbord_contacts').empty().append(cont_list);
+    $('.hidbord_contacts #cont_import_file').on('change', import_contact);
+
+    cont_groups = Object.keys(cont_groups).sort();
+};
+
+var manage_contact = function(e) {
+    "use strict";
+
+    var action = $(e.target).text(),
+        key = $(e.target).attr('alt'), name, prmpt;
+    
+    if (action == 'delete' && confirm('Really delete?')) {
+        delete contacts[key];
+    }
+
+    if (action == 'disable' && confirm('Are you sure?')) {
+        contacts[key].hide = 1;
+    }
+
+    if (action == 'enable' && confirm('Are you sure?')) {
+        contacts[key].hide = 0;
+    }
+
+    if (action == 'rename') {
+        prmpt = prompt("Name this contact:", contacts[key].name);
+        if(prmpt !== null) contacts[key].name = '' + prmpt;
+    }
+
+    if (action == 'groups') {
+        prmpt = prompt("Groups separated by semicolon (;)", $.isArray(contacts[key].groups) ? contacts[key].groups.join('; ') : "");
+        if(prmpt !== null){
+            if(prmpt === ''){
+                contacts[key].groups = [];
+            }else{
+                contacts[key].groups = prmpt.split(';').map(function(s){return s.trim().toLowerCase();}).sort();
+            }
+        }
+    }
+
+    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts));
+    render_contact();
+};
+
+var import_contact = function(evt) {
+    "use strict";
+    var files = evt.target.files; // FileList object
+
+    if (files[0] && files[0].type.match('text.*')) {
+        var reader = new FileReader();
+
+//        console.log(files[0]);
+
+        reader.onload = (function(theFile) {
+            return function(e) {
+                // result e.target.result;                
+                try{
+//                    console.log(decodeURIComponent(e.target.result));
+                    var in_data = JSON.parse(decodeURIComponent(e.target.result));
+//                    console.log(in_data);
+                    for(var c in in_data){
+                        if(!(c in contacts)){
+                            contacts[c] = in_data[c];
+                        }
+                    }
+                    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts));
+                    render_contact();
+                }catch(err){
+//                    console.log(err);
+                    alert('Can\'t import!');
+                }
+            };
+        })(files[0]);
+        reader.readAsText(files[0]);
+    }
+};
+
+if (ssGet(boardHostName + 'magic_desu_contacts')) {
+    contacts = JSON.parse(ssGet(boardHostName + 'magic_desu_contacts'));
+//    console.log(contacts);
+}
+
+var CODEC_VERSION = 1, MESSAGE_NORMAL = 0, MESSAGE_DIRECT = 1;
+
+var encodeMessage = function(message, keys, msg_type){
+    'use strict';
+
+    var i, pwd,salt,iv,preIter, arrTemp, keyshift, rp, p, sig,
+        //deflate = new Zlib.RawDeflate(strToUTF8Arr(JSON.stringify(message))),
+        compressed = pako.deflateRaw(strToUTF8Arr(JSON.stringify(message))),
+        compressedAt = Math.floor((new Date()).getTime() / 1000),
+        finalLength = 316 + 148 * Object.keys(keys).length + compressed.byteLength + 8,
+        containerAB = new ArrayBuffer(finalLength),
+        container = new Uint8Array(containerAB), crypted,
+        signedPart = new Uint8Array(containerAB, 261);
+
+    preIter = Math.random()*20;for (i = 0; i < preIter; i++){sjcl.random.randomWords(8, 0);}
+    pwd = sjcl.codec.hex.fromBits(sjcl.random.randomWords(8, 0));
+    
+    preIter = Math.random()*20;for (i = 0; i < preIter; i++) {sjcl.random.randomWords(8, 0);}
+    salt = sjcl.random.randomWords(8, 0);
+    
+    preIter = Math.random()*20;for (i = 0; i < preIter; i++) {sjcl.random.randomWords(8, 0);}
+    iv = sjcl.random.randomWords(4, 0);
+
+    p = {
+        iv: iv,
+        iter: 1000,
+        mode: "ccm",
+        ts: 64,
+        ks: 256,
+        salt: salt
+    };
+
+    p = sjcl.encrypt(pwd, sjcl.codec.bytes.toBits(compressed), p, rp);
+
+    crypted = sjcl.codec.bytes.fromBits(p.ct);
+
+    container[0] = CODEC_VERSION; // version
+
+    container[1] = finalLength & 255; //data size
+    container[2] = (finalLength >> 8) & 255;
+    container[3] = (finalLength >> 16) & 255;
+    container[4] = (finalLength >> 24) & 255;
+
+    arrTemp = hexToBytes(rsaProfile.n, 128); // our publick key
+    for (i = 0; i < arrTemp.length; i++) {
+        container[5 + i] = arrTemp[i];
+    }
+
+    container[261] = msg_type; //type of message
+    container[262] = compressedAt & 255; //coding unix_timestamp
+    container[263] = (compressedAt >> 8) & 255;
+    container[264] = (compressedAt >> 16) & 255;
+    container[265] = (compressedAt >> 24) & 255;
+
+    arrTemp = sjcl.codec.bytes.fromBits(iv); // iv
+    for (i = 0; i < arrTemp.length; i++) {
+        container[266 + i] = arrTemp[i];
+    }
+    var iv2 = arrayBufferDataUri(arrTemp);
+
+    arrTemp = sjcl.codec.bytes.fromBits(salt); // iv
+    for (i = 0; i < arrTemp.length; i++) {
+        container[282 + i] = arrTemp[i];
+    }
+    var salt2 = arrayBufferDataUri(arrTemp);
+
+    container[314] = Object.keys(keys).length & 255; // number of keys
+    container[315] = (Object.keys(keys).length >> 8) & 255; // number of keys
+
+    keyshift = 0;
+    for (var c in keys) {
+
+        arrTemp = hexToBytes(c, 20); // keyhash
+        for (i = 0; i < arrTemp.length; i++) {
+            container[316 + i + keyshift*148] = arrTemp[i];
+        }
+
+        var testRsa = new RSAKey();
+        testRsa.setPublic(keys[c], '10001');
+
+        arrTemp = hexToBytes(testRsa.encrypt(pwd), 128); // crypted password
+        for (i = 0; i < arrTemp.length; i++) {
+            container[336 + i + keyshift*148] = arrTemp[i];
+        }
+
+        keyshift++;
+    }
+
+    keyshift = 316 + 148 * Object.keys(keys).length;
+    for (i = 0; i < crypted.length; i++) {
+        container[keyshift + i] = crypted[i];
+    }
+
+    sig = rsa.signStringWithSHA256(signedPart);
+
+    arrTemp = hexToBytes(sig, 128); // keyhash
+    for (i = 0; i < arrTemp.length; i++) {
+        container[133 + i] = arrTemp[i];
+    }
+
+    return container;
+};
+
+var decodeMessage = function(data){
+    'use strict';
+
+    if(data[0] != CODEC_VERSION) return false;
+    var msgType = data[261],
+        keyNum = data[314] + data[315] * 256,
+        dataLength = data[1] + data[2] * 256 + data[3] * 65536 + data[4] * 16777216,
+        compressedAt = data[262] + data[263] * 256 + data[264] * 65536 + data[265] * 16777216,
+        cryptedPart = data.subarray(316 + 148 * keyNum),
+        signedPart = data.subarray(261), keys = {}, i, j, message;
+
+    if(dataLength != data.byteLength) return false;
+    if(keyNum * 148 > data.byteLength) return false;
+
+    var key = [], sig = [], iv = [], salt = [];
+
+    for (i = 0; i < 128; i++) {
+        key.push(data[5+i]);
+        sig.push(data[133+i]);
+    }
+
+    key = bytesToHex(key);
+    sig = bytesToHex(sig);
+
+    try{
+        var testRsa = new RSAKey();
+        testRsa.setPublic(key, '10001');
+        if (!testRsa.verifyString(signedPart, sig)) {
+            return false;
+        }
+    } catch (e) {
+        return false;
+    }
+
+    for (i = 0; i < 16; i++) {
+        iv.push(data[266+i]);
+    }
+    
+    for (i = 0; i < 32; i++) {
+        salt.push(data[282+i]);
+    }
+
+    for (j = 0; j < keyNum; j++) {
+        var keyhas = [], keyval = [];
+
+        for (i = 0; i < 20; i++) {
+            keyhas.push(data[316 + i + j*148]);
+        }
+
+        for (i = 0; i < 128; i++) {
+            keyval.push(data[336 + i + j*148]);
+        }
+
+        keyhas = bytesToHex(keyhas);
+        keyval = bytesToHex(keyval);
+
+        keys[keyhas] = keyval;
+    }
+
+
+    var container = {
+        id: SHA256(signedPart),
+        ts: compressedAt,
+        key: key,
+        keyhash: hex_sha1(key),
+        type: msgType,
+        keys: Object.keys(keys),
+        message: {text:""}
+    };
+
+    if (!(rsa_hash in keys)) {
+        container.status = 'NOKEY';
+        return container;
+    }
+
+    var aesmsg = {
+        "iv": sjcl.codec.bytes.toBits(iv),
+        "v": 1,
+        "iter": 1000,
+        "ks": 256,
+        "ts": 64,
+        "mode": "ccm",
+        "cipher": "aes",
+        "salt": sjcl.codec.bytes.toBits(salt),
+        "ct": sjcl.codec.bytes.toBits(cryptedPart)
+    };
+
+    try {
+        var password = rsa.decrypt(keys[rsa_hash]);
+        var om = sjcl.decrypt(password, aesmsg);
+        //var inflate = new Zlib.RawInflate(om);
+        var plain = pako.inflateRaw(om);
+        container.status = 'OK';
+        container.message = JSON.parse(utf8ArrToStr(plain));
+        return container;
+    } catch (e) {
+        console.log(e);
+        return false;
+    }
+
+    return false;
+};
 var desudesuicon = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAADAFBMVEUYAAAoEhUXHBxKGhgVKxgQMgdUHRYpLS1OKx1pJyFGMTFhLCR0LSY3PT0fSix0MS08QTYtRjRuNix/PTWGPDdKTU4hXSx7QjReTEs7YCmASkZdVj4YbDKNSUJ0UE0xaDtZWVyIT0B6VD5JZUYdeDqcVU6YWE+QW1FkaW4kgUE9eUuKZ2GRaFGCbG6gZWCqY1tGhiqlZVpSgjlxdXkwjU5ue3BjgWhwg0+pcl2QfE9PjmKzcGWucXi7cGiCgXmvdW9/gog7m1mifGOKhF+me3O4dnBWlWlgllK/e29CqiBUpDa4gm+BlF+RjXijiHyKk11Ypkp0n0LLgHZIqmSkjmyxi3FarC9+nV6pkGRppkhGthd8oFK5jGVfp2eRk5pHtyZppnl3oYN3pV2gl3CjmGOcl5CMn4vCkoRVt3BWvjSroGlpuEyeoKdfvj3Km3OJrYO1oIN3uE/BnYGrpICopJFruXjHnnywpnS6oJKMs1+CtXCspJ1qvmylp6RgwXl+u2O9oqabsnBpxkl9uY+nqbJnykGZt4Bzx1V1w3iqs4B9xlzWqYGPv32HwIy8soCntam7sKrRrJHVrInGsI61tJ6JwpV+x4SPwoizs7uttbmExoqRwZfNr5+0tbK9to7Ct3uiu7LYraV41U/Gtp+OzW+nw6F+2FrgtpLKwI3fuZzOwYaYz5y+wMeW0ZWqzYLLwpWjzpXdu6nTwK2jz6rGw7ul0oyj0aPMxaLDxcKN32mR3XO4zpexz6jKyLGv0LTFyNDnw6Wd3ZGj26LYzZnXz6Gh4Jztx7ej4ojX0Kqh5X+32bzO0Nqj45+z3qXP0dXuzLCx36uz3rKq46Dk0L3G2cbB28PX1b6+3riq5qnh2Kqz5qvU2NXd2bfV2c+y6Zyy6LPW2eD+0cHi27P21cLU4cG77Kq/6r297Ljc4szo4rnW5szS59XH7br23sjf4ujF78LI8bT938/24dHN7srU7NDf6Nzr58TQ8MTh6OPs6s7n6+/M+MvW99b+69zx9+b19fnl0Av3AAAAAXRSTlMAQObYZgAADKBJREFUWEfFlPt3HOV9xp+57szOzGrvu7rsSquLhSy7WMYWSLKDa+zEQG0IxeXSNtx6ISUNB3IICaVQSEvSQxIgjQttSsHEoQ4Q7uZyCrWxsTGxAUvyVXetVtLeZm+zszM7s7PTH1ack/wF+f70njnv+5n3+zzP+wX+0EUAd65H7fc/0opzZaUKgCqoAirgAYD+/Y2fPwMaWH/dQaGl3aI0HjoAcNVcF6ylT/6U+p2t0wzadEDnABFlETXQ/6v2rCBf2zr/4e0mCJ2zCUBUf1uc/+hts76nHBQd8m1/ZlEW0DHXuRCuUgw41MDVaFrXF2+emwRooGbLwzo4DdBZk6uy/3JI5iWqyZnyZGXRuce/1aIAqyNBJpt1itNhURZFo6Z14ZgPIAGMOH+5aOkswdsGV32579VKV0gJOishQbMrkO7+grIsABLTYnCWDlCgrBqNTPDTLhdAAnT7ucHrKY7idIJQn3i4mWuxKhJVISm1RPnTVPs3XgIsQDIOe7IcNFjQKOiI5mQZjRtgBMk4LNicPX7AnyasFBlyIrA8HWtJV5xU5w9uAQC09FfbDZPXAJ4DEG9ate1LwNF4PV4wQOjBZzOa2JUmoBx3ns5Jf/X1DDEOJ/f2GKCMQZuBh14kKE3La5h/M1794EsA19mRcBOw7dznFlefXazUzwvz8m57921UOWFlQtSJpSUAvDgDTz9t8TzPA+GtMXwJiM48T8c5nSDGl3nYkzoRV5Haqv6xhD8vsnOpCvWaJCmxMaBqAioPcMDS8Iuv/8lKDqwoGw2w4HTmKaqEnEXJNSrtfeia7Q90dwdLOWcZpxQ2y3q0jKJ7M13VvBcchrRBoAGoUVz4kwlhgPETc5aFCouaT+ZGH+t8ilHNqZcKvG0Z714Tq+YRUPDeFR6IdbOG+MQIr9MADdDQP/FvfXadkQ3Mg83CYCNF+hc4+yoDYemG8fkiKOs/rgRQG/1N0/NNV474OjuY6dxVn/qitUYLGq8ubuglwOmAwRqUt+/Dh68+cIVwdv8RN3p798NiM8kA3iiRwdK1xREffpveRgDTenSlBULDtYdmV/OaVANlgP3RPbd+C7j4H/YnCODyO/aKFqXPBs79dWoSCwn63TsvyvRp0fjspiau4QINYtMhdSN0AmBhkOsevfFhAgOp48/t9dj+9ZkaWIYT87tC6zaFYpv7nc+4eJtL4twUr6+4oHPYpBfTQR5NVcpue2qmSbTRNLxd7PTpqwf2CRqtRifCJYpsTsmIxY488mMdTZfwnM41AJPXKdwkV2qe6hF9hUzg6hu1RwAIAsjtQ/lLm86KuSq7tjCppIe9oZLsPwV3ldafvS7hWKWvBClnKidiF85GgFCqfvmL3PKtAICycu/QzQOfSbIN33A//Rl5/NPjck06BQH6zEjHqK2vaMA0A1fPhgsn+eoEZR376k4BB6CWy8i7XPXCLzXY7FbPJzUTkDHV8wJD4zjXGvrpxf1cvtECOeMgHfpqo6jJ/3k9xXylfBFiZRQAuAuLe+MVOnBVHzILy+ig0WEUgfmdumGuc5TBNwDzzWq1GlkKBNHq54zMJV2DmHG53UChsLh3NBSJbEzkW3Am37aASM+LDAKcEuaxgdN4qwFQRvurWCguYYPtajGLXjtSb7wxEpE7Ea1kJ9DSYfryZ5qKVs9U0Ak1Nl4Mvd06qLErNg4tSUBAwclN5mPf1BYBd5sKAC6gCWb2PLgB97rjyKNp+xEPaDjc5ZBgqBRrNESUnrGW5fSUO9uuW5cPSJMA1MMjI6seE2s10wSANhR6vRLRGyNnGQC5bGuqFtukm+UGoF+ou1jnBCPqnFl78da9i24CqenTqbMFN41KvAg0u3nwDL7nL1aAwOvv+yeisy3QdanUsPEtvVJmdyphV4oDtv1RP2xhNyJr19OFGlBczpzIF+ZJX/XSn1yzPw0nCip6XBeHFI5TGlOZ/5uFEMvqF8wTk7rGIfqmSKjCd6OuO2oAsstIxPX8cr32jd3s/zwupZu/KBa+WJg9rSuKwpQACti84/Veujzj0LlLCdSp7MdkK1XZ5PRuAirn58iFKWttPsHd25rftd97Iuo+Z5SN7aa7JtaJ+rkPQAEDaxzOvD9QtDTeZ7mpDPOxyfjt7hGyHq/M4ViJnw+6ejN/1yc4m0Znus7IquEWVi0HbLKeLRwACcSapvLrS2hVhVYdRZ6LsR/9fG8JtZk4zqcPIDKEKcxtvP9w+0vrUWfGnWsxs+5YN+nQsSJiSek+VWNh92pnwRlOfXU3iFP37YujuPcXJ7zdG9MbNjYvvbPNCWn64sBRsqLY+fmL6rrJGmzDRlem0zipg0vs6JvUyzLH9/lYh3d8z1/ueLPFy20ubib4I+uS5lXTOJ9ylWza8KpDlM7qUFINQMlXZ1N9ILlfzaZs0ZYc63dKhsGWZ81hL3ft4uZ8yHeF+8rvtpyvo35pe3OWJ/G6TzXYlCO0Mg+M0vbJol7Pt6V6yiwxcfrlo96eYWle+vcqSO5q8Z21XW2BJ6pxAEAipFtO5mlIMDzVMgAK2Bbm+VfZIdmTTG5gx9/ybSsyRw7OrfbpH8ZH9Z++gztbmQtPqm08AGTrY3ahebnwr4t8wVExEx+AArZdnhIlD/zp3u589amNXzVnZr3u+kcHxYmyHrnbuIt0nN9DqYRHyAjk4RZjqR4tl0SfGtBsfuwwKGAgHDCIvYSrydI67+vb0E2rpjJmSIxYv2lK2H0LiaffYKA6/a68XomVMFPVmNLUPUWNpqvJD0ACMQlouz2ZN1T2Z0SHYlYVGp4gQmNy1z2vb3Dk/vEgA+fQ9MIXHttimWCEk4NInHHUqqqjMQ9KrKEE9Im7Mmzbx+3kQQlZoKkS7BrcQdbjff92xvSkO6Jj/q8D8obMDDa/SOuhhV//bShFo9xwQWZ9y2u+smc+dEj07OLKhfFaogjXpcMlhPD9U04G3dEx59WiePT8Q3dpZzTGmm6nDtApGqrYmEg+QwnJW/azyc5rdhx68Ofenb9qq3RdZrtR2Ccjj6bm/GnBvWPfayrCdzgyJwVTm+uc/HigcZgGYCgOg3WbRza3rH78gQcST98bTPRfj9T7GZlhzI4oxiqtoP5+cvC2CXt8LYGklCZF59Mv6Kh9mQOJglLbeeyy6WVybPq5/xIGQqszzx42y1Q6EKuUZgYrlDRgvJLds+bYBvvBC1nTrNaC09eBJM8eBgHcdwOrQEI+uJ/0rn3i297bXvmOADAm40Qzky56aMx/ze2fMLMjE/aOlvLyQ7nJrOhRcVSuHvkeKGDXRZA0kuLpkQ8uUjcO/+Cy8EEXRTlFR8j7yuSmoCZbwTWBicqN3j7OVeiiw++RbalKrSlvramePwwaACvDJ6vh5cQJOxJ9R9r1T0MMAPNcelmfps8Z6B7GshD1BESIAIOnBy7fPLqsCW9t7WyIKMsSK/vkjPvJfA4LiBx25o1cbooJIz3oOkX4elcPLMRhAgCQ98BxsxnsfyUZSRwWRIAEfBIMyUDgyU/vbwciGbQoVbtnBEpURxi+y1b7MQ4MIgMAJTOPEWi43pPzvRBcCRI7qdTzsR8eGUwgF0FgHoAIQI0DSXfv2oHICVOFDIqhgAwzbUbOnDyS3u7hqPsbN0Bqra/ov/64ewv472QcjijHwkYc4W2ca01sdQQLSxAwDa/pBZAPLEVGk5MXIIc6jjIACciiblg/coS9W15r/oicmzsTNdh0GIKSxNreDr9lJdHSrE4BjKsMlHIZ6ArnPbkqRa5/qaGBAOZBobf9zVz/41NhfhUmWazzr5H6bxn0DXVGoNgtgWVhFi5TBACLqlASRlVFLqDhgktuedTI4AXyv29z/RoQvm8KH7f6AchndpElCxPomQBa82JZFIEMZXke+bZLQgFaJdAYqgFzUe1cZpa2HMVLd9/w8qo+3s8AUVewf6vpx2fEJdVl1GMvM2AAoBgwt1ybXFxkYJczDQ30ignlSmDXyJYL/vBnR9vbEMpWXW/PxP9vBtn2nmwcaG0+jpJJAZAz2PcoVS4nqGAFAAnElPZ25d2ZcsuS2H7JJV/b8ReA/Ebv5+joPPPDvazmqGpLaCZqF+Zd8JYBH+r+WZewgUgVOhoaLA0//xsDsyhnAKBr2n161h49Eg5vefKfYcb7eGkBQODo6UM3l10igECyVy45Jy9LFtIRgARasvueY3ETVipAHp+aU/CtQOeu8W8+2FPLZr9Qm4P518p7MI1GxkR5yFtJzPJBAARw7eafCapwD4wcACB8lFzMJPje3cnsiUXhdgC5ZBh4L+G/yZtb+cnMpwZMoTPjfh9/+Pp/8JfWm1VQBz4AAAAASUVORK5CYII=';
 
 var injectCSS = function(css) {
@@ -4719,92 +4807,6 @@ var insertInto = function(textarea, text) {
     }
 };
 
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding#Appendix.3A_Decode_a_Base64_string_to_Uint8Array_or_ArrayBuffer
-/* UTF-8 array to DOMString and vice versa */
-
-var utf8ArrToStr = function(aBytes) {
-	"use strict";
-
-	var sView = "";
-
-	for (var nPart, nLen = aBytes.length, nIdx = 0; nIdx < nLen; nIdx++) {
-		nPart = aBytes[nIdx];
-		sView += String.fromCharCode(
-			nPart > 251 && nPart < 254 && nIdx + 5 < nLen ? /* six bytes */
-			/* (nPart - 252 << 32) is not possible in ECMAScript! So...: */
-			(nPart - 252) * 1073741824 + (aBytes[++nIdx] - 128 << 24) + (aBytes[++nIdx] - 128 << 18) + (aBytes[++nIdx] - 128 << 12) + (aBytes[++nIdx] - 128 << 6) + aBytes[++nIdx] - 128
-			: nPart > 247 && nPart < 252 && nIdx + 4 < nLen ? /* five bytes */
-			(nPart - 248 << 24) + (aBytes[++nIdx] - 128 << 18) + (aBytes[++nIdx] - 128 << 12) + (aBytes[++nIdx] - 128 << 6) + aBytes[++nIdx] - 128
-			: nPart > 239 && nPart < 248 && nIdx + 3 < nLen ? /* four bytes */
-			(nPart - 240 << 18) + (aBytes[++nIdx] - 128 << 12) + (aBytes[++nIdx] - 128 << 6) + aBytes[++nIdx] - 128
-			: nPart > 223 && nPart < 240 && nIdx + 2 < nLen ? /* three bytes */
-			(nPart - 224 << 12) + (aBytes[++nIdx] - 128 << 6) + aBytes[++nIdx] - 128
-			: nPart > 191 && nPart < 224 && nIdx + 1 < nLen ? /* two bytes */
-			(nPart - 192 << 6) + aBytes[++nIdx] - 128
-			: /* nPart < 127 ? */ /* one byte */
-			nPart
-			);
-	}
-
-	return sView;
-
-};
-
-var strToUTF8Arr = function(sDOMStr) {
-	"use strict";
-	var aBytes, nChr, nStrLen = sDOMStr.length, nArrLen = 0;
-
-	/* mapping... */
-
-	for (var nMapIdx = 0; nMapIdx < nStrLen; nMapIdx++) {
-		nChr = sDOMStr.charCodeAt(nMapIdx);
-		nArrLen += nChr < 0x80 ? 1 : nChr < 0x800 ? 2 : nChr < 0x10000 ? 3 : nChr < 0x200000 ? 4 : nChr < 0x4000000 ? 5 : 6;
-	}
-
-	aBytes = new Uint8Array(nArrLen);
-
-	/* transcription... */
-
-	for (var nIdx = 0, nChrIdx = 0; nIdx < nArrLen; nChrIdx++) {
-		nChr = sDOMStr.charCodeAt(nChrIdx);
-		if (nChr < 128) {
-			/* one byte */
-			aBytes[nIdx++] = nChr;
-		} else if (nChr < 0x800) {
-			/* two bytes */
-			aBytes[nIdx++] = 192 + (nChr >>> 6);
-			aBytes[nIdx++] = 128 + (nChr & 63);
-		} else if (nChr < 0x10000) {
-			/* three bytes */
-			aBytes[nIdx++] = 224 + (nChr >>> 12);
-			aBytes[nIdx++] = 128 + (nChr >>> 6 & 63);
-			aBytes[nIdx++] = 128 + (nChr & 63);
-		} else if (nChr < 0x200000) {
-			/* four bytes */
-			aBytes[nIdx++] = 240 + (nChr >>> 18);
-			aBytes[nIdx++] = 128 + (nChr >>> 12 & 63);
-			aBytes[nIdx++] = 128 + (nChr >>> 6 & 63);
-			aBytes[nIdx++] = 128 + (nChr & 63);
-		} else if (nChr < 0x4000000) {
-			/* five bytes */
-			aBytes[nIdx++] = 248 + (nChr >>> 24);
-			aBytes[nIdx++] = 128 + (nChr >>> 18 & 63);
-			aBytes[nIdx++] = 128 + (nChr >>> 12 & 63);
-			aBytes[nIdx++] = 128 + (nChr >>> 6 & 63);
-			aBytes[nIdx++] = 128 + (nChr & 63);
-		} else /* if (nChr <= 0x7fffffff) */ {
-			/* six bytes */
-			aBytes[nIdx++] = 252 + /* (nChr >>> 32) is not possible in ECMAScript! So...: */ (nChr / 1073741824);
-			aBytes[nIdx++] = 128 + (nChr >>> 24 & 63);
-			aBytes[nIdx++] = 128 + (nChr >>> 18 & 63);
-			aBytes[nIdx++] = 128 + (nChr >>> 12 & 63);
-			aBytes[nIdx++] = 128 + (nChr >>> 6 & 63);
-			aBytes[nIdx++] = 128 + (nChr & 63);
-		}
-	}
-	return aBytes;
-};
-
 var imoticons = {
     "gin":  '<img style="vertical-align:bottom;" alt="Suigintou"   title="Suigintou"   src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAANlBMVEUA2XIAAAAICBggICAgIECAIEBAQEBQUHDAQIBgYICYmKCwsLDwqIDIyMj40KDg4OD48LD///9BGnM4AAAAAXRSTlMAQObYZgAAAT1JREFUOI2Vk4GOhCAMRLdQrFQF+f+fvWnxorC3m1xXSTbzOi1YXq9/BCG+ymlNgT5RRAE6CFbVPxAKzAJdmDkY8q4LiySx1ZGJIDYCTxBnZgIGWnsoGwSPEdBW79AggUOgp15ra850I+g6AD3RIG1GalAeAfVf7ateFuEBZJN+VX+sy3D3kHPNWOGRHcg6bIOyqRvtMNozoecJAGFAKiXv+FSbOWoeDwImbT0LIrWGnmbA2jjTabGmhhIg6BVvPQIorp8pndWBTDcQ44M4S1VUjBqXGAcLKj0sOUNdniUiNsLcp6HrC/IfBCyEjtQMEIrQ4zJ9ccZQNJsa6gSaGI7qIJsUvBgEaahB80lZA4fPbOACYgY2gXc7RKyC343pJE0/2kUc/HYxPMlTvct34NrI5fXx9l3Vvt1gJ4Z/P5jeENMXpCU2AAAAAElFTkSuQmCC"/>',
     "kana": '<img style="vertical-align:bottom;" alt="Kanaria"     title="Kanaria"     src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAARVBMVEUAAFsAAADAACBAMBAoSDiwOBggYEDwIGBwYDBYeGjggDBQwFDgoIDQsCCwsLCouLDwwJDIyMj/0HDw4KD46EDg//D///+VBTP8AAAAAXRSTlMAQObYZgAAAUJJREFUOE99k4uOhCAMRadOdQWtDg/7/5+6t5DJgMNuY2LMOS0F6uPRBr3jMQ7yMUa1Z6jUXO9Vow4UIudOCwcFBpSeV1oMNzAabkYsBnW8M7x12pagyp1rjLYEuYuNXRcU1VNDLFvxb4PAmGu65qxZgu/WIKu6786ckGUSCFaiEZwJRdFt+pm2ULroBN5TKoqiQsBZgH96cHwyUapKALd9oI3PNiAcJiS7DvATZ9ULjo/FhJ3owNddsEV0MyEtqm7HxcWOm5BKhbQtml749DC62+JXqhUWcGbMju+447eRXuiA/V04zaiB0/ousNLJ8vRrFrF8cLpxTBzlNecsln+fawhKJDqriBDL90gTBHCMaxaSnAdDTxJmDyMIPdc1DGrMoGTGoTrgxZjJDHsPuPWBRCjz33/m0wiNFygCNd5/0fNfXQoanYE5/8sAAAAASUVORK5CYII="/>',
@@ -5153,13 +5155,12 @@ $(function($) {
         $(document).bind('animationstart', jpegInserted).bind('MSAnimationStart', jpegInserted).bind('webkitAnimationStart', jpegInserted);
     }, 3000);
 
-    if (ssGet('magic_desu_numbers')) {
-        rsaProfile = ssGet('magic_desu_numbers');
+    if (ssGet(boardHostName + 'magic_desu_numbers')) {
+        rsaProfile = ssGet(boardHostName + 'magic_desu_numbers');
         rsa.setPrivateEx(rsaProfile.n, '10001', rsaProfile.d, rsaProfile.p, rsaProfile.q, rsaProfile.dmp1, rsaProfile.dmq1, rsaProfile.coeff);
         rsa_hash = hex_sha1(rsaProfile.n);
         rsa_hashB64 = hex2b64(rsa_hash);
     }
-
 
     inject_ui();
 

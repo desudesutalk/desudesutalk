@@ -14,7 +14,7 @@ var add_contact = function(e) {
         groups: []
     };
 
-    localStorage.setItem('magic_desu_contacts', JSON.stringify(contacts));
+    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts));
     render_contact();
 };
 
@@ -149,7 +149,7 @@ var manage_contact = function(e) {
         }
     }
 
-    localStorage.setItem('magic_desu_contacts', JSON.stringify(contacts));
+    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts));
     render_contact();
 };
 
@@ -174,7 +174,7 @@ var import_contact = function(evt) {
                             contacts[c] = in_data[c];
                         }
                     }
-                    localStorage.setItem('magic_desu_contacts', JSON.stringify(contacts));
+                    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts));
                     render_contact();
                 }catch(err){
 //                    console.log(err);
@@ -186,7 +186,7 @@ var import_contact = function(evt) {
     }
 };
 
-if (localStorage.getItem('magic_desu_contacts')) {
-    contacts = JSON.parse(localStorage.getItem('magic_desu_contacts'));
+if (ssGet(boardHostName + 'magic_desu_contacts')) {
+    contacts = JSON.parse(ssGet(boardHostName + 'magic_desu_contacts'));
 //    console.log(contacts);
 }

@@ -12,7 +12,20 @@ module.exports = function(grunt) {
                                      "src/libs/pako.min.js",
                                      "src/libs/highlight.pack.js"],
 
-                    "ddt.user.js": ["src/metablock.js", 'src/_head.js', "dist/crypto.js","dist/libs.js","src/misc/*.js","src/main.js","src/_tail.js"],
+                    "ddt.user.js": ["src/metablock.js", 'src/_head.js', "dist/crypto.js","dist/libs.js",
+                                    //"src/misc/*.js",
+                                    "src/misc/storage.js",
+                                    "src/misc/helpers.js",
+                                    "src/misc/utf8array.js",
+                                    "src/misc/jpeg.js",
+                                    "src/misc/boards.js",
+                                    "src/misc/codec.js",
+                                    "src/misc/contacts.js",
+                                    "src/misc/crypt.js",
+                                    "src/misc/jpeg.js",
+                                    "src/misc/ui.js",
+                                    "src/misc/wakabamark.js",
+                                    "src/main.js","src/_tail.js"],
                     "ddt.meta.js": ["src/metablock.js"]
                 }
             }

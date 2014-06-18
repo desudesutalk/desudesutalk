@@ -13,7 +13,7 @@ var do_login = function() {
     var int32View = new Int32Array(buffer);
     var Uint8View = new Uint8Array(buffer);
 
-    var key_from_pass = sjcl.misc.pbkdf2(lf.passwd.value, "salt", 10000, 256 * 8);
+    var key_from_pass = sjcl.misc.pbkdf2(lf.passwd.value, parseInt(lf.magik_num.value) + "_salt", 10000, 256 * 8);
 
     int32View.set(key_from_pass);
 
@@ -38,7 +38,7 @@ var do_login = function() {
     rsa_hash = hex_sha1(rsaProfile.n);
     rsa_hashB64 = hex2b64(rsa_hash);
 
-    ssSet('magic_desu_numbers', rsaProfile);
+    ssSet(boardHostName + 'magic_desu_numbers', rsaProfile);
 
     $('#identi').html(rsa_hash).identicon5({
         rotate: true,
