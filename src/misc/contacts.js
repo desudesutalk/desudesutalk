@@ -9,13 +9,14 @@ var add_contact = function(e) {
 
     contacts[rsa_hash] = {
         key: key,
-        name: name,
+        name: '' + name,
         hide: 0,
         groups: []
     };
 
     ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts));
     render_contact();
+    $('em[alt="'+rsa_hash+'"]').text('' + name);
 };
 
 function safe_tags(str) {
@@ -135,7 +136,11 @@ var manage_contact = function(e) {
 
     if (action == 'rename') {
         prmpt = prompt("Name this contact:", contacts[key].name);
-        if(prmpt !== null) contacts[key].name = '' + prmpt;
+        if(prmpt !== null) {
+            contacts[key].name = '' + prmpt;
+            $('strong[alt="'+key+'"]').text('' + prmpt);
+            $('em[alt="'+key+'"]').text('' + prmpt);
+        }
     }
 
     if (action == 'groups') {
