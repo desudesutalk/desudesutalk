@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.2.2
+// @version      0.2.3
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/res/*
 // @include      http://dobrochan.ru/*/res/*
@@ -3652,7 +3652,7 @@ var add_contact = function(e) {
 
     ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts));
     render_contact();
-    $('em[alt="'+rsa_hash+'"]').text('' + name);
+    $('em[alt="'+rsa_hash+'"]').text('' + name).css({"color": '', "font-weight": "bold", "font-style": 'normal'});
 };
 
 function safe_tags(str) {
@@ -3775,7 +3775,7 @@ var manage_contact = function(e) {
         if(prmpt !== null) {
             contacts[key].name = '' + prmpt;
             $('strong[alt="'+key+'"]').text('' + prmpt);
-            $('em[alt="'+key+'"]').text('' + prmpt);
+            $('em[alt="'+key+'"]').text('' + prmpt).css({"color": '', "font-weight": "bold", "font-style": 'normal'});
         }
     }
 
