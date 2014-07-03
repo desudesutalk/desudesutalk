@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.2.5
+// @version      0.2.6
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/res/*
 // @include      http://dobrochan.ru/*/res/*
@@ -5037,7 +5037,7 @@ var restoreURLs = function(str) {
         if (txt.length > 63) {
             txt = txt.substring(0, 30) + '...' + txt.substring(txt.length - 30);
         }
-        return '<a href="' + url + '" target="_blank">' + txt + '</a> ' + b;
+        return '<a href="' + url + '" target="_blank">' + safe_tags(txt) + '</a> ' + b;
     });
 };
 
