@@ -1,19 +1,19 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.2.6
+// @version      0.2.7
 // @description  Write something useful!
-// @include      http://dobrochan.com/*/res/*
-// @include      http://dobrochan.ru/*/res/*
-// @include      http://dobrochan.org/*/res/*
-// @include      http://inach.org/*/res/*
-// @include      https://8chan.co/*/res/*
-// @include      http://2ch.hk/*/res/*
-// @include      http://iichan.hk/*/res/*
-// @include      http://2-ch.su/*/res/*
-// @include      http://syn-ch.com/*/res/*
-// @include      http://syn-ch.org/*/res/*
-// @include      http://syn-ch.ru/*/res/*
+// @include      http://dobrochan.com/*/*
+// @include      http://dobrochan.ru/*/*
+// @include      http://dobrochan.org/*/*
+// @include      http://inach.org/*/*
+// @include      https://8chan.co/*/*
+// @include      http://2ch.hk/*/*
+// @include      http://iichan.hk/*/*
+// @include      http://2-ch.su/*/*
+// @include      http://syn-ch.com/*/*
+// @include      http://syn-ch.org/*/*
+// @include      http://syn-ch.ru/*/*
 // @include      https://boards.4chan.org/*/thread/*
 // @include      http://boards.4chan.org/*/thread/*
 // @copyright    2014+, Boku 
