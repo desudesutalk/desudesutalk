@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuSteg
 // @namespace    udp://desushelter/*
-// @version      0.3.0
+// @version      0.3.1
 // @description  Write something useful!
 // @include      https://8chan.co/ddt/*
 // @copyright    2014+, Boku 
@@ -4019,7 +4019,7 @@ var jsf5steg = (function(){
 		}
 
 		// Do the bit alignment of the EOI marker
-		if ( bytepos >= 0 ) {
+		if ( bytepos >= 0 && bytepos !=7) {
 			var fillbits = [];
 			fillbits[1] = bytepos+1;
 			fillbits[0] = (1<<(bytepos+1))-1;

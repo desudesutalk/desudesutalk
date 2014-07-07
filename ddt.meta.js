@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuSteg
 // @namespace    udp://desushelter/*
-// @version      0.3.0
+// @version      0.3.1
 // @description  Write something useful!
 // @include      https://8chan.co/ddt/*
 // @copyright    2014+, Boku 

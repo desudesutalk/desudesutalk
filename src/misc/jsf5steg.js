@@ -868,7 +868,7 @@ var jsf5steg = (function(){
 		}
 
 		// Do the bit alignment of the EOI marker
-		if ( bytepos >= 0 ) {
+		if ( bytepos >= 0 && bytepos !=7) {
 			var fillbits = [];
 			fillbits[1] = bytepos+1;
 			fillbits[0] = (1<<(bytepos+1))-1;
