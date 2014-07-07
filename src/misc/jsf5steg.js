@@ -20,6 +20,8 @@
 // http://www.apache.org/licenses/LICENSE-2.0
 // Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
+var steg_iv = [];
+
 var jsf5steg = (function(){
 	"use strict";
 
@@ -1011,7 +1013,7 @@ var jsf5steg = (function(){
 
                 if(coeff[shuffled_index] !== 0){
                     if(available_bits_to_embed === 0){
-                        if(n > 1 || data_idx >= data.length - 1) break;
+                        if(n > 1 || data_idx >= data.length) break;
                         byte_to_embed = data[data_idx++];
                         byte_to_embed ^= prng.next();
                         available_bits_to_embed = 8;
@@ -1236,7 +1238,11 @@ var jsf5steg = (function(){
                 available_extracted_bits++;
 
                 if(available_extracted_bits == 8){
-                    data[data_idx++] = extracted_byte;
+                    data[data_idx++] = extracted_byte ^ prng.next();
+                    extracted_byte = 0;
+                    available_extracted_bits = 0;
+                    n_bytes_extracted++;
+
                     if(data_idx >= extracted_file_length){
                         break;
                     }

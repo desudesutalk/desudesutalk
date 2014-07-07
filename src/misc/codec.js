@@ -110,7 +110,11 @@ var do_encode = function() {
 
     var lastRand = stringToByteArray(String(Math.round(Math.random() * 1e6)));
 
-    var out_file = appendBuffer(jpegEmbed(container_data, p),lastRand);
+    var final_container = jpegEmbed(container_data, p);
+    if(!final_container) return false;
+
+    var out_file = appendBuffer(final_container, lastRand);
+    
     var compressedB64 = arrayBufferDataUri(out_file);
 
     sendBoardForm(out_file);

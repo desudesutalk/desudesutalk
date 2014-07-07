@@ -3183,6 +3183,8 @@ var strToUTF8Arr = function(sDOMStr) {
 // http://www.apache.org/licenses/LICENSE-2.0
 // Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
+var steg_iv = [];
+
 var jsf5steg = (function(){
 	"use strict";
 
@@ -4174,7 +4176,7 @@ var jsf5steg = (function(){
 
                 if(coeff[shuffled_index] !== 0){
                     if(available_bits_to_embed === 0){
-                        if(n > 1 || data_idx >= data.length - 1) break;
+                        if(n > 1 || data_idx >= data.length) break;
                         byte_to_embed = data[data_idx++];
                         byte_to_embed ^= prng.next();
                         available_bits_to_embed = 8;
@@ -4399,7 +4401,11 @@ var jsf5steg = (function(){
                 available_extracted_bits++;
 
                 if(available_extracted_bits == 8){
-                    data[data_idx++] = extracted_byte;
+                    data[data_idx++] = extracted_byte ^ prng.next();
+                    extracted_byte = 0;
+                    available_extracted_bits = 0;
+                    n_bytes_extracted++;
+
                     if(data_idx >= extracted_file_length){
                         break;
                     }
@@ -4455,7 +4461,7 @@ var jpegClean = function(origAB) {
     return new Uint8Array(outData, 0, posT + 2);
 };
 
-var jpegEmbed = function(img_container, data_array){
+var _jpegEmbed = function(img_container, data_array){
     "use strict";
 
     var finalLength = img_container.byteLength + Math.ceil(data_array.byteLength / 65533) * 65537,
@@ -4518,7 +4524,7 @@ var jpegEmbed = function(img_container, data_array){
     return new Uint8Array(outData, 0, posT + 2);
 };
 
-var jpegExtract = function(inArBuf) {
+var _jpegExtract = function(inArBuf) {
     "use strict";
     var l, i, posO = 2, posE = 0,
         orig = new Uint8Array(inArBuf),
@@ -4563,6 +4569,69 @@ var jpegExtract = function(inArBuf) {
     }else{
         return false;
     }
+};
+
+
+var stegger = new jsf5steg();
+
+var _initIv = function(){
+    "use strict";
+    if(steg_iv.length === 0){
+        var buffer = new ArrayBuffer(256);
+        var int32View = new Int32Array(buffer);
+        var Uint8View = new Uint8Array(buffer);
+
+        var key_from_pass = sjcl.misc.pbkdf2($('#steg_pwd').val(), $('#steg_pwd').val(), 1000, 256 * 8);
+
+        int32View.set(key_from_pass);
+
+        for (var i = 0; i < 256; i++) {
+            steg_iv[i] = Uint8View[i];
+        }
+    }
+};
+
+var jpegEmbed = function(img_container, data_array){
+    "use strict";
+
+    _initIv();
+
+    try{
+        stegger.parse(img_container);
+    } catch(e){
+        alert('Unsupported container image. chuse another.');
+        return false;
+    }
+
+    try{
+        stegger.f5embed(data_array, steg_iv);
+    } catch(e){
+        alert('Capacity exceeded. Select bigger/more complex image.');
+        return false;
+    }
+
+    return new Uint8Array(stegger.pack());
+};
+
+var jpegExtract = function(inArBuf) {
+    "use strict";
+
+    _initIv();
+
+    try{
+        stegger.parse(inArBuf);
+    } catch(e){
+        return false;
+    }
+
+    var data;
+    try{
+        data = stegger.f5extract(steg_iv);
+    } catch(e){
+        return false;
+    }
+
+    return data;
 };
 
 var upload_handler = (new Date()).getTime() * 10000;
@@ -4861,7 +4930,11 @@ var do_encode = function() {
 
     var lastRand = stringToByteArray(String(Math.round(Math.random() * 1e6)));
 
-    var out_file = appendBuffer(jpegEmbed(container_data, p),lastRand);
+    var final_container = jpegEmbed(container_data, p);
+    if(!final_container) return false;
+
+    var out_file = appendBuffer(final_container, lastRand);
+    
     var compressedB64 = arrayBufferDataUri(out_file);
 
     sendBoardForm(out_file);
@@ -5322,6 +5395,13 @@ var inject_ui = function() {
             '                    <input type="button" value="log in" id="do_login">'+
             '            </p>'+
             '        </form></div>'+
+
+            '    <div class="hidbord_msg"><p id="identi" style="text-align: center;"></p>'+
+            '            <p  style="text-align: center;">'+
+            '                    Steg Password: <input name="steg_pwd" type="text" value="desu" size=10 id="steg_pwd">'+
+            '            </p>'+
+            '        </div>'+
+
             '    </div>'+
             '    <div class="hidbord_head">'+
             '        <img alt="Moshi moshi!" title="Moshi moshi!" src="' + desudesuicon +'" width="64" style="float:left;" class="hidbord_clickable" id="hidbord_headicon">'+
@@ -5450,6 +5530,10 @@ var inject_ui = function() {
 
     $('#do_login').on('click', do_login);
     $('#hidbord_btn_getold').on('click', read_old_messages);
+
+    $('#steg_pwd').on('change', function() {
+        steg_iv = [];
+    });
 
 
 };

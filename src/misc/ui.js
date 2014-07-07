@@ -30,6 +30,13 @@ var inject_ui = function() {
             '                    <input type="button" value="log in" id="do_login">'+
             '            </p>'+
             '        </form></div>'+
+
+            '    <div class="hidbord_msg"><p id="identi" style="text-align: center;"></p>'+
+            '            <p  style="text-align: center;">'+
+            '                    Steg Password: <input name="steg_pwd" type="text" value="desu" size=10 id="steg_pwd">'+
+            '            </p>'+
+            '        </div>'+
+
             '    </div>'+
             '    <div class="hidbord_head">'+
             '        <img alt="Moshi moshi!" title="Moshi moshi!" src="' + desudesuicon +'" width="64" style="float:left;" class="hidbord_clickable" id="hidbord_headicon">'+
@@ -158,6 +165,10 @@ var inject_ui = function() {
 
     $('#do_login').on('click', do_login);
     $('#hidbord_btn_getold').on('click', read_old_messages);
+
+    $('#steg_pwd').on('change', function() {
+        steg_iv = [];
+    });
 
 
 };

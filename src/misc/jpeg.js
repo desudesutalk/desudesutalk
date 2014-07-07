@@ -39,7 +39,7 @@ var jpegClean = function(origAB) {
     return new Uint8Array(outData, 0, posT + 2);
 };
 
-var jpegEmbed = function(img_container, data_array){
+var _jpegEmbed = function(img_container, data_array){
     "use strict";
 
     var finalLength = img_container.byteLength + Math.ceil(data_array.byteLength / 65533) * 65537,
@@ -102,7 +102,7 @@ var jpegEmbed = function(img_container, data_array){
     return new Uint8Array(outData, 0, posT + 2);
 };
 
-var jpegExtract = function(inArBuf) {
+var _jpegExtract = function(inArBuf) {
     "use strict";
     var l, i, posO = 2, posE = 0,
         orig = new Uint8Array(inArBuf),
@@ -147,4 +147,67 @@ var jpegExtract = function(inArBuf) {
     }else{
         return false;
     }
+};
+
+
+var stegger = new jsf5steg();
+
+var _initIv = function(){
+    "use strict";
+    if(steg_iv.length === 0){
+        var buffer = new ArrayBuffer(256);
+        var int32View = new Int32Array(buffer);
+        var Uint8View = new Uint8Array(buffer);
+
+        var key_from_pass = sjcl.misc.pbkdf2($('#steg_pwd').val(), $('#steg_pwd').val(), 1000, 256 * 8);
+
+        int32View.set(key_from_pass);
+
+        for (var i = 0; i < 256; i++) {
+            steg_iv[i] = Uint8View[i];
+        }
+    }
+};
+
+var jpegEmbed = function(img_container, data_array){
+    "use strict";
+
+    _initIv();
+
+    try{
+        stegger.parse(img_container);
+    } catch(e){
+        alert('Unsupported container image. chuse another.');
+        return false;
+    }
+
+    try{
+        stegger.f5embed(data_array, steg_iv);
+    } catch(e){
+        alert('Capacity exceeded. Select bigger/more complex image.');
+        return false;
+    }
+
+    return new Uint8Array(stegger.pack());
+};
+
+var jpegExtract = function(inArBuf) {
+    "use strict";
+
+    _initIv();
+
+    try{
+        stegger.parse(inArBuf);
+    } catch(e){
+        return false;
+    }
+
+    var data;
+    try{
+        data = stegger.f5extract(steg_iv);
+    } catch(e){
+        return false;
+    }
+
+    return data;
 };
