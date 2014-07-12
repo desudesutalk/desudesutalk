@@ -14,6 +14,7 @@
 // @include      http://syn-ch.com/*/*
 // @include      http://syn-ch.org/*/*
 // @include      http://syn-ch.ru/*/*
+// @include      http://krautchan.net/*/*
 // @include      https://boards.4chan.org/*/thread/*
 // @include      http://boards.4chan.org/*/thread/*
 // @copyright    2014+, Boku 
