@@ -61,6 +61,10 @@ $(function($) {
 
     inject_ui();
 
+    if (ssGet(boardHostName + 'magic_desu_pwd')) {
+        $('#steg_pwd').val(ssGet(boardHostName + 'magic_desu_pwd'));
+    }
+
     render_contact();
 
 });

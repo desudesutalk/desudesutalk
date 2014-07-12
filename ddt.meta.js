@@ -1,9 +1,21 @@
 // ==UserScript==
 // @name         DesuDesuSteg
 // @namespace    udp://desushelter/*
-// @version      0.3.1
+// @version      0.3.2
 // @description  Write something useful!
-// @include      https://8chan.co/ddt/*
+// @include      http://dobrochan.com/*/*
+// @include      http://dobrochan.ru/*/*
+// @include      http://dobrochan.org/*/*
+// @include      http://inach.org/*/*
+// @include      https://8chan.co/*/*
+// @include      http://2ch.hk/*/*
+// @include      http://iichan.hk/*/*
+// @include      http://2-ch.su/*/*
+// @include      http://syn-ch.com/*/*
+// @include      http://syn-ch.org/*/*
+// @include      http://syn-ch.ru/*/*
+// @include      https://boards.4chan.org/*/thread/*
+// @include      http://boards.4chan.org/*/thread/*
 // @copyright    2014+, Boku 
 // @icon         https://github.com/desudesutalk/desudesutalk/raw/master/icon.jpg
 // @updateURL    https://github.com/desudesutalk/desudesutalk/raw/f5steg/ddt.meta.js

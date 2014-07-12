@@ -167,6 +167,7 @@ var inject_ui = function() {
     $('#hidbord_btn_getold').on('click', read_old_messages);
 
     $('#steg_pwd').on('change', function() {
+        ssSet(boardHostName + 'magic_desu_pwd', $('#steg_pwd').val());
         steg_iv = [];
     });
 
