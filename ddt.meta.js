@@ -18,7 +18,7 @@
 // @include      http://boards.4chan.org/*/thread/*
 // @copyright    2014+, Boku 
 // @icon         https://github.com/desudesutalk/desudesutalk/raw/master/icon.jpg
-// @updateURL    https://github.com/desudesutalk/desudesutalk/raw/f5steg/ddt.meta.js
+// @updateURL    https://github.com/desudesutalk/desudesutalk/raw/master/ddt.meta.js
 // @run-at       document-start
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
