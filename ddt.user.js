@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.2
+// @version      0.3.3
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -6497,8 +6497,13 @@ var jpegInserted = function(event) {
     }
 };
 
+var ArrayPrototypeEvery = Array.prototype.every;
+
 $(function($) {
     "use strict";
+
+    Array.prototype.every = ArrayPrototypeEvery;
+
     sjcl.random.startCollectors();
 
     var insertAnimation = ' hidbordNodeInserted{from{clip:rect(1px,auto,auto,auto);}to{clip:rect(0px,auto,auto,auto);}}',

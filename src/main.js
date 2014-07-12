@@ -37,8 +37,13 @@ var jpegInserted = function(event) {
     }
 };
 
+var ArrayPrototypeEvery = Array.prototype.every;
+
 $(function($) {
     "use strict";
+
+    Array.prototype.every = ArrayPrototypeEvery;
+
     sjcl.random.startCollectors();
 
     var insertAnimation = ' hidbordNodeInserted{from{clip:rect(1px,auto,auto,auto);}to{clip:rect(0px,auto,auto,auto);}}',
