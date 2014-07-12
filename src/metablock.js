@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         DesuDesuSteg
+// @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
 // @version      0.3.2
 // @description  Write something useful!
