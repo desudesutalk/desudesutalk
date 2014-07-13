@@ -671,7 +671,7 @@ var showReplyform = function(msg_id, textInsert) {
             '  <div>' +
             '    <div style="margin:  3px;">' +
             '      <div style="width: 590px;">' +
-            '        <input type="file" id="c_file" name="c_file">' +
+            '        <input type="file" id="c_file" name="c_file" style="max-width: 300px;">' +
             '            <span style="float: right;" id="hidbordTextControls">' +
             '              <span title="Bold"><input value="B" style="font-weight: bold;" type="button" id="hidbordBtBold"></span>' +
             '              <span title="Italic"><input value="i" style="font-weight: bold; font-style: italic;" type="button" id="hidbordBtItalic"></span>' +
