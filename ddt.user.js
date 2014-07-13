@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.3
+// @version      0.3.4
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -5440,7 +5440,7 @@ var inject_ui = function() {
             '.hidbord_spoiler:not(:hover), .hidbord_spoiler:not(:hover) * { color: #CCCCCC !important; } '+
             '.hidbord_quot1 { color: #789922; }'+
             '.hidbord_quot2 { color: #546c18; } '+
-            '.hidbord_main {  color: #800000 !important; font-size: medium !important; font-family: calibri; position: fixed; bottom: 25px; right: 25px; box-shadow: 0 0 10px #999; display: block; width: 650px; border: 3px solid #fff; border-radius: 5px; background-color: rgb(217,225,229); overflow: hidden; top: 25px; background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAEAgMAAADUn3btAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gQIFQEfWioE/wAAAAlQTFRF0Njc2eHl////72WY8QAAAAFiS0dEAmYLfGQAAAAQSURBVAgdY2BlEGEIYHAEAAHAAKtr/oOEAAAAAElFTkSuQmCC); } '+
+            '.hidbord_main { z-index: 1000; color: #800000 !important; font-size: medium !important; font-family: calibri; position: fixed; bottom: 25px; right: 25px; box-shadow: 0 0 10px #999; display: block; width: 650px; border: 3px solid #fff; border-radius: 5px; background-color: rgb(217,225,229); overflow: hidden; top: 25px; background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAEAgMAAADUn3btAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gQIFQEfWioE/wAAAAlQTFRF0Njc2eHl////72WY8QAAAAFiS0dEAmYLfGQAAAAQSURBVAgdY2BlEGEIYHAEAAHAAKtr/oOEAAAAAElFTkSuQmCC); } '+
             '.hidbord_maincontent{ padding: 5px; overflow-y: scroll; overflow-x: hidden; position: absolute; top: 65px; width: 640px; bottom: 28px; } '+
             '.hidbord_head{ height: 64px; border-bottom: 1px solid #fff; box-shadow: 0 0 10px #000; position: absolute; top: 0; left: 0; right: 0; text-align: center; background-color: rgb(217,225,229); } '+
             '.hidbord_head h3{ margin-top: 5px; padding-left: 0; font-family: comic sans ms; font-style: italic; font-size: x-large; } '+
@@ -5456,7 +5456,7 @@ var inject_ui = function() {
             '.hidbord_mnu a { color: #999; padding: 0.2em 0.4em; text-decoration: none; border: 1px solid #fff; } '+
             '.hidbord_mnu a:hover { background: #fe8; border: 1px solid #db4; } '+
             '.hidbord_clickable { cursor: pointer; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: -moz-none; -ms-user-select: none; user-select: none; }'+
-            '.hidbord_hidden { display: none; } '+
+            '.hidbord_hidden { display: none; } .hidbord_main p {baclground: none}'+
             '#hidbord_popup {font-size: medium !important; font-family: calibri; color: #800000 !important;}');
     
     //Highlight.js
@@ -5716,7 +5716,16 @@ var push_msg = function(msg, msgPrepend, thumb) {
 
     $("#msg_" + msg.id + ' #hidbord_mnu_info').on('click', function(e){
         var msg_id = $(e.target).closest('.hidbord_msg').first().attr('id');
-        $(e.target).closest('.hidbord_msg').first().find('#' + msg_id + ' .hidbord_msg_header').toggleClass('hidbord_hidden');
+        var headrs = $(e.target).closest('.hidbord_msg').first().find('#' + msg_id + ' .hidbord_msg_header');
+        for (var i = 0; i < headrs.length; i++) {
+            var elm = $(headrs[i]);
+            if(elm.css('display') == 'none'){
+                elm.removeClass('hidbord_hidden');
+            }else{
+                elm.addClass('hidbord_hidden');
+            }
+
+        }
     });
 
     $("#msg_" + msg.id + ' .hidbord_post_img').on('click', function(e){
