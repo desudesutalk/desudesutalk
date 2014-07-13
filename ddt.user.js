@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.5
+// @version      0.3.6
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -5456,7 +5456,7 @@ var inject_ui = function() {
             '.hidbord_mnu a { color: #999; padding: 0.2em 0.4em; text-decoration: none; border: 1px solid #fff; } '+
             '.hidbord_mnu a:hover { background: #fe8; border: 1px solid #db4; } '+
             '.hidbord_clickable { cursor: pointer; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: -moz-none; -ms-user-select: none; user-select: none; }'+
-            '.hidbord_hidden { display: none; } .hidbord_main h3 {baclground: none}'+
+            '.hidbord_hidden { display: none; } .hidbord_main h3 {background: none}'+
             '#hidbord_popup {z-index: 2000; font-size: medium !important; font-family: calibri; color: #800000 !important;}');
     
     //Highlight.js
