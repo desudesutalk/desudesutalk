@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.10
+// @version      0.3.11
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -5452,6 +5452,7 @@ var inject_ui = function() {
             '.hidbord_main hr, #hidbord_popup hr { background:#ddd; border:0; height:1px } '+
             '.hidbord_mnu{ visibility: hidden; font-size: x-small; float:right; } '+
             '.hidbord_msg:hover .hidbord_mnu { visibility: visible; } '+
+            '.hidbord_msg ol, .hidbord_msg ul { clear: both; } '+
             '.hidbord_mnu a { color: #999; padding: 0.2em 0.4em; text-decoration: none; border: 1px solid #fff; } '+
             '.hidbord_mnu a:hover { background: #fe8; border: 1px solid #db4; } '+
             '.hidbord_clickable { cursor: pointer; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: -moz-none; -ms-user-select: none; user-select: none; }'+
@@ -6405,7 +6406,7 @@ var restoreURLs = function(str) {
 var saveCode = function(str) {
     "use strict";
 
-    return str.replace(/(\`{1,2})([^\s]|[^\s].*?[^\s])\1/ig, function(match, a, b) {
+    return str.replace(/(\`{1,2})([^\s]|[^\s].*?[^\s])\1(?=[^\`])/ig, function(match, a, b) {
         return '`' + encodeURIComponent(encodeURIComponent(b)).replace(/\*/g, "%2A").replace(/\-/g, "%2D").replace(/\_/g, "%5F") + '`';
     });
 };

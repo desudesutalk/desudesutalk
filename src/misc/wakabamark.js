@@ -232,7 +232,7 @@ var restoreURLs = function(str) {
 var saveCode = function(str) {
     "use strict";
 
-    return str.replace(/(\`{1,2})([^\s]|[^\s].*?[^\s])\1/ig, function(match, a, b) {
+    return str.replace(/(\`{1,2})([^\s]|[^\s].*?[^\s])\1(?=[^\`])/ig, function(match, a, b) {
         return '`' + encodeURIComponent(encodeURIComponent(b)).replace(/\*/g, "%2A").replace(/\-/g, "%2D").replace(/\_/g, "%5F") + '`';
     });
 };
