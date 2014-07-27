@@ -1,14 +1,13 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.9
+// @version      0.3.10
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
 // @include      http://dobrochan.org/*/*
 // @include      http://inach.org/*/*
 // @include      https://8chan.co/*/*
-// @include      http://2ch.hk/*/*
 // @include      http://iichan.hk/*/*
 // @include      http://2-ch.su/*/*
 // @include      http://syn-ch.com/*/*
@@ -6357,7 +6356,7 @@ var wkbmrk = function(in_text) {
 var saveURLs = function(str) {
     "use strict";
 
-    return str.replace(/([a-z]{3,6}\:\/\/[^\s\"><]+)(\s[\*\_\%\-]|$|\s)/ig, function(match, a, b) {
+    return str.replace(/([a-z]{3,6}\:\/\/[^\s\"><\`]+)(\s[\*\_\%\-]|$|\s)/ig, function(match, a, b) {
         var safeurl = encodeURIComponent(a).replace(/\*/g, "%2A").replace(/\-/g, "%2D").replace(/\_/g, "%5F");
         var ending = b.length == 2 ? b.replace(" ", "") : b;
         return safeurl + ']' + ending;
