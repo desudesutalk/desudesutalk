@@ -180,46 +180,65 @@ var wkbmrk = function(in_text) {
     return res;
 };
 
+var safeStr2B64 = function(str){
+    "use strict";
+    return arrayBufferDataUri(strToUTF8Arr(str)).replace(/\+/g, '#');
+};
+
+var safeB642Str = function(str){
+    "use strict";
+    return utf8ArrToStr(dataURLtoUint8Array(',' + str.replace(/\#/g, '+')));
+};
+
 var saveURLs = function(str) {
     "use strict";
 
-    return str.replace(/([a-z]{3,6}\:\/\/[^\s\"><\`]+)(\s[\*\_\%\-]|$|\s)/ig, function(match, a, b) {
-        var safeurl = encodeURIComponent(a).replace(/\*/g, "%2A").replace(/\-/g, "%2D").replace(/\_/g, "%5F");
-        var ending = b.length == 2 ? b.replace(" ", "") : b;
-        return safeurl + ']' + ending;
+    return str.replace(/([a-z]{3,6}\:\/\/[^\s\"><\`]+)($|\s)/ig, function(match, a, b) {
+        return '`URL:' + safeStr2B64(a+b) + '`';
     });
 };
 
 var restoreURLs = function(str) {
     "use strict";
 
-    return str.replace(/([a-z]{3,6}\%3A\%2F\%2F[^\s<\*\_\-]+)](.?)/ig, function(match, a, b) {
-        var txt, url;
-        txt = decodeURIComponent(a);
-        url = decodeURIComponent(a);
+    return str.replace(/`URL:([a-zA-Z0-9\/\#\=]+)`/ig, function(match, a) {
+        var txt, url, b = '';
+        url = safeB642Str(a);
 
-        //Wikipedia
-        if (url.match(/^https?:\/\/[a-z]+\.wikipedia\.org\/wiki\//)) {
-            txt = url.replace(/^https?:\/\/([a-z]+)\.wikipedia\.org\/wiki\/(.+)/, function(match, lang, title) {
-                return lang.toUpperCase() + ' wiki: ' + decodeURIComponent(title);
-            });
-            url = url.replace(/^http:\/\//, 'https://');
+        if(url[url.length-1] == ' '){
+            url = url.trim();
+            b = ' ';
         }
 
-        //Lurkmore
-        if (url.match(/^https?:\/\/lurkmore\.to\//)) {
-            txt = url.replace(/^https?:\/\/lurkmore\.to\/(.+)/, function(match, title) {
-                return 'Лурк: ' + decodeURIComponent(title);
-            });
-            url = url.replace(/^http:\/\//, 'https://');
-        }
+        txt = url;        
 
-        //Google
-        if (url.match(/^https?:\/\/(www\.)?google\.[a-z]{2,3}\/search\?/)) {
-            txt = url.replace(/^https?:\/\/(www\.)?google\.[a-z]{2,3}\/search\?.*?q\=([^\&]+).*/, function(match, www, query) {
-                return 'Гугл: ' + decodeURIComponent(query.replace(/\+/g, ' '));
-            });
-            url = url.replace(/^http:\/\//, 'https://');
+        // 
+        try{
+            //Wikipedia
+            if (url.match(/^https?:\/\/[a-z]+\.wikipedia\.org\/wiki\//)) {
+                txt = url.replace(/^https?:\/\/([a-z]+)\.wikipedia\.org\/wiki\/(.+)/, function(match, lang, title) {
+                    return lang.toUpperCase() + ' wiki: ' + decodeURIComponent(title);
+                });
+                url = url.replace(/^http:\/\//, 'https://');
+            }
+
+            //Lurkmore
+            if (url.match(/^https?:\/\/lurkmore\.to\//)) {
+                txt = url.replace(/^https?:\/\/lurkmore\.to\/(.+)/, function(match, title) {
+                    return 'Лурк: ' + decodeURIComponent(title);
+                });
+                url = url.replace(/^http:\/\//, 'https://');
+            }
+
+            //Google
+            if (url.match(/^https?:\/\/(www\.)?google\.[a-z]{2,3}\/search\?/)) {
+                txt = url.replace(/^https?:\/\/(www\.)?google\.[a-z]{2,3}\/search\?.*?q\=([^\&]+).*/, function(match, www, query) {
+                    return 'Гугл: ' + decodeURIComponent(query.replace(/\+/g, ' '));
+                });
+                url = url.replace(/^http:\/\//, 'https://');
+            }
+        }catch(e){
+            // decodeURIComponent is so strange function...
         }
 
         if (txt.length > 63) {
@@ -232,16 +251,16 @@ var restoreURLs = function(str) {
 var saveCode = function(str) {
     "use strict";
 
-    return str.replace(/(\`{1,2})([^\s]|[^\s].*?[^\s])\1(?=[^\`])/ig, function(match, a, b) {
-        return '`' + encodeURIComponent(encodeURIComponent(b)).replace(/\*/g, "%2A").replace(/\-/g, "%2D").replace(/\_/g, "%5F") + '`';
+    return str.replace(/(\`{1,2})([^\s]|[^\s].*?[^\s])\1(?=[^\`]|$)/ig, function(match, a, b) {
+        return '`COD:' + safeStr2B64(b) + '`';
     });
 };
 
 var restoreCode = function(str) {
     "use strict";
 
-    return str.replace(/(\`)([^\s]|[^\s].*?[^\s])\`/ig, function(match, a, b) {
-        return '<code>' + decodeURIComponent(decodeURIComponent(b)).replace(/\&/g, '&amp;').replace(/</g, '&lt;').replace(/\>/g, '&gt;') + '</code>';
+    return str.replace(/`COD:([a-zA-Z0-9\/\#\=]+)`/ig, function(match, a) {
+        return '<code>' + safeB642Str(a).replace(/\&/g, '&amp;').replace(/</g, '&lt;').replace(/\>/g, '&gt;') + '</code>';
     });
 };
 
@@ -269,22 +288,17 @@ var parseOneLineTags = function(match, tag, str) {
         res = res.replace(/\[(gin|kana|desu|boku|dawa|hina|kira|bara|meat|cake|tea|sarcasm|elita)\]/ig, function(match, a, b) {
             return imoticons[a.toLowerCase()];
         });
-    }
 
-    if (tag === null) {
         //reflinks
         res = res.replace(/(\&gt\;\&gt\;)([0-9a-f]{64})/ig, function(match, a, b) {
             return '<a href="javascript:;" alt="' + b + '" class="hidbord_msglink">&gt;&gt;' + b.substr(0, 8) + '</a>';
         });
-    }
 
-    if (tag === null) {
         //userlinks
         res = res.replace(/(\{)([0-9a-f]{40})\}/ig, function(match, a, b) {
             return '<span style="background: #fff; vertical-align:middle;" class="idntcn2">' + b + '</span>&nbsp;' + getContactHTML(b);
         });
     }
-
 
     res = tag === null ? restoreCode(restoreURLs(res)) : res;
 
