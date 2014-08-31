@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.13
+// @version      0.3.14
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -4976,7 +4976,7 @@ var add_contact = function(e) {
         groups: []
     };
 
-    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
+    ssSet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
     render_contact();
     $('em[alt="'+rsa_hash+'"]').text('' + name).css({"color": '', "font-weight": "bold", "font-style": 'normal'});
 };
@@ -5037,7 +5037,7 @@ var render_contact = function() {
     "use strict";
 
     if (ssGet(boardHostName + 'magic_desu_contacts', contactsInLocalStorage)) {
-        contacts = JSON.parse(ssGet(boardHostName + 'magic_desu_contacts', contactsInLocalStorage));
+        contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage));
     //    console.log(contacts);
     }
 
@@ -5122,7 +5122,7 @@ var manage_contact = function(e) {
         }
     }
 
-    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
+    ssSet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
     render_contact();
 };
 
@@ -5404,7 +5404,12 @@ var inject_ui = function() {
             '            </p>'+
 
             '            <p  style="text-align: center;">'+
-            '                    <label>Store contacts in public: <input type="checkbox" id="hidboard_option_pubstore" style="vertical-align:middle;" checked></label>'+
+            '                    <label>Use global contacts: <input type="checkbox" id="hidboard_option_globalcontacts" style="vertical-align:middle;" checked></label>'+
+            '            </p>'+
+
+            '            <p  style="text-align: center;">'+
+            '                    <label>Store contacts in public: <input type="checkbox" id="hidboard_option_pubstore" style="vertical-align:middle;" checked></label><br/>'+
+            '                     (this will disable "Global contacts")'+
             '            </p>'+
 
             '            <p  style="text-align: center;">'+
@@ -5520,16 +5525,37 @@ var inject_ui = function() {
     $('#hidboard_option_pubstore').on('change', function() {
         contactsInLocalStorage = !!$('#hidboard_option_pubstore').attr('checked');
         ssSet('magic_desu_contactsInLocalStorage', !!$('#hidboard_option_pubstore').attr('checked'));
+        render_contact();
     });
 
-    if(!contactsInLocalStorage){
+    if(!useGlobalContacts){
+        $('#hidboard_option_globalcontacts').attr('checked', null);
+    }else{
         $('#hidboard_option_pubstore').attr('checked', null);
+    }
+
+    if(!contactsInLocalStorage){
+        $('#hidboard_option_pubstore').attr('checked', null);        
     }
 
     if(!autoscanNewJpegs){
         $('#hidboard_option_autofetch').attr('checked', null);
         $('#hidboard_option_autoscanison').attr('checked', null);
     }
+
+    $('#hidboard_option_globalcontacts').on('change', function() {
+        ssSet('magic_desu_useGlobalContacts', !!$('#hidboard_option_globalcontacts').attr('checked'));
+        if(ssGet('magic_desu_useGlobalContacts')){
+            useGlobalContacts = true;
+            contactsInLocalStorage = false;
+            $('#hidboard_option_pubstore').attr('checked', null);
+            ssSet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
+            render_contact();
+        }else{
+            useGlobalContacts = false;
+            render_contact();
+        }
+    });
 
     $('#hidboard_option_autoscanison').on('change', function() {
         ssSet(boardHostName + 'autoscanDefault', !!$('#hidboard_option_autoscanison').attr('checked'));
@@ -6519,8 +6545,12 @@ var is4chan = !!document.URL.match(/\/boards\.4chan\.org\//);
 
 var autoscanNewJpegs = true;
 var contactsInLocalStorage = false;
+var useGlobalContacts = false;
 
 contactsInLocalStorage = ssGet('magic_desu_contactsInLocalStorage');
+useGlobalContacts = ssGet('magic_desu_useGlobalContacts');
+
+if(useGlobalContacts && contactsInLocalStorage) useGlobalContacts = false;
 
 autoscanNewJpegs = ssGet(boardHostName + 'autoscanDefault');
 

@@ -37,7 +37,12 @@ var inject_ui = function() {
             '            </p>'+
 
             '            <p  style="text-align: center;">'+
-            '                    <label>Store contacts in public: <input type="checkbox" id="hidboard_option_pubstore" style="vertical-align:middle;" checked></label>'+
+            '                    <label>Use global contacts: <input type="checkbox" id="hidboard_option_globalcontacts" style="vertical-align:middle;" checked></label>'+
+            '            </p>'+
+
+            '            <p  style="text-align: center;">'+
+            '                    <label>Store contacts in public: <input type="checkbox" id="hidboard_option_pubstore" style="vertical-align:middle;" checked></label><br/>'+
+            '                     (this will disable "Global contacts")'+
             '            </p>'+
 
             '            <p  style="text-align: center;">'+
@@ -153,16 +158,37 @@ var inject_ui = function() {
     $('#hidboard_option_pubstore').on('change', function() {
         contactsInLocalStorage = !!$('#hidboard_option_pubstore').attr('checked');
         ssSet('magic_desu_contactsInLocalStorage', !!$('#hidboard_option_pubstore').attr('checked'));
+        render_contact();
     });
 
-    if(!contactsInLocalStorage){
+    if(!useGlobalContacts){
+        $('#hidboard_option_globalcontacts').attr('checked', null);
+    }else{
         $('#hidboard_option_pubstore').attr('checked', null);
+    }
+
+    if(!contactsInLocalStorage){
+        $('#hidboard_option_pubstore').attr('checked', null);        
     }
 
     if(!autoscanNewJpegs){
         $('#hidboard_option_autofetch').attr('checked', null);
         $('#hidboard_option_autoscanison').attr('checked', null);
     }
+
+    $('#hidboard_option_globalcontacts').on('change', function() {
+        ssSet('magic_desu_useGlobalContacts', !!$('#hidboard_option_globalcontacts').attr('checked'));
+        if(ssGet('magic_desu_useGlobalContacts')){
+            useGlobalContacts = true;
+            contactsInLocalStorage = false;
+            $('#hidboard_option_pubstore').attr('checked', null);
+            ssSet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
+            render_contact();
+        }else{
+            useGlobalContacts = false;
+            render_contact();
+        }
+    });
 
     $('#hidboard_option_autoscanison').on('change', function() {
         ssSet(boardHostName + 'autoscanDefault', !!$('#hidboard_option_autoscanison').attr('checked'));

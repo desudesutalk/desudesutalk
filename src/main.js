@@ -3,8 +3,12 @@ var is4chan = !!document.URL.match(/\/boards\.4chan\.org\//);
 
 var autoscanNewJpegs = true;
 var contactsInLocalStorage = false;
+var useGlobalContacts = false;
 
 contactsInLocalStorage = ssGet('magic_desu_contactsInLocalStorage');
+useGlobalContacts = ssGet('magic_desu_useGlobalContacts');
+
+if(useGlobalContacts && contactsInLocalStorage) useGlobalContacts = false;
 
 autoscanNewJpegs = ssGet(boardHostName + 'autoscanDefault');
 
