@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.12
+// @version      0.3.13
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -2823,14 +2823,12 @@ var hljs=new function(){function j(v){return v.replace(/&/gm,"&amp;").replace(/<
 var scriptStore = window.opera && window.opera.scriptStorage || localStorage,
     isGM = typeof GM_setValue === 'function';
 
-if(isGM || window.opera && window.opera.scriptStorage){
-	localStorage.removeItem('magic_desu_numbers');
-}
-
-var ssGet = function(name)    {
+var ssGet = function(name, inLocal)    {
 	"use strict";
 
-	if(isGM){
+	if(!inLocal) inLocal = false;
+
+	if(isGM && !inLocal){
 		/*jshint newcap: false */
 		if(GM_getValue(name) === undefined) return null;
 		return JSON.parse(GM_getValue(name));
@@ -2839,10 +2837,12 @@ var ssGet = function(name)    {
 	return JSON.parse(scriptStore.getItem(name));
 };
 
-var ssSet = function(name, val)    {
+var ssSet = function(name, val, inLocal)    {
 	"use strict";
 
-	if(isGM){
+	if(!inLocal) inLocal = false;
+
+	if(isGM && !inLocal){
 		/*jshint newcap: false  */
 		return GM_setValue(name, JSON.stringify(val));
 	}
@@ -4976,7 +4976,7 @@ var add_contact = function(e) {
         groups: []
     };
 
-    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts));
+    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
     render_contact();
     $('em[alt="'+rsa_hash+'"]').text('' + name).css({"color": '', "font-weight": "bold", "font-style": 'normal'});
 };
@@ -5035,6 +5035,12 @@ var contactsSelector = function(){
 
 var render_contact = function() {
     "use strict";
+
+    if (ssGet(boardHostName + 'magic_desu_contacts', contactsInLocalStorage)) {
+        contacts = JSON.parse(ssGet(boardHostName + 'magic_desu_contacts', contactsInLocalStorage));
+    //    console.log(contacts);
+    }
+
 
     cont_groups = {};
 
@@ -5116,7 +5122,7 @@ var manage_contact = function(e) {
         }
     }
 
-    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts));
+    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
     render_contact();
 };
 
@@ -5141,7 +5147,7 @@ var import_contact = function(evt) {
                             contacts[c] = in_data[c];
                         }
                     }
-                    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts));
+                    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
                     render_contact();
                 }catch(err){
 //                    console.log(err);
@@ -5153,10 +5159,6 @@ var import_contact = function(evt) {
     }
 };
 
-if (ssGet(boardHostName + 'magic_desu_contacts')) {
-    contacts = JSON.parse(ssGet(boardHostName + 'magic_desu_contacts'));
-//    console.log(contacts);
-}
 
 var CODEC_VERSION = 1, MESSAGE_NORMAL = 0, MESSAGE_DIRECT = 1;
 
@@ -5400,7 +5402,18 @@ var inject_ui = function() {
             '            <p  style="text-align: center;">'+
             '                    Steg Password: <input name="steg_pwd" type="text" value="desu" size=10 id="steg_pwd">'+
             '            </p>'+
+
+            '            <p  style="text-align: center;">'+
+            '                    <label>Store contacts in public: <input type="checkbox" id="hidboard_option_pubstore" style="vertical-align:middle;" checked></label>'+
+            '            </p>'+
+
+            '            <p  style="text-align: center;">'+
+            '                    <label>Autoscan is on by default: <input type="checkbox" id="hidboard_option_autoscanison" style="vertical-align:middle;" checked></label>'+
+            '            </p>'+
+
+
             '        </div>'+
+
 
             '    </div>'+
             '    <div class="hidbord_head">'+
@@ -5502,6 +5515,24 @@ var inject_ui = function() {
 
     $('#hidboard_option_autofetch').on('change', function() {
         autoscanNewJpegs = $('#hidboard_option_autofetch').attr('checked');
+    });
+
+    $('#hidboard_option_pubstore').on('change', function() {
+        contactsInLocalStorage = !!$('#hidboard_option_pubstore').attr('checked');
+        ssSet('magic_desu_contactsInLocalStorage', !!$('#hidboard_option_pubstore').attr('checked'));
+    });
+
+    if(!contactsInLocalStorage){
+        $('#hidboard_option_pubstore').attr('checked', null);
+    }
+
+    if(!autoscanNewJpegs){
+        $('#hidboard_option_autofetch').attr('checked', null);
+        $('#hidboard_option_autoscanison').attr('checked', null);
+    }
+
+    $('#hidboard_option_autoscanison').on('change', function() {
+        ssSet(boardHostName + 'autoscanDefault', !!$('#hidboard_option_autoscanison').attr('checked'));
     });
 
     if ("n" in rsaProfile) {
@@ -6487,6 +6518,13 @@ var isDobro = !!document.URL.match(/\/dobrochan\.[comrgu]+\//);
 var is4chan = !!document.URL.match(/\/boards\.4chan\.org\//);
 
 var autoscanNewJpegs = true;
+var contactsInLocalStorage = false;
+
+contactsInLocalStorage = ssGet('magic_desu_contactsInLocalStorage');
+
+autoscanNewJpegs = ssGet(boardHostName + 'autoscanDefault');
+
+console.log(contactsInLocalStorage, autoscanNewJpegs);
 
 var jpegInserted = function(event) {
     "use strict";

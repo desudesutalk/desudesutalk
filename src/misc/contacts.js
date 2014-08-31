@@ -14,7 +14,7 @@ var add_contact = function(e) {
         groups: []
     };
 
-    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts));
+    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
     render_contact();
     $('em[alt="'+rsa_hash+'"]').text('' + name).css({"color": '', "font-weight": "bold", "font-style": 'normal'});
 };
@@ -73,6 +73,12 @@ var contactsSelector = function(){
 
 var render_contact = function() {
     "use strict";
+
+    if (ssGet(boardHostName + 'magic_desu_contacts', contactsInLocalStorage)) {
+        contacts = JSON.parse(ssGet(boardHostName + 'magic_desu_contacts', contactsInLocalStorage));
+    //    console.log(contacts);
+    }
+
 
     cont_groups = {};
 
@@ -154,7 +160,7 @@ var manage_contact = function(e) {
         }
     }
 
-    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts));
+    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
     render_contact();
 };
 
@@ -179,7 +185,7 @@ var import_contact = function(evt) {
                             contacts[c] = in_data[c];
                         }
                     }
-                    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts));
+                    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
                     render_contact();
                 }catch(err){
 //                    console.log(err);
@@ -191,7 +197,3 @@ var import_contact = function(evt) {
     }
 };
 
-if (ssGet(boardHostName + 'magic_desu_contacts')) {
-    contacts = JSON.parse(ssGet(boardHostName + 'magic_desu_contacts'));
-//    console.log(contacts);
-}

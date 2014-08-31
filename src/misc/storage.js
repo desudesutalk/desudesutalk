@@ -1,14 +1,12 @@
 var scriptStore = window.opera && window.opera.scriptStorage || localStorage,
     isGM = typeof GM_setValue === 'function';
 
-if(isGM || window.opera && window.opera.scriptStorage){
-	localStorage.removeItem('magic_desu_numbers');
-}
-
-var ssGet = function(name)    {
+var ssGet = function(name, inLocal)    {
 	"use strict";
 
-	if(isGM){
+	if(!inLocal) inLocal = false;
+
+	if(isGM && !inLocal){
 		/*jshint newcap: false */
 		if(GM_getValue(name) === undefined) return null;
 		return JSON.parse(GM_getValue(name));
@@ -17,10 +15,12 @@ var ssGet = function(name)    {
 	return JSON.parse(scriptStore.getItem(name));
 };
 
-var ssSet = function(name, val)    {
+var ssSet = function(name, val, inLocal)    {
 	"use strict";
 
-	if(isGM){
+	if(!inLocal) inLocal = false;
+
+	if(isGM && !inLocal){
 		/*jshint newcap: false  */
 		return GM_setValue(name, JSON.stringify(val));
 	}

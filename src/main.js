@@ -2,6 +2,13 @@ var isDobro = !!document.URL.match(/\/dobrochan\.[comrgu]+\//);
 var is4chan = !!document.URL.match(/\/boards\.4chan\.org\//);
 
 var autoscanNewJpegs = true;
+var contactsInLocalStorage = false;
+
+contactsInLocalStorage = ssGet('magic_desu_contactsInLocalStorage');
+
+autoscanNewJpegs = ssGet(boardHostName + 'autoscanDefault');
+
+console.log(contactsInLocalStorage, autoscanNewJpegs);
 
 var jpegInserted = function(event) {
     "use strict";

@@ -35,7 +35,18 @@ var inject_ui = function() {
             '            <p  style="text-align: center;">'+
             '                    Steg Password: <input name="steg_pwd" type="text" value="desu" size=10 id="steg_pwd">'+
             '            </p>'+
+
+            '            <p  style="text-align: center;">'+
+            '                    <label>Store contacts in public: <input type="checkbox" id="hidboard_option_pubstore" style="vertical-align:middle;" checked></label>'+
+            '            </p>'+
+
+            '            <p  style="text-align: center;">'+
+            '                    <label>Autoscan is on by default: <input type="checkbox" id="hidboard_option_autoscanison" style="vertical-align:middle;" checked></label>'+
+            '            </p>'+
+
+
             '        </div>'+
+
 
             '    </div>'+
             '    <div class="hidbord_head">'+
@@ -137,6 +148,24 @@ var inject_ui = function() {
 
     $('#hidboard_option_autofetch').on('change', function() {
         autoscanNewJpegs = $('#hidboard_option_autofetch').attr('checked');
+    });
+
+    $('#hidboard_option_pubstore').on('change', function() {
+        contactsInLocalStorage = !!$('#hidboard_option_pubstore').attr('checked');
+        ssSet('magic_desu_contactsInLocalStorage', !!$('#hidboard_option_pubstore').attr('checked'));
+    });
+
+    if(!contactsInLocalStorage){
+        $('#hidboard_option_pubstore').attr('checked', null);
+    }
+
+    if(!autoscanNewJpegs){
+        $('#hidboard_option_autofetch').attr('checked', null);
+        $('#hidboard_option_autoscanison').attr('checked', null);
+    }
+
+    $('#hidboard_option_autoscanison').on('change', function() {
+        ssSet(boardHostName + 'autoscanDefault', !!$('#hidboard_option_autoscanison').attr('checked'));
     });
 
     if ("n" in rsaProfile) {
