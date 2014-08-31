@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.14
+// @version      0.3.15
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -4437,6 +4437,11 @@ var jpegClean = function(origAB) {
             for (i = 0; i < l; i++) {
                 output[posT++] = orig[posO++];
             }
+
+            while(orig[posO] !== 0xFF){
+                pos0++;
+            }
+
         } else if (orig[posO] === 0xFF && (orig[posO + 1] >> 4) === 0xE) {
             posO += 2 + orig[posO + 2] * 256 + orig[posO + 3];
         } else if (orig[posO] === 0xFF && orig[posO + 1] === 0xDA) {
@@ -4453,6 +4458,8 @@ var jpegClean = function(origAB) {
                 output[posT++] = orig[posO++];
             }
         }
+
+
     }
 
     output[posT] = orig[posO];
