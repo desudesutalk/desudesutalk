@@ -15,13 +15,13 @@ var jpegClean = function(origAB) {
             for (i = 0; i < l; i++) {
                 output[posT++] = orig[posO++];
             }
+        } else if (orig[posO] === 0xFF && (orig[posO + 1] >> 4) === 0xE) {
+            posO += 2 + orig[posO + 2] * 256 + orig[posO + 3];
 
             while(orig[posO] !== 0xFF){
                 pos0++;
             }
-
-        } else if (orig[posO] === 0xFF && (orig[posO + 1] >> 4) === 0xE) {
-            posO += 2 + orig[posO + 2] * 256 + orig[posO + 3];
+            
         } else if (orig[posO] === 0xFF && orig[posO + 1] === 0xDA) {
             l = (2 + orig[posO + 2] * 256 + orig[posO + 3]);
             for (i = 0; i < l; i++) {
