@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.16
+// @version      0.3.17
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -6561,6 +6561,10 @@ if(useGlobalContacts && contactsInLocalStorage) useGlobalContacts = false;
 
 autoscanNewJpegs = ssGet(boardHostName + 'autoscanDefault');
 
+if(autoscanNewJpegs !== false && autoscanNewJpegs !== true){
+    autoscanNewJpegs = true;
+    ssSet(boardHostName + 'autoscanDefault', true);
+}
 console.log(contactsInLocalStorage, autoscanNewJpegs);
 
 var jpegInserted = function(event) {

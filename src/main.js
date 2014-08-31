@@ -12,6 +12,10 @@ if(useGlobalContacts && contactsInLocalStorage) useGlobalContacts = false;
 
 autoscanNewJpegs = ssGet(boardHostName + 'autoscanDefault');
 
+if(autoscanNewJpegs !== false && autoscanNewJpegs !== true){
+    autoscanNewJpegs = true;
+    ssSet(boardHostName + 'autoscanDefault', true);
+}
 console.log(contactsInLocalStorage, autoscanNewJpegs);
 
 var jpegInserted = function(event) {
