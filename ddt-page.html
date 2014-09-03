@@ -6439,22 +6439,25 @@ var restoreURLs = function(str) {
                 url = url.replace(/^http:\/\//, 'https://');
             }
 
-        //Lurkmore
-        if (url.match(/^https?:\/\/lurkmore\.to\//)) {
-            txt = url.replace(/^https?:\/\/lurkmore\.to\/(.+)/, function(match, title) {
-                return 'Лурк: ' + decodeURIComponent(title);
-            });
-            url = url.replace(/^http:\/\//, 'https://');
+	        //Lurkmore
+	        if (url.match(/^https?:\/\/lurkmore\.to\//)) {
+	            txt = url.replace(/^https?:\/\/lurkmore\.to\/(.+)/, function(match, title) {
+	                return 'Лурк: ' + decodeURIComponent(title);
+	            });
+	            url = url.replace(/^http:\/\//, 'https://');
+	        }
+	
+	        //Google
+	        if (url.match(/^https?:\/\/(www\.)?google\.[a-z]{2,3}\/search\?/)) {
+	            txt = url.replace(/^https?:\/\/(www\.)?google\.[a-z]{2,3}\/search\?.*?q\=([^\&]+).*/, function(match, www, query) {
+	                return 'Гугл: ' + decodeURIComponent(query.replace(/\+/g, ' '));
+	            });
+	            url = url.replace(/^http:\/\//, 'https://');
+	        }
+        }catch(e){
+            // decodeURIComponent is so strange function...
         }
-
-        //Google
-        if (url.match(/^https?:\/\/(www\.)?google\.[a-z]{2,3}\/search\?/)) {
-            txt = url.replace(/^https?:\/\/(www\.)?google\.[a-z]{2,3}\/search\?.*?q\=([^\&]+).*/, function(match, www, query) {
-                return 'Гугл: ' + decodeURIComponent(query.replace(/\+/g, ' '));
-            });
-            url = url.replace(/^http:\/\//, 'https://');
-        }
-
+        
         if (txt.length > 63) {
             txt = txt.substring(0, 30) + '...' + txt.substring(txt.length - 30);
         }
