@@ -5646,7 +5646,7 @@ var do_popup = function(e) {
 	"use strict";
 
     var msgid = $(e.target).attr('alt'),
-        fromId = $(e.target).closest('.hidbord_msg').first().attr('id'),
+        fromId = $(e.target).closest('.hidbord_msg').first().attr('id').replace(/^msg_/, ''),
         msgClone, oMsg, oMsgH;
 
     $('#hidbord_popup_' + msgid).remove();
@@ -5677,8 +5677,8 @@ var do_popup = function(e) {
                    ' <i style="color: #999;">(' + msgTimeTxt + ') <span href="javascript:;" class="hidbord_mnu_reply hidbord_clickable">#'+msg.id.substr(0, 8)+'</span></i>'+
                    '    </div>'+
                    '    <hr style="clear:both;">'+
-                   '    <div style="overflow: hidden;"><img src="'+msg.thumb+'" class="hidbord_post_img hidbord_clickable" style="max-width: 150px; max-height:150px; float: left; padding: 5px 15px 5px 5px;"/>' + 
-                   txt + '</div>'+
+                   '    <div style="overflow: hidden;"><img src="'+msg.thumb+'" class="hidbord_post_img hidbord_clickable" style="max-width: 150px; max-height:150px; float: left; padding: 5px 15px 5px 5px;"/>' + txt + '</div>'+
+                   '<span class="msgrefs" style="font-size: 11px;font-style: italic;"></span>'+
                    '</div>';
 
         $('#hidbord_popup_' + msgid).append(code).css('box-shadow', ' 0 0 10px #555');
@@ -5708,9 +5708,11 @@ var do_popup = function(e) {
 
     msgAppendListeners('#hidbord_popup_' + msgid);
 
+    renderRefs(msgid, '#hidbord_popup_' + msgid);
+
     $('#hidbord_popup_' + msgid).css({'right': '50px', 'top': py+'px'});
 
-    $('#hidbord_popup_' + msgid + '.hidbord_msglink[alt="'+fromId+'"]').css({'text-decoration': 'none', 'border-bottom':'1px dashed', 'font-weight': 'bold' });
+    $('#hidbord_popup_' + msgid + ' .hidbord_msglink[alt="'+fromId+'"]').css({'text-decoration': 'none', 'border-bottom':'1px dashed', 'font-weight': 'bold' });
 
     var local_popup_del_timer;
 
@@ -5813,7 +5815,51 @@ var msgAppendListeners = function(msgQuery){
     }); 
 };
 
-var messages_list = [], new_messages = 0, all_messages = {};
+var renderRefs = function(msgId, elm){
+    "use strict";
+
+    if(!ref_map[msgId]){
+        return false;
+    }
+
+    if(!elm){
+        elm = '#msg_' + msgId;
+    }
+
+    ref_map[msgId].sort(function(m1, m2) {
+        var a = all_messages[m1],
+            b = all_messages[m2];
+        if(b.post_id != a.post_id){
+            return b.post_id - a.post_id;
+        }
+
+        if(b.txt.ts != a.txt.ts){
+            return b.txt.ts - a.txt.ts;
+        }else{
+            if(b.txt.id < a.txt.id){
+                return -1;
+            }else{
+                return 1;
+            }
+
+        }
+    });
+
+    var links = '';
+
+    for (var i = 0; i < ref_map[msgId].length; i++) {
+        links += '<a href="javascript:;" alt="' + ref_map[msgId][i] + '" class="hidbord_msglink">&gt;&gt;' + ref_map[msgId][i].substr(0, 8) + '</a> &nbsp; ';
+    }
+
+    if(links !== ''){
+        $(elm + ' .msgrefs').empty().append('replies: ' + links);
+    }
+
+    msgAppendListeners(elm + ' .msgrefs');
+
+};
+
+var messages_list = [], new_messages = 0, all_messages = {}, ref_map = {};
 
 var push_msg = function(msg, msgPrepend, thumb) {
 	"use strict";
@@ -5846,6 +5892,24 @@ var push_msg = function(msg, msgPrepend, thumb) {
 
     all_messages[msg.id] = msg;
 
+     if(messages_list.length > 0){
+        for (i = 0; i < messages_list.length; i++) {
+            if(msg.post_id !==0){
+                if(all_messages[messages_list[i]].post_id <= msg.post_id){
+                    prependTo = '#msg_' + all_messages[messages_list[i]].id;
+                    break;
+                }
+            }else{
+                if(all_messages[messages_list[i]].txt.ts <= msg.txt.ts){
+                    prependTo = '#msg_' + all_messages[messages_list[i]].id;
+                    break;
+                }
+            }
+        }
+    }
+
+    messages_list.push(msg.id);
+
     if(messages_list.length > 0){
         messages_list.sort(function(m1, m2) {
             var a = all_messages[m1],
@@ -5865,22 +5929,7 @@ var push_msg = function(msg, msgPrepend, thumb) {
 
             }
         });
-        for (i = 0; i < messages_list.length; i++) {
-            if(msg.post_id !==0){
-                if(all_messages[messages_list[i]].post_id <= msg.post_id){
-                    prependTo = '#msg_' + all_messages[messages_list[i]].id;
-                    break;
-                }
-            }else{
-                if(all_messages[messages_list[i]].txt.ts <= msg.txt.ts){
-                    prependTo = '#msg_' + all_messages[messages_list[i]].id;
-                    break;
-                }
-            }
-        }
     }
-    messages_list.push(msg.id);
-
 
     msgDate.setTime(parseInt(msg.txt.ts) * 1000);
     
@@ -5913,11 +5962,28 @@ var push_msg = function(msg, msgPrepend, thumb) {
             '    </div>'+
             '    <hr style="clear:both;">'+
             '    <div style="overflow: hidden;"><img src="'+thumb+'" class="hidbord_post_img hidbord_clickable" style="max-width: 150px; max-height:150px; float: left; padding: 5px 15px 5px 5px;"/>' + txt + '</div>'+
+            '<span class="msgrefs" style="font-size: 11px;font-style: italic;"></span>'+
             '</div>';
 
     $(prependTo).after($(code));
 
     msgAppendListeners('#msg_' + msg.id);
+
+    $('#msg_' + msg.id + ' .hidbord_msglink').each(function(i, e){
+        var refTo = $(e).attr('alt');
+
+        if(!ref_map[refTo]){
+            ref_map[refTo] = [];
+        }
+
+        if(ref_map[refTo].indexOf(msg.id) == -1){
+            ref_map[refTo].push(msg.id);   
+        }
+
+        renderRefs(refTo);
+    });
+
+    renderRefs(msg.id);
 
     new_messages++;
     $('#hidbord_notify_counter').text(new_messages).show();
