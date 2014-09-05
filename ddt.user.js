@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.17
+// @version      0.3.18
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -5488,7 +5488,7 @@ var inject_ui = function() {
             '<span id="hidbord_notify_counter" class="hidbord_clickable" style="position: absolute;background: #f00;z-index: 100;bottom: 4px;right: 4px;font-weight: bold;padding: 2px 7px;border-radius: 30px; color: #fff;box-shadow: 0 0 1px #f00;font-size: 15px;display: none;">1</span>'+
             '</div>';
     
-    injectCSS('#hidbord_popup a, .hidbord_main a {color: #ff6600;} #hidbord_popup a:hover, .hidbord_main a:hover {color: #0066ff;}'+
+    injectCSS('.hidbord_popup a, .hidbord_main a {color: #ff6600;} .hidbord_popup a:hover, .hidbord_main a:hover {color: #0066ff;}'+
             '.hidbord_notifer{font-size: smaller !important;padding: 0;font-family: calibri;position: fixed;bottom: 25px;right: 25px;box-shadow: 0 0 10px #999;display: block;border: 3px solid #fff;border-radius: 5px;background-color: rgb(217,225,229);overflow: hidden;} '+
             '.hidbord_msg code { padding: 0 4px; font-size: 90%; color: #c7254e; background-color: #f9f2f4; white-space: nowrap; border-radius: 4px; } '+
             '.hidbord_msg code, .hidbord_msg kbd, .hidbord_msg pre, .hidbord_msg samp { font-family: Menlo,Monaco,Consolas,"Courier New",monospace; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word; } '+
@@ -5510,7 +5510,7 @@ var inject_ui = function() {
             '.hidbord_msg { font-family: calibri; display: block; border-right: 1px solid #999; border-bottom: 1px solid #999; border-left: 1px solid #fafafa; border-top: 1px solid #fafafa; margin: 2px 10px 10px 2px; background-color: #fafafa; padding: 5px; word-wrap: break-word;} '+
             '.hidbord_msg_focused { border: 1px dashed #e00; } '+
             '.hidbord_msg_new { background-color: #ffe; } '+
-            '.hidbord_main hr, #hidbord_popup hr { background:#ddd; border:0; height:1px } '+
+            '.hidbord_main hr, .hidbord_popup hr { background:#ddd; border:0; height:1px } '+
             '.hidbord_mnu{ visibility: hidden; font-size: x-small; float:right; } '+
             '.hidbord_msg:hover .hidbord_mnu { visibility: visible; } '+
             '.hidbord_msg ol, .hidbord_msg ul { clear: both; } '+
@@ -5518,7 +5518,7 @@ var inject_ui = function() {
             '.hidbord_mnu a:hover { background: #fe8; border: 1px solid #db4; } '+
             '.hidbord_clickable { cursor: pointer; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: -moz-none; -ms-user-select: none; user-select: none; }'+
             '.hidbord_hidden { display: none; } .hidbord_main h3 {background: none}'+
-            '#hidbord_popup {z-index: 2000; font-size: medium !important; font-family: calibri; color: #800000 !important;}');
+            '.hidbord_popup {z-index: 2000; font-size: medium !important; font-family: calibri; color: #800000 !important;}');
     
     //Highlight.js
     injectCSS('.hljs { display: block; padding: 0.5em; background: #002b36; color: #839496; } .hljs-comment, .hljs-template_comment, .diff .hljs-header, .hljs-doctype, .hljs-pi, .lisp .hljs-string, .hljs-javadoc { color: #586e75; }  .hljs-keyword, .hljs-winutils, .method, .hljs-addition, .css .hljs-tag, .hljs-request, .hljs-status, .nginx .hljs-title { color: #859900; }  .hljs-number, .hljs-command, .hljs-string, .hljs-tag .hljs-value, .hljs-rules .hljs-value, .hljs-phpdoc, .tex .hljs-formula, .hljs-regexp, .hljs-hexcolor, .hljs-link_url { color: #2aa198; }  .hljs-title, .hljs-localvars, .hljs-chunk, .hljs-decorator, .hljs-built_in, .hljs-identifier, .vhdl .hljs-literal, .hljs-id, .css .hljs-function { color: #268bd2; }  .hljs-attribute, .hljs-variable, .lisp .hljs-body, .smalltalk .hljs-number, .hljs-constant, .hljs-class .hljs-title, .hljs-parent, .haskell .hljs-type, .hljs-link_reference { color: #b58900; }  .hljs-preprocessor, .hljs-preprocessor .hljs-keyword, .hljs-pragma, .hljs-shebang, .hljs-symbol, .hljs-symbol .hljs-string, .diff .hljs-change, .hljs-special, .hljs-attr_selector, .hljs-subst, .hljs-cdata, .clojure .hljs-title, .css .hljs-pseudo, .hljs-header { color: #cb4b16; }  .hljs-deletion, .hljs-important { color: #dc322f; }  .hljs-link_label { color: #6c71c4; } .tex .hljs-formula { background: #073642; } ');
@@ -5645,29 +5645,52 @@ var popup_del_timer;
 var do_popup = function(e) {
 	"use strict";
 
-    $('#hidbord_popup').remove();
-    var msgid = '#msg_' + $(e.target).attr('alt'),
+    var msgid = $(e.target).attr('alt'),
+        fromId = $(e.target).closest('.hidbord_msg').first().attr('id'),
         msgClone, oMsg, oMsgH;
 
-    if ($(msgid).length !== 0) {
-        oMsg = $(msgid);
-        msgClone = $(msgid).clone().css('margin', '0');
-        msgClone.removeClass('hidbord_msg_focused').find('.hidbord_mnu').remove();
-        oMsgH = oMsg.height();
-    } else {
+    $('#hidbord_popup_' + msgid).remove();
+    $('body').append('<div class="hidbord_popup" id="hidbord_popup_' + msgid + '" style="position: fixed; top: 0; right: -1250px; width: 611px;"></div');
+
+    if(!all_messages[msgid]){
         oMsg = msgClone = $('<div style="padding: 10px; background: #fee; border: 1px solid #f00; font-weight: bold; text-align:center;">NOT FOUND</div>');
         oMsgH = 50;
+    } else{
+        var msg = all_messages[msgid], txt, person, msgTimeTxt,
+            msgDate = new Date();
+        
+        msgDate.setTime(parseInt(msg.txt.ts) * 1000);
+    
+        if (msg.status == 'OK') {
+            txt = wkbmrk(msg.txt.msg);        
+        } else {
+            txt = '<p><strong style="color: #f00; font-size: x-large;">NOT FOR YOU! CAN\'T BE DECODED!</strong></p>';
+        }
+
+        msgTimeTxt = dateToStr(msgDate);
+
+        person = getContactHTML(msg.keyid, msg.pubkey);
+
+        var code = '<div class="hidbord_msg" id="msg_' + msg.id + '" style="margin: 0;">'+
+                   '    <div style="overflow: hidden" class="hidbord_msg_header" >'+ 
+                   '<span style="background: #fff;" class="idntcn2">' + msg.keyid + '</span>&nbsp;' + person +
+                   ' <i style="color: #999;">(' + msgTimeTxt + ') <span href="javascript:;" class="hidbord_mnu_reply hidbord_clickable">#'+msg.id.substr(0, 8)+'</span></i>'+
+                   '    </div>'+
+                   '    <hr style="clear:both;">'+
+                   '    <div style="overflow: hidden;"><img src="'+msg.thumb+'" class="hidbord_post_img hidbord_clickable" style="max-width: 150px; max-height:150px; float: left; padding: 5px 15px 5px 5px;"/>' + 
+                   txt + '</div>'+
+                   '</div>';
+
+        $('#hidbord_popup_' + msgid).append(code).css('box-shadow', ' 0 0 10px #555');
+
+        msgClone = $('#hidbord_popup_' + msgid).css('margin', '0');
+        oMsgH = msgClone.height();
     }
 
     var opy = $(e.target).offset().top - window.scrollY,
         px = e.clientX,
-        py = 10 + opy + $(e.target).height(); //e.clientY + 10;
-
-/*    if (px > $(window).width() / 2) {
-        px -= oMsg.width();
-    }*/
-
-    var height_css = null;
+        py = 10 + opy + $(e.target).height(),
+        height_css = null;
 
     if (py > $(window).height() / 2) {
         py -= oMsgH + 20 + $(e.target).height();
@@ -5683,24 +5706,114 @@ var do_popup = function(e) {
         }
     }
 
-    $('body').append('<div id="hidbord_popup" style="position: fixed; top: ' + py + 'px; right: 50px; width: 611px;"></div');
-    $('#hidbord_popup').append(msgClone).css('box-shadow', ' 0 0 10px #555');
+    msgAppendListeners('#hidbord_popup_' + msgid);
 
-    $('#hidbord_popup .hidbord_msg').on('mouseover', function() {
-        clearTimeout(popup_del_timer);
-    }).on('mouseout', del_popup);
+    $('#hidbord_popup_' + msgid).css({'right': '50px', 'top': py+'px'});
+
+    $('#hidbord_popup_' + msgid + '.hidbord_msglink[alt="'+fromId+'"]').css({'text-decoration': 'none', 'border-bottom':'1px dashed', 'font-weight': 'bold' });
+
+    var local_popup_del_timer;
+
+    $('#hidbord_popup_' + msgid ).on('mouseover', function() {
+        clearTimeout(local_popup_del_timer);
+        clearTimeout(msgPopupTimers[msgid]);
+    }).on('mouseout', function(){
+        local_popup_del_timer = setTimeout(function() {
+            $('#hidbord_popup_' + msgid).remove();
+        }, 200);
+    });
 
 };
 
-var del_popup = function() {
+var msgPopupTimers = {};
+
+var del_popup = function(e) {
 	"use strict";
 
-    popup_del_timer = setTimeout(function() {
-        $('#hidbord_popup').remove();
+    var msgid = $(e.target).attr('alt');
+    
+    clearTimeout(msgPopupTimers[msgid]);
+
+    if(msgid == 'file_selector'){
+        $('#file_selector').remove();
+        return;
+    }
+    
+    msgPopupTimers[msgid] = setTimeout(function() {
+        if(msgid == 'msg_preview'){
+            $('#prev_popup').remove();
+        }else{
+            $('#hidbord_popup_' + msgid).remove();
+        }
     }, 200);
 };
 
-var messages_list = [], new_messages = 0;
+var msgAppendListeners = function(msgQuery){
+    "use strict";
+
+    $(msgQuery + ' .idntcn').identicon5({
+        rotate: true,
+        size: 40
+    });
+
+    $(msgQuery + ' .hidbord_addcntct_link').on('click', add_contact);
+    $(msgQuery + ' .hidbord_mnu_reply').on('click', replytoMsg);
+    $(msgQuery + ' .hidbord_usr_reply').on('click', replytoUsr);
+    $(msgQuery + ' .hidbord_mnu_replydirect').on('click', replytoMsgDirect);
+
+    $(msgQuery + ' #hidbord_mnu_info').on('click', function(e){
+        var msg_id = $(e.target).closest('.hidbord_msg').first().attr('id');
+        var headrs = $(e.target).closest('.hidbord_msg').first().find('#' + msg_id + ' .hidbord_msg_header');
+        for (var i = 0; i < headrs.length; i++) {
+            var elm = $(headrs[i]);
+            if(elm.css('display') == 'none'){
+                elm.removeClass('hidbord_hidden');
+            }else{
+                elm.addClass('hidbord_hidden');
+            }
+
+        }
+    });
+
+    $(msgQuery + ' .hidbord_post_img').on('click', function(e){
+        var imgname = e.target.src.replace(/.+?\/([^\/]+)$/, '$1');
+        window.scrollTo(0, $('a img[src*="' + imgname + '"]').offset().top);
+    });    
+
+    var new_msg = $(msgQuery);
+
+    new_msg.on('mouseout', function() {
+        $(this).removeClass('hidbord_msg_new');
+    });
+
+
+    new_msg.find('pre').each(function(i, e) {
+        hljs.highlightBlock(e);
+    });
+
+    new_msg.find('.hidbord_msglink').on('mouseover', function(e){
+        var msgid = $(e.target).attr('alt');   
+        msgPopupTimers[msgid] = setTimeout(function() {
+            do_popup(e);
+        }, 200);
+
+    }).on('mouseout', del_popup)
+        .on('click', function(e) {
+            var to_msg = $('#msg_' + $(e.target).attr('alt'));
+            $('.hidbord_msg_focused').removeClass('hidbord_msg_focused');
+            to_msg.addClass('hidbord_msg_focused').children().one('click', function(e) {
+                $(e.target).parent().removeClass('hidbord_msg_focused');
+            });
+            $('.hidbord_thread')[0].scrollTop += to_msg.offset().top - 100 - window.scrollY;
+        });
+
+    new_msg.find('.idntcn2').identicon5({
+        rotate: true,
+        size: 18
+    }); 
+};
+
+var messages_list = [], new_messages = 0, all_messages = {};
 
 var push_msg = function(msg, msgPrepend, thumb) {
 	"use strict";
@@ -5717,6 +5830,8 @@ var push_msg = function(msg, msgPrepend, thumb) {
     to: []
   },*/
 
+  msg.thumb = thumb;
+
   //console.log(msg);
 
     var prependTo = '#allgetter_button',
@@ -5724,13 +5839,17 @@ var push_msg = function(msg, msgPrepend, thumb) {
         msgDate = new Date(),
         msgTimeTxt, i;
 
-    if ($("#msg_" + msg.id).length == 1) {
+    if (all_messages[msg.id]) {
         $("#msg_" + msg.id).addClass('hidbord_msg_new');
         return;
     }
 
+    all_messages[msg.id] = msg;
+
     if(messages_list.length > 0){
-        messages_list.sort(function(a, b) {
+        messages_list.sort(function(m1, m2) {
+            var a = all_messages[m1],
+                b = all_messages[m2];
             if(b.post_id != a.post_id){
                 return b.post_id - a.post_id;
             }
@@ -5748,19 +5867,19 @@ var push_msg = function(msg, msgPrepend, thumb) {
         });
         for (i = 0; i < messages_list.length; i++) {
             if(msg.post_id !==0){
-                if(messages_list[i].post_id <= msg.post_id){
-                    prependTo = '#msg_' + messages_list[i].id;
+                if(all_messages[messages_list[i]].post_id <= msg.post_id){
+                    prependTo = '#msg_' + all_messages[messages_list[i]].id;
                     break;
                 }
             }else{
-                if(messages_list[i].txt.ts <= msg.txt.ts){
-                    prependTo = '#msg_' + messages_list[i].id;
+                if(all_messages[messages_list[i]].txt.ts <= msg.txt.ts){
+                    prependTo = '#msg_' + all_messages[messages_list[i]].id;
                     break;
                 }
             }
         }
     }
-    messages_list.push(msg);
+    messages_list.push(msg.id);
 
 
     msgDate.setTime(parseInt(msg.txt.ts) * 1000);
@@ -5796,71 +5915,9 @@ var push_msg = function(msg, msgPrepend, thumb) {
             '    <div style="overflow: hidden;"><img src="'+thumb+'" class="hidbord_post_img hidbord_clickable" style="max-width: 150px; max-height:150px; float: left; padding: 5px 15px 5px 5px;"/>' + txt + '</div>'+
             '</div>';
 
-    //if (msgPrepend) {
-        $(prependTo).after($(code));
-    //} else {
-    //    $('.hidbord_thread #hidbord_reply_button').before($(code));
-    //}
+    $(prependTo).after($(code));
 
-    $("#msg_" + msg.id + ' .idntcn').identicon5({
-        rotate: true,
-        size: 40
-    });
-
-    $("#msg_" + msg.id + ' .hidbord_addcntct_link').on('click', add_contact);
-
-    $("#msg_" + msg.id + ' .hidbord_mnu_reply').on('click', replytoMsg);
-    $("#msg_" + msg.id + ' .hidbord_usr_reply').on('click', replytoUsr);
-    $("#msg_" + msg.id + ' .hidbord_mnu_replydirect').on('click', replytoMsgDirect);
-
-    $("#msg_" + msg.id + ' #hidbord_mnu_info').on('click', function(e){
-        var msg_id = $(e.target).closest('.hidbord_msg').first().attr('id');
-        var headrs = $(e.target).closest('.hidbord_msg').first().find('#' + msg_id + ' .hidbord_msg_header');
-        for (var i = 0; i < headrs.length; i++) {
-            var elm = $(headrs[i]);
-            if(elm.css('display') == 'none'){
-                elm.removeClass('hidbord_hidden');
-            }else{
-                elm.addClass('hidbord_hidden');
-            }
-
-        }
-    });
-
-    $("#msg_" + msg.id + ' .hidbord_post_img').on('click', function(e){
-        var imgname = e.target.src.replace(/.+?\/([^\/]+)$/, '$1');
-//        console.log(imgname, $('a img[src*="' + imgname + '"]').offset().top);
-        window.scrollTo(0, $('a img[src*="' + imgname + '"]').offset().top);
-    });    
-
-
-//    console.log($("#msg_" + msg.id + ' .hidbord_addcntct_link'));
-
-    var new_msg = $("#msg_" + msg.id);
-
-    new_msg.on('mouseout', function() {
-        $(this).removeClass('hidbord_msg_new');
-    });
-
-
-    new_msg.find('pre').each(function(i, e) {
-        hljs.highlightBlock(e);
-    });
-
-    new_msg.find('.hidbord_msglink').on('mouseover', do_popup)
-        .on('mouseout', del_popup)
-        .on('click', function(e) {
-            var to_msg = $('#msg_' + $(e.target).attr('alt'));
-            $('.hidbord_msg_focused').removeClass('hidbord_msg_focused');
-            to_msg.addClass('hidbord_msg_focused').children().one('click', function(e) {
-                $(e.target).parent().removeClass('hidbord_msg_focused');
-            });
-            $('.hidbord_thread')[0].scrollTop += to_msg.offset().top - 100 - window.scrollY;
-        });
-    new_msg.find('.idntcn2').identicon5({
-        rotate: true,
-        size: 18
-    });
+    msgAppendListeners('#msg_' + msg.id);
 
     new_messages++;
     $('#hidbord_notify_counter').text(new_messages).show();
@@ -5913,24 +5970,6 @@ var process_olds = function() {
             $('#hidbord_btn_getold').val('Get old messages');
             processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2]);
         }
-/*
-
-        getURLasAB(jpgURL[0], function(arrayBuffer, date) {
-            var byteArray = new Uint8Array(arrayBuffer);
-            if (byteArray) {
-                var arc = jpegExtract(arrayBuffer);
-                if(arc){
-                    var p = decodeMessage(arc);
-                    if(p) do_decode(p, true, jpgURL[1], date, jpgURL[2]);
-                }                   
-            }
-            if (process_images.length !== 0) {
-                $('#hidbord_btn_getold').val('Stop fetch! ['+process_images.length+']');
-                setTimeout(process_olds, 0); //500 + Math.round(500 * Math.random()));
-            }else{
-                $('#hidbord_btn_getold').val('Get old messages');
-            }
-        });*/
     }
 };
 
@@ -6033,7 +6072,7 @@ var replytoUsr = function(e) {
 };
 
 var do_preview_popup = function(e) {
-	"use strict";
+    "use strict";
 
 
     var img_thumb = '';
@@ -6044,18 +6083,18 @@ var do_preview_popup = function(e) {
         img_thumb = '<div style="width: 148px; height:148px; float: left; margin: 5px 15px 5px 5px; border: 2px dashed #999;"/>';
     }
 
-    $('#hidbord_popup').remove();
-    var txt = '<div class="hidbord_msg" style="box-shadow: 0 0 10px #555;overflow-y: scroll;">' + img_thumb + wkbmrk($('#hidbord_reply_text').val()) + '</div>';
+    $('#prev_popup').remove();
+    var txt = '<div class="hidbord_msg" style="box-shadow: 0 0 10px #555;overflow-y: scroll;" alt="msg_preview">' + img_thumb + wkbmrk($('#hidbord_reply_text').val()) + '</div>';
 
 //    console.log(txt);
 
-    $('body').append('<div id="hidbord_popup" style="position: fixed; top: -2000px; right: -2000px; width: 611px;"></div');
-    $('#hidbord_popup').append(txt);
-    $('#hidbord_popup .idntcn2').identicon5({
+    $('body').append('<div class="hidbord_popup" id="prev_popup" style="position: fixed; top: -2000px; right: -2000px; width: 611px;"></div');
+    $('#prev_popup').append(txt);
+    $('#prev_popup .idntcn2').identicon5({
         rotate: true,
         size: 18
     });
-    $('#hidbord_popup pre').each(function(i, e) {
+    $('#prev_popup pre').each(function(i, e) {
         hljs.highlightBlock(e);
     });
 
@@ -6063,25 +6102,25 @@ var do_preview_popup = function(e) {
         py = e.clientY + 10;
 
     if (px > $(window).width() / 2) {
-        px -= $('#hidbord_popup').width();
+        px -= $('#prev_popup').width();
     }
 
     if (py > $(window).height() / 2) {
-        py -= $('#hidbord_popup').height() + 20;
+        py -= $('#prev_popup').height() + 20;
         if(py < 10 ){
-            $('#hidbord_popup').find('.hidbord_msg').css('height', (e.clientY - 50) + 'px');
+            $('#prev_popup').find('.hidbord_msg').css('height', (e.clientY - 50) + 'px');
             py = 10;
         }        
     }else{
-        if(py + $('#hidbord_popup').height() + 10 > $(window).height()){
-            $('#hidbord_popup').find('.hidbord_msg').css('height', ($(window).height() - py - 10) + 'px');
+        if(py + $('#prev_popup').height() + 10 > $(window).height()){
+            $('#prev_popup').find('.hidbord_msg').css('height', ($(window).height() - py - 50) + 'px');
         }
     }
 
-    $('#hidbord_popup').css('right', '50px').css('top', py + 'px');
+    $('#prev_popup').css('right', '50px').css('top', py + 'px');
 
-    $('#hidbord_popup .hidbord_msg').on('mouseover', function() {
-        clearTimeout(popup_del_timer);
+    $('#prev_popup .hidbord_msg').on('mouseover', function() {
+        clearTimeout(msgPopupTimers.msg_preview);
     }).on('mouseout', del_popup);
 
 };
@@ -6089,21 +6128,21 @@ var do_preview_popup = function(e) {
 var do_imgpreview_popup = function(e) {
 	"use strict";
 
-    $('#hidbord_popup').remove();
+    $('#file_selector').remove();
     if (!container_image) return;
     var txt = '<div class="hidbord_msg" style="box-shadow: 0 0 10px #555;"><img style="max-width: 200px; max-height: 200px;" src="' + container_image + '"></div>';
     var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
         h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
-    $('body').append('<div id="hidbord_popup" style="position: fixed; bottom: -2000px; left: -2000px;"></div');
-    $('#hidbord_popup').append(txt);
+    $('body').append('<div class="hidbord_popup" id="file_selector" style="position: fixed; bottom: -2000px; left: -2000px;"></div');
+    $('#file_selector').append(txt);
 
     var px = $(e.target).offset().left,
         py = $(window).height() - ($(e.target).offset().top - window.scrollY);
 
-    $('#hidbord_popup').css('left', px + 'px').css('bottom', py + 'px');
+    $('#file_selector').css('left', px + 'px').css('bottom', py + 'px');
 
-    $('#hidbord_popup .hidbord_msg').on('mouseover', function() {
+    $('#file_selector .hidbord_msg').on('mouseover', function() {
         clearTimeout(popup_del_timer);
     }).on('mouseout', del_popup);
 
@@ -6129,7 +6168,7 @@ var showReplyform = function(msg_id, textInsert) {
             '  <div>' +
             '    <div style="margin:  3px;">' +
             '      <div style="width: 590px;">' +
-            '        <input type="file" id="c_file" name="c_file" style="max-width: 300px;">' +
+            '        <input type="file" id="c_file" name="c_file" style="max-width: 300px;" alt="file_selector">' +
             '            <span style="float: right;" id="hidbordTextControls">' +
             '              <span title="Bold"><input value="B" style="font-weight: bold;" type="button" id="hidbordBtBold"></span>' +
             '              <span title="Italic"><input value="i" style="font-weight: bold; font-style: italic;" type="button" id="hidbordBtItalic"></span>' +
@@ -6143,7 +6182,7 @@ var showReplyform = function(msg_id, textInsert) {
             '      <textarea style="margin: 2px; width: 580px; height: 136px; resize: vertical; background-image: none; background-position: 0% 0%; background-repeat: repeat repeat;" id="hidbord_reply_text"></textarea>  ' +
             '      <div style="width: 590px;">' +
             '        <input type="button" value="crypt and send" id="do_encode">  ' +
-            '        <span style="float: right;"><a href="javascript:;" id="hidbordform_preview">message preview</a></span>  ' +
+            '        <span style="float: right;"><a href="javascript:;" id="hidbordform_preview" alt="msg_preview">message preview</a></span>  ' +
             '      </div>' +
             '    </div>' +
             '  </div>' +
@@ -6173,7 +6212,13 @@ var showReplyform = function(msg_id, textInsert) {
         $('#hidbord_replyform #c_file').on('change', handleFileSelect);
         $('#hidbord_replyform #do_encode').on('click', do_encode);
 
-        $('#hidbord_replyform #hidbordform_preview').on('mouseover', do_preview_popup)
+        $('#hidbord_replyform #hidbordform_preview').on('mouseover', function(e){
+            var evt = e;
+            
+            msgPopupTimers.msg_preview = setTimeout((function(e){ return function(){
+                do_preview_popup(evt);
+            };})(e), 200);
+        })
             .on('mouseout', del_popup);
 
         $('#hidbord_replyform #c_file').on('mouseover', do_imgpreview_popup)
@@ -6617,16 +6662,6 @@ var jpegInserted = function(event) {
             }
         }
 
-/*        getURLasAB(jpgURL, function(arrayBuffer, date) {
-            var arc = jpegExtract(arrayBuffer);
-//            console.log(arc);
-            if(arc){
-                var p = decodeMessage(arc);
-//                console.log(p);
-                if(p) do_decode(p, null, thumbURL, date, post_id);
-            }            
-        });*/
-
         processJpgUrl(jpgURL, thumbURL, post_id);
     }
 };
@@ -6649,7 +6684,7 @@ $(function($) {
 
     setTimeout(function() {
         $(document).bind('animationstart', jpegInserted).bind('MSAnimationStart', jpegInserted).bind('webkitAnimationStart', jpegInserted);
-    }, 3000);
+    }, 10000);
 
     if (ssGet(boardHostName + 'magic_desu_numbers')) {
         rsaProfile = ssGet(boardHostName + 'magic_desu_numbers');
