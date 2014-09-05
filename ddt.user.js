@@ -5654,6 +5654,7 @@ var do_popup = function(e) {
 
     if(!all_messages[msgid]){
         oMsg = msgClone = $('<div style="padding: 10px; background: #fee; border: 1px solid #f00; font-weight: bold; text-align:center;">NOT FOUND</div>');
+        $('#hidbord_popup_' + msgid).append(msgClone);
         oMsgH = 50;
     } else{
         var msg = all_messages[msgid], txt, person, msgTimeTxt,
