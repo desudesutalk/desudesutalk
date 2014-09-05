@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.18
+// @version      0.3.19
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -5828,22 +5828,9 @@ var renderRefs = function(msgId, elm){
     }
 
     ref_map[msgId].sort(function(m1, m2) {
-        var a = all_messages[m1],
-            b = all_messages[m2];
-        if(b.post_id != a.post_id){
-            return b.post_id - a.post_id;
-        }
-
-        if(b.txt.ts != a.txt.ts){
-            return b.txt.ts - a.txt.ts;
-        }else{
-            if(b.txt.id < a.txt.id){
-                return -1;
-            }else{
-                return 1;
-            }
-
-        }
+        var a = messages_list.indexOf(m1),
+            b = messages_list.indexOf(m2);
+        return b - a;
     });
 
     var links = '';
