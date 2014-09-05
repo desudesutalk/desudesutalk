@@ -40,15 +40,7 @@ var jpegInserted = function(event) {
             }
         }
 
-        getURLasAB(jpgURL, function(arrayBuffer, date) {
-            var arc = jpegExtract(arrayBuffer);
-//            console.log(arc);
-            if(arc){
-                var p = decodeMessage(arc);
-//                console.log(p);
-                if(p) do_decode(p, null, thumbURL, date, post_id);
-            }            
-        });
+        processJpgUrl(jpgURL, thumbURL, post_id);
     }
 };
 
@@ -70,7 +62,7 @@ $(function($) {
 
     setTimeout(function() {
         $(document).bind('animationstart', jpegInserted).bind('MSAnimationStart', jpegInserted).bind('webkitAnimationStart', jpegInserted);
-    }, 3000);
+    }, 10000);
 
     if (ssGet(boardHostName + 'magic_desu_numbers')) {
         rsaProfile = ssGet(boardHostName + 'magic_desu_numbers');

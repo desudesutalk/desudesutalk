@@ -4964,7 +4964,43 @@ var do_decode = function(message, msgPrepend, thumb, fdate, post_id) {
     };
 
     push_msg(out_msg, msgPrepend, thumb);
-    return true;
+    return out_msg;
+};
+
+
+var processedJpegs = {};
+
+var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
+    "use strict";
+
+    if(processedJpegs[jpgURL]){
+        
+        if(processedJpegs[jpgURL].id != 'none'){
+            $("#msg_" + processedJpegs[jpgURL].id).addClass('hidbord_msg_new');
+        }
+        
+        console.log('from cache');
+
+        if (typeof(cb) == "function") {
+            cb();
+        }
+        return;
+    }
+
+    processedJpegs[jpgURL] = {'id': 'none'};
+    
+    getURLasAB(jpgURL, function(arrayBuffer, date) {
+        var arc = jpegExtract(arrayBuffer);
+        if(arc){
+            var p = decodeMessage(arc);
+            if(p) processedJpegs[jpgURL].id = do_decode(p, null, thumbURL, date, post_id).id;
+        }
+
+        if (typeof(cb) == "function") {
+            cb();
+        }
+
+    });
 };
 
 var contacts = {}, cont_groups = [];
@@ -5416,7 +5452,7 @@ var inject_ui = function() {
 
             '            <p  style="text-align: center;">'+
             '                    <label>Store contacts in public: <input type="checkbox" id="hidboard_option_pubstore" style="vertical-align:middle;" checked></label><br/>'+
-            '                     (this will disable "Global contacts")'+
+            '                     (Should be used with Scriptish. Also this will disable "Global contacts")'+
             '            </p>'+
 
             '            <p  style="text-align: center;">'+
@@ -5751,7 +5787,6 @@ var push_msg = function(msg, msgPrepend, thumb) {
             '            <br/><i style="color: #090; font-size: x-small;" class="hidbord_clickable hidbord_usr_reply" alt="'+msg.keyid+'">' + msg.keyid + '</i>'+
             '        </div>'+
             '        <div style="clear: both; padding: 5px;"><strong>Sent to:</strong> ' + recipients + '</div>'+
-            '        [<a href="javascript:;" class="hidbord_get_clean">get clean image</a>]'+
             '    </div>'+
             '    <div style="overflow: hidden" class="hidbord_msg_header" >'+ 
             '<span style="background: #fff;" class="idntcn2">' + msg.keyid + '</span>&nbsp;' + person +
@@ -5827,24 +5862,6 @@ var push_msg = function(msg, msgPrepend, thumb) {
         size: 18
     });
 
-    $("#msg_" + msg.id + ' .hidbord_get_clean').on('click', null, {thumb: thumb}, function(e){
-        console.log(e);
-        var imgname = e.data.thumb.replace(/.+?\/([^\/]+)$/, '$1');
-        var container = $('a img[src*="' + imgname + '"]').closest('a').attr('href');
-
-        getURLasAB(container, function(arrayBuffer, date) {
-            var cleanFile = jpegClean(arrayBuffer);
-            var a = document.createElement('a');
-            a.download = container.replace(/.+?\/([^\/]+)$/, '$1');
-            a.href = "data:image/jpeg;base64," + arrayBufferDataUri(cleanFile);
-            a.target = "_blank";            
-            $(a).click();
-            console.log($(a));
-        });
-        return false;
-    });
-
-
     new_messages++;
     $('#hidbord_notify_counter').text(new_messages).show();
 
@@ -5887,6 +5904,17 @@ var process_olds = function() {
 
     if (process_images.length > 0) {
         jpgURL = process_images.pop();
+
+        if (process_images.length !== 0) {
+            $('#hidbord_btn_getold').val('Stop fetch! ['+process_images.length+']');
+            //setTimeout(process_olds, 0); //500 + Math.round(500 * Math.random()));
+            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], function(){setTimeout(process_olds, 0);});
+        }else{
+            $('#hidbord_btn_getold').val('Get old messages');
+            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2]);
+        }
+/*
+
         getURLasAB(jpgURL[0], function(arrayBuffer, date) {
             var byteArray = new Uint8Array(arrayBuffer);
             if (byteArray) {
@@ -5902,7 +5930,7 @@ var process_olds = function() {
             }else{
                 $('#hidbord_btn_getold').val('Get old messages');
             }
-        });
+        });*/
     }
 };
 
@@ -6589,7 +6617,7 @@ var jpegInserted = function(event) {
             }
         }
 
-        getURLasAB(jpgURL, function(arrayBuffer, date) {
+/*        getURLasAB(jpgURL, function(arrayBuffer, date) {
             var arc = jpegExtract(arrayBuffer);
 //            console.log(arc);
             if(arc){
@@ -6597,7 +6625,9 @@ var jpegInserted = function(event) {
 //                console.log(p);
                 if(p) do_decode(p, null, thumbURL, date, post_id);
             }            
-        });
+        });*/
+
+        processJpgUrl(jpgURL, thumbURL, post_id);
     }
 };
 

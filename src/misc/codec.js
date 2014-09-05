@@ -137,5 +137,41 @@ var do_decode = function(message, msgPrepend, thumb, fdate, post_id) {
     };
 
     push_msg(out_msg, msgPrepend, thumb);
-    return true;
+    return out_msg;
+};
+
+
+var processedJpegs = {};
+
+var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
+    "use strict";
+
+    if(processedJpegs[jpgURL]){
+        
+        if(processedJpegs[jpgURL].id != 'none'){
+            $("#msg_" + processedJpegs[jpgURL].id).addClass('hidbord_msg_new');
+        }
+        
+        console.log('from cache');
+
+        if (typeof(cb) == "function") {
+            cb();
+        }
+        return;
+    }
+
+    processedJpegs[jpgURL] = {'id': 'none'};
+    
+    getURLasAB(jpgURL, function(arrayBuffer, date) {
+        var arc = jpegExtract(arrayBuffer);
+        if(arc){
+            var p = decodeMessage(arc);
+            if(p) processedJpegs[jpgURL].id = do_decode(p, null, thumbURL, date, post_id).id;
+        }
+
+        if (typeof(cb) == "function") {
+            cb();
+        }
+
+    });
 };
