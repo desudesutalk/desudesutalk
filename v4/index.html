@@ -1,0 +1,71 @@
+<html>
+<head>
+	<title>NextGen</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<script language="JavaScript" type="text/javascript" src="src/libs/zepto.min.js"></script>
+	<script language="JavaScript" type="text/javascript" src="src/libs/pako.min.js"></script>
+
+	<script language="JavaScript" type="text/javascript" src="src/libs/jquery.identicon5.js"></script>	
+
+	<script language="JavaScript" type="text/javascript" src="src/libs/cryptojs/components/core.js"></script>
+	<script language="JavaScript" type="text/javascript" src="src/libs/cryptojs/components/cipher-core.js"></script>
+	<script language="JavaScript" type="text/javascript" src="src/libs/cryptojs/components/aes.js"></script>
+	<script language="JavaScript" type="text/javascript" src="src/libs/cryptojs/components/mode-cfb.js"></script>
+	<script language="JavaScript" type="text/javascript" src="src/libs/cryptojs/components/hmac.js"></script>	
+	<script language="JavaScript" type="text/javascript" src="src/libs/cryptojs/components/sha256.js"></script>	
+	<script language="JavaScript" type="text/javascript" src="src/libs/cryptojs/components/pbkdf2.js"></script>	
+	<script language="JavaScript" type="text/javascript" src="src/libs/cryptojs/components/enc-base64.js"></script>
+
+	<script language="JavaScript" type="text/javascript" src="src/libs/elliptic.js"></script>
+
+	<script language="JavaScript" type="text/javascript" src="src/libs/utf8array.js"></script>
+
+	<script language="JavaScript" type="text/javascript" src="src/helpers.js"></script>
+	<script language="JavaScript" type="text/javascript" src="src/main.js"></script>
+</head>
+<body>
+
+
+<table style="width: 100%; text-align: center;" border=1>
+<tr><td rowspan=2><form id="encode">	
+	<p style="text-align: center;"><textarea id="in_message" rows=40 cols=60></textarea><br/>
+	<input type="submit" value="Encode"/></p>
+</form>
+</td>
+
+
+<td rowspan=2><form id="decode">	
+	<p style="text-align: center;"><textarea id="in_coded" rows=40 cols=65 style="font-size: x-small;"></textarea><br/>
+	<input type="submit" value="Decode"/></p>
+	<p id="contacts_output" style="font-size: x-small;"></p>
+</form>
+
+</td>
+
+
+
+
+<td><form id="login">
+	<p><label>Salt: <input name="login_salt" type="text" style="color: #ddd;"/></label><br/>
+	   <label>Password: <input name="login_pwd" type="text" style="color: #ddd;"/></label></p>
+	<p><input type="submit" value="Log in!"/></p>
+	<p id="login_info" style="font-size: x-small;"></p>
+</form>
+</td>
+</tr>
+
+
+
+<tr><td style="width: 600px;"><form id="contacts">
+	<p><label>Addres: <input name="contact_address" type="text" length=90 /></label><input type="submit" value="Add"/></p>
+	<textarea id="contacts_list" rows=6 cols=90 disabled="disabled" style="font-size: x-small;"></textarea>
+</form></td></tr>
+</table>
+
+
+
+
+
+
+</body>
+</html>
