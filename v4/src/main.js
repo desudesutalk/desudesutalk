@@ -518,10 +518,15 @@ $(function(){
         event.preventDefault();
 
         var msg = $('#encode textarea').val();
+        var hideSender = $('#encode input[name="hide_sender"]').attr('checked');
+        var hideContacts = $('#encode input[name="hide_contacts"]').attr('checked');
+
+
+
         var start = new Date().getTime();
 
         
-        var c = encodeMessage(JSON.stringify({"msg": msg}), contacts);//, true, true);
+        var c = encodeMessage(JSON.stringify({"msg": msg}), contacts, hideSender, hideContacts);//, true, true);
         //console.log(c);
 
 		var end = new Date().getTime();
@@ -565,14 +570,18 @@ $(function(){
         	var data = '';
         	if(m.sender){
         		data += '<b>FROM:</b> ' + m.sender + '<br/><br/>';
-        	}
+        	}else{
+                data += '<b>FROM:</b> Unknown<br/><br/>';
+            }
 
         	if(m.msgContacts.length > 0){
         		data += '<b>TO:</b><br/>';
         		for (i = 0; i < m.msgContacts.length; i++) {
         			data += m.msgContacts[i] + '<br>';
         		};
-        	}
+        	}else{
+                data += '<b>TO:</b> ' + m.contactsNum + ' hidden contacts.';
+            }
 
         	$('#contacts_output').empty().html(data);
         }else{
