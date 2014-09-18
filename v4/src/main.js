@@ -159,10 +159,19 @@ var login = function(salt, password) {
 };
 
 var addContact = function(contactStr) {
+    contactStr = contactStr.replace(/[^a-z-A-Z0-9\/\+]/g, '');
     var words  = encodeWordArray(CryptoJS.enc.Base64.parse(contactStr));
 
     var pubEncKey = decodePublicKey(words.slice(0, 33)),
         pubSigKey = decodePublicKey(words.slice(33));
+
+    if(!pubEncKey.validate() || !pubSigKey.validate()){
+        return false;
+    }
+
+    if(contactStr == keyPair.publicKeyPairPrintable){
+        return false;
+    }
 
     contacts[contactStr] = {
         "publicEnc": pubEncKey,
@@ -566,8 +575,21 @@ $(function(){
         	}
 
         	$('#contacts_output').empty().html(data);
+        }else{
+            $('#contacts_output').empty().html('<b style="color: #f00;">DECODE FAIL.</b>');
         }
 
+        return false;
+    });
+
+    $('#clear_contacts').on('click', function(event){
+        event.preventDefault();
+
+        contacts = {};
+
+        localStorage.ddt_contacts = JSON.stringify([]);
+        $('#contacts textarea').val('');
+        
         return false;
     });
 
