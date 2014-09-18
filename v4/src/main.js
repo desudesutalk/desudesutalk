@@ -165,7 +165,7 @@ var addContact = function(contactStr) {
     var pubEncKey = decodePublicKey(words.slice(0, 33)),
         pubSigKey = decodePublicKey(words.slice(33));
 
-    if(keyPair.publicKeyPairPrintable && contactStr == keyPair.publicKeyPairPrintable){
+    if(!pubEncKey.validate() || !pubSigKey.validate()){
         return false;
     }
 
