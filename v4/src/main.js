@@ -1,120 +1,3 @@
-var EC = ellipticjs.ec("secp256k1"), // Здесь http://safecurves.cr.yp.to/ написано, что эта курва небезопасна, но её используют в Биткоине и Битмессадже
-    fieldSize = 32;
-
-var encodeWordArray = function(array) {
-    var result = [];
-
-    for (var i = 0; i < array.sigBytes; ++i) {
-        result.push(array.words[i >> 2] >> (24 - (i % 4) * 8) & 0xff);
-    }
-
-    return result;
-};
-
-var decodeWordArray = function (bytes) {
-    var words = [];
-
-    for (var i in bytes) {
-        words[i >> 2] = words[i >> 2] || 0;
-        words[i >> 2] |= bytes[i] << (24 - (i % 4) * 8);
-    }
-
-    return CryptoJS.lib.WordArray.create(words, bytes.length);
-};
-
-var pad = function(array, length) {
-    if (length === undefined) {
-        length = fieldSize;
-    }
-
-    for (var i = 0; array.length < length; ++i) {
-        array.unshift(0);
-    }
-
-    return array;
-};
-
-var encodeWordArray = function(array) {
-    var result = [];
-
-    for (var i = 0; i < array.sigBytes; ++i) {
-        result.push(array.words[i >> 2] >> (24 - (i % 4) * 8) & 0xff);
-    }
-
-    return result;
-};
-
-var encodePrivateKey = function(key) {
-	return pad(key.getPrivate().toArray());
-};
-
-var decodePrivateKey = function(encoded) {
-    return EC.keyPair(encoded);
-};
-
-var encodePublicKey = function(key, compress) {
-    var result;
-
-    key = key.getPublic();
-
-    if (key.inf) {
-        result = [0];
-    } else if (compress) {
-        result = pad(key.getX().toArray());
-        result.unshift(2 + key.getY().isOdd());
-    } else {
-        result = pad(key.getX().toArray()).concat(pad(key.getY().toArray()));
-        result.unshift(4);
-    }
-
-    return result;
-};
-
-var decodePublicKey = function(encoded) {
-    var point;
-
-    switch (encoded[0]) {
-        case 0:
-            point = EC.curve.point(null, null);
-            break;
-
-        case 2:
-        case 3:
-            point = EC.curve.pointFromX(encoded[0] - 2, encoded.slice(1, fieldSize + 1));
-            break;
-
-        case 4:
-            point = EC.curve.point(encoded.slice(1, fieldSize + 1), encoded.slice(fieldSize + 1, 2 * fieldSize + 1));
-    }
-
-    return EC.keyPair(point);
-};
-
-var encodeSharedSecret = function(secret) {
-	return pad(secret.toArray());
-};
-
-var encodeInteger = function(integer) {
-	var result = [];
-
-	while (integer) {
-		result.push(integer & 0xff);
-		integer >>= 8;
-	}
-
-	return pad(result.reverse(), 8);
-};
-
-// Операции над байтовыми массивами одинакового размера
-
-var xorBytes = function(a, b) {
-	for (var i in a) {
-		a[i] ^= b[i];
-	}
-
-	return a;
-};
-
 var contacts = {}, keyPair = null;
 
 var login = function(salt, password) {
@@ -316,12 +199,12 @@ If sender is not hidden
 
 	var slots = [];
 
-	var secret = encodeSharedSecret(ephemeral.derive(keyPair.publicEnc));
+	var secret = getSharedSecret(ephemeral, keyPair.privateEnc);
     //console.log('secret', sessionKey);
 	slots.push(xorBytes(secret, sessionKey));
 
 	for (i in contacts) {
-		secret = encodeSharedSecret(ephemeral.derive(contacts[i].publicEnc.getPublic()));
+		secret = getSharedSecret(ephemeral, contacts[i].publicEnc);
 		slots.push(xorBytes(secret, sessionKey));
 	}
 
@@ -372,7 +255,7 @@ var decodeMessage = function(msg) {
 
         try {
             ephemeral = decodePublicKey(ephemeral);
-            secret = encodeSharedSecret(keyPair.privateEnc.derive(ephemeral.getPublic()));
+            secret = getSharedSecret(keyPair.privateEnc, ephemeral);
             message.ephemeralPub = ephemeral;
             firstByte ^= secret[31];
         } catch (exception) {
@@ -450,7 +333,7 @@ var decodeMessage = function(msg) {
                     for (i = 0; i < message.contactsNum; i++) {
                         pubEncKey = decodePublicKey(res.slice(     48 + i*66, 33 + 48 + i*66));
                         pubSigKey = decodePublicKey(res.slice(33 + 48 + i*66, 66 + 48 + i*66));
-                        tmpSecret = arrayBufferDataUri(encodeSharedSecret(message.ephemeralPriv.derive(pubEncKey.getPublic())));
+                        tmpSecret = arrayBufferDataUri(getSharedSecret(message.ephemeralPriv, pubEncKey));
 
                         if(otherSecrets.indexOf(tmpSecret) == -1){
                             return undefined;                            
