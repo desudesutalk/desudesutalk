@@ -165,10 +165,6 @@ var addContact = function(contactStr) {
     var pubEncKey = decodePublicKey(words.slice(0, 33)),
         pubSigKey = decodePublicKey(words.slice(33));
 
-    if(!pubEncKey.validate() || !pubSigKey.validate()){
-        return false;
-    }
-
     if(keyPair.publicKeyPairPrintable && contactStr == keyPair.publicKeyPairPrintable){
         return false;
     }
@@ -268,7 +264,8 @@ If sender is not hidden
     	addBytes(encodePrivateKey(ephemeral));
 
     	for (i in contacts) {
-    		msgContacts.push(contacts[i].publicKeyPair);    		
+    		if(contacts[i].publicKeyPairPrintable != keyPair.publicKeyPairPrintable)
+    			msgContacts.push(contacts[i].publicKeyPair);    		
     	}
     	msgContacts = shuffleArray(msgContacts);
     }
