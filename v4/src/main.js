@@ -169,7 +169,7 @@ var addContact = function(contactStr) {
         return false;
     }
 
-    if(contactStr == keyPair.publicKeyPairPrintable){
+    if(keyPair.publicKeyPairPrintable && contactStr == keyPair.publicKeyPairPrintable){
         return false;
     }
 
