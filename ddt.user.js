@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.20
+// @version      0.3.22
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -4692,7 +4692,8 @@ var getRandPhrase = function(){
             ["be", "have", "do", "say", "get", "make", "go", "know", "take", "see", "come", "think", "look", "want", "give", "use", "find", "tell", "ask", "work", "seem", "feel", "try", "leave", "call"],
             ["good", "new", "first", "last", "long", "great", "little", "own", "other", "old", "right", "big", "high", "different", "small", "large", "next", "early", "young", "important", "few", "public", "bad", "same", "able"],
             ["to", "of", "in", "for", "on", "with", "at", "by", "from", "up", "about", "into", "over", "after", "beneath", "under", "above"],
-            ["the", "and", "a", "that", "I", "it", "not", "he", "as", "you", "this", "but", "his", "they", "her", "she", "or", "an", "will", "my", "one", "all", "would", "there", "their"]],
+            ["the", "and", "a", "that", "I", "it", "not", "he", "as", "you", "this", "but", "his", "they", "her", "she", "or", "an", "will", "my", "one", "all", "would", "there", "their"],
+            ["information", "back", "parent", "face", "others", "level", "office", "door", "health", "person", "art", "war", "history", "party", "result", "change", "morning", "reason", "research", "girl", "guy", "food", "moment", "air", "teacher"]],
         res = [];       
 
 
@@ -4758,17 +4759,10 @@ var _sendBoardForm = function(file, formAddon) {
 
     if(formAddon.length > 0){
         formData = formData.filter(function(a){
-            if(["name","email","subject","post","spoiler","file","file_url","password","thread","board"].indexOf(a.name) > -1) return true;
+            if(["name","email","subject","post","spoiler","body","file","file_url","password","thread","board"].indexOf(a.name) > -1) return true;
             return false;
         });
         formData.push.apply(formData, formAddon);
-
-        bodyValue = $('textarea[name=body]').val();
-        if(!bodyValue){
-            bodyValue = getRandPhrase();
-        }
-        formData.push({"name": "body", "value": bodyValue});
-
     }
 
     for (var i = 0; i < formData.length; i++) {
