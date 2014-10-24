@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.22
+// @version      0.3.23
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -16,6 +16,12 @@
 // @include      http://krautchan.net/*/*
 // @include      https://boards.4chan.org/*/thread/*
 // @include      http://boards.4chan.org/*/thread/*
+// @include      https://2ch.hk/*/*
+// @include      https://2ch.re/*/*
+// @include      https://2ch.tf/*/*
+// @include      https://2ch.wf/*/*
+// @include      https://2ch.yt/*/*
+// @include      https://2-ch.so/*/*
 // @copyright    2014+, Boku 
 // @icon         https://github.com/desudesutalk/desudesutalk/raw/master/icon.jpg
 // @updateURL    https://github.com/desudesutalk/desudesutalk/raw/master/ddt.meta.js

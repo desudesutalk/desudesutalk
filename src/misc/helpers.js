@@ -198,19 +198,21 @@ var getURLasAB = function(rawURL, cb) {
 
     var url = getHost(rawURL);
 
-    if(url.crossdomain){
-        /*jshint newcap: false  */
-        if (typeof GM_xmlhttpRequest === "function") {
-            GM_xmlhttpRequest({
-                method: "GET",
-                url: url.href,
-                overrideMimeType: "text/plain; charset=x-user-defined",
-                onload: function(oEvent) {
-                    var ff_buffer = stringToByteArray(oEvent.responseText || oEvent.response);
-                    cb(ff_buffer.buffer, new Date(0));
-                }
-            });
-        }
+    if(["2ch.hk", "2ch.pm", "2ch.re", "2ch.tf", "2ch.wf", "2ch.yt", "2-ch.so"].indexOf(url.host.toLowerCase()) != -1){
+        url.href += "?t=" + Math.floor(Math.random()*1000000);
+    }
+
+    /*jshint newcap: false  */
+    if (typeof GM_xmlhttpRequest === "function") {
+        GM_xmlhttpRequest({
+            method: "GET",
+            url: url.href,
+            overrideMimeType: "text/plain; charset=x-user-defined",
+            onload: function(oEvent) {
+                var ff_buffer = stringToByteArray(oEvent.responseText || oEvent.response);
+                cb(ff_buffer.buffer, new Date(0));
+            }
+        });
     }else{
         var oReq = new XMLHttpRequest();
 

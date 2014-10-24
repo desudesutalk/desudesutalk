@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.22
+// @version      0.3.23
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -16,6 +16,12 @@
 // @include      http://krautchan.net/*/*
 // @include      https://boards.4chan.org/*/thread/*
 // @include      http://boards.4chan.org/*/thread/*
+// @include      https://2ch.hk/*/*
+// @include      https://2ch.re/*/*
+// @include      https://2ch.tf/*/*
+// @include      https://2ch.wf/*/*
+// @include      https://2ch.yt/*/*
+// @include      https://2-ch.so/*/*
 // @copyright    2014+, Boku 
 // @icon         https://github.com/desudesutalk/desudesutalk/raw/master/icon.jpg
 // @updateURL    https://github.com/desudesutalk/desudesutalk/raw/master/ddt.meta.js
@@ -3050,19 +3056,21 @@ var getURLasAB = function(rawURL, cb) {
 
     var url = getHost(rawURL);
 
-    if(url.crossdomain){
-        /*jshint newcap: false  */
-        if (typeof GM_xmlhttpRequest === "function") {
-            GM_xmlhttpRequest({
-                method: "GET",
-                url: url.href,
-                overrideMimeType: "text/plain; charset=x-user-defined",
-                onload: function(oEvent) {
-                    var ff_buffer = stringToByteArray(oEvent.responseText || oEvent.response);
-                    cb(ff_buffer.buffer, new Date(0));
-                }
-            });
-        }
+    if(["2ch.hk", "2ch.pm", "2ch.re", "2ch.tf", "2ch.wf", "2ch.yt", "2-ch.so"].indexOf(url.host.toLowerCase()) != -1){
+        url.href += "?t=" + Math.floor(Math.random()*1000000);
+    }
+
+    /*jshint newcap: false  */
+    if (typeof GM_xmlhttpRequest === "function") {
+        GM_xmlhttpRequest({
+            method: "GET",
+            url: url.href,
+            overrideMimeType: "text/plain; charset=x-user-defined",
+            onload: function(oEvent) {
+                var ff_buffer = stringToByteArray(oEvent.responseText || oEvent.response);
+                cb(ff_buffer.buffer, new Date(0));
+            }
+        });
     }else{
         var oReq = new XMLHttpRequest();
 
@@ -5502,12 +5510,12 @@ var inject_ui = function() {
                 '</div>'+
             '</div>'+
             '<div class="hidbord_notifer">'+
-            '    <img id="hidbord_show" class="hidbord_clickable" alt="Moshi moshi!" title="Moshi moshi!" src="' + desudesuicon +'" width="32" style="margin:0; z-index:50;vertical-align: bottom;"/>'+
+            '    <img id="hidbord_show" class="hidbord_clickable" alt="Moshi moshi!" title="Moshi moshi!" src="' + desudesuicon +'" width="32" style="margin:0; z-index:1050;vertical-align: bottom;"/>'+
             '<span id="hidbord_notify_counter" class="hidbord_clickable" style="position: absolute;background: #f00;z-index: 100;bottom: 4px;right: 4px;font-weight: bold;padding: 2px 7px;border-radius: 30px; color: #fff;box-shadow: 0 0 1px #f00;font-size: 15px;display: none;">1</span>'+
             '</div>';
     
     injectCSS('.hidbord_popup a, .hidbord_main a {color: #ff6600;} .hidbord_popup a:hover, .hidbord_main a:hover {color: #0066ff;}'+
-            '.hidbord_notifer{font-size: smaller !important;padding: 0;font-family: calibri;position: fixed;bottom: 25px;right: 25px;box-shadow: 0 0 10px #999;display: block;border: 3px solid #fff;border-radius: 5px;background-color: rgb(217,225,229);overflow: hidden;} '+
+            '.hidbord_notifer{ z-index: 1000; font-size: smaller !important;padding: 0;font-family: calibri;position: fixed;bottom: 25px;right: 25px;box-shadow: 0 0 10px #999;display: block;border: 3px solid #fff;border-radius: 5px;background-color: rgb(217,225,229);overflow: hidden;} '+
             '.hidbord_msg code { padding: 0 4px; font-size: 90%; color: #c7254e; background-color: #f9f2f4; white-space: nowrap; border-radius: 4px; } '+
             '.hidbord_msg code, .hidbord_msg kbd, .hidbord_msg pre, .hidbord_msg samp { font-family: Menlo,Monaco,Consolas,"Courier New",monospace; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word; } '+
             '.hidbord_spoiler code { padding: 0; } '+
@@ -6251,7 +6259,7 @@ var showReplyform = function(msg_id, textInsert) {
             '              <span title="Quote selected"><input value=">" style="font-weight: bold;" type="button" id="hidbordBtQuote"></span>' +
             '            </span>  ' +
             '      </div>  ' +
-            '      <textarea style="margin: 2px; width: 580px; height: 136px; resize: vertical; background-image: none; background-position: 0% 0%; background-repeat: repeat repeat;" id="hidbord_reply_text"></textarea>  ' +
+            '      <textarea style="max-width: none; margin: 2px; width: 580px; height: 136px; resize: vertical; background-image: none; background-position: 0% 0%; background-repeat: repeat repeat;" id="hidbord_reply_text"></textarea>  ' +
             '      <div style="width: 590px;">' +
             '        <input type="button" value="crypt and send" id="do_encode">  ' +
             '        <span style="float: right;"><a href="javascript:;" id="hidbordform_preview" alt="msg_preview">message preview</a></span>  ' +
