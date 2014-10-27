@@ -3346,61 +3346,63 @@ var jsf5steg = (function(){
 
     	var successiveACState = 0, successiveACNextValue;
     
-    	function decodeACSuccessive(component, zz, pos) {
-      		var k = spectralStart, e = spectralEnd, r = 0;
-      		while (k <= e) {
-        		//var z = dctZigZag[k];
-        		switch (successiveACState) {
-        			case 0: // initial state
-          				var rs = decodeHuffman(component.huffmanTableAC);
-          				var s = rs & 15; 
-                  r = rs >> 4;
-          				if (s === 0) {
-            				if (r < 15) {
-              					eobrun = receive(r) + (1 << r);
-              					successiveACState = 4;
-            				} else {
-              					r = 16;
-              					successiveACState = 1;
-            				}
-          				} else {
-            				if (s !== 1) throw "invalid ACn encoding";
-            				successiveACNextValue = receiveAndExtend(s);
-            				successiveACState = r ? 2 : 3;
-          				}
-          				continue;
-        			case 1: // skipping r zero items
-        			case 2:
-          				if (zz[pos + k])
-            				zz[pos + k] += (readBit() << successive);
-          				else {
-            				r--;
-            				if (r === 0)
-              					successiveACState = successiveACState == 2 ? 3 : 0;
-          				}
-          				break;
-        			case 3: // set value for a zero item
-          				if (zz[pos + k])
-            				zz[pos + k] += (readBit() << successive);
-          				else {
-            				zz[pos + k] = successiveACNextValue << successive;
-            				successiveACState = 0;
-          				}
-          				break;
-        			case 4: // eob
-          				if (zz[pos + k])
-            				zz[pos + k] += (readBit() << successive);
-          				break;
-        		}
-        		k++;
-      		}
+        function decodeACSuccessive(component, zz, pos) {
+            var k = spectralStart, e = spectralEnd, r = 0;
+            while (k <= e) {
+                //var z = dctZigZag[k];
+                switch (successiveACState) {
+                    case 0: // initial state
+                        var rs = decodeHuffman(component.huffmanTableAC);
+                        var s = rs & 15; 
+                        r = rs >> 4;
+                        if (s === 0) {
+                            if (r < 15) {
+                                eobrun = receive(r) + (1 << r);
+                                successiveACState = 4;
+                            } else {
+                                r = 16;
+                                successiveACState = 1;
+                            }
+                        } else {
+                            if (s !== 1) throw "invalid ACn encoding";
+                            successiveACNextValue = receive(s);
+                            if(!successiveACNextValue)
+                                successiveACNextValue = -1;                            
+                            successiveACState = r ? 2 : 3;
+                        }
+                        continue;
+                    case 1: // skipping r zero items
+                    case 2:
+                        if (zz[pos + k])
+                            zz[pos + k] += (readBit() << successive) * (zz[pos + k] >= 0 ? 1 : -1);
+                        else {
+                            r--;
+                            if (r === 0)
+                                successiveACState = successiveACState == 2 ? 3 : 0;
+                        }
+                        break;
+                    case 3: // set value for a zero item
+                        if (zz[pos + k])
+                            zz[pos + k] += (readBit() << successive) * (zz[pos + k] >= 0 ? 1 : -1);
+                        else {
+                            zz[pos + k] = successiveACNextValue << successive;
+                            successiveACState = 0;
+                        }
+                        break;
+                    case 4: // eob
+                        if (zz[pos + k])
+                            zz[pos + k] += (readBit() << successive) * (zz[pos + k] >= 0 ? 1 : -1);
+                        break;
+                }
+                k++;
+            }
 
-      		if (successiveACState === 4) {
-        		eobrun--;
-        		if (eobrun === 0)
-          			successiveACState = 0;
-      		}
-    	}
+            if (successiveACState === 4) {
+                eobrun--;
+                if (eobrun === 0)
+                    successiveACState = 0;
+            }
+        }
 
     	function decodeMcu(component, decode, mcu, row, col) {
       		var mcuRow = (mcu / mcusPerLine) | 0;
@@ -3509,7 +3511,7 @@ var jsf5steg = (function(){
                 var blocksPerColumn = Math.ceil(Math.ceil(frame.scanLines  / 8) * component.v / frame.maxV);
                 var blocksPerLineForMcu = mcusPerLine * component.h;
                 var blocksPerColumnForMcu = mcusPerColumn * component.v;
-                var blocksBufferSize = 64 * blocksPerColumnForMcu * (blocksPerLineForMcu + 1);
+                var blocksBufferSize = 64 * blocksPerColumnForMcu * (blocksPerLineForMcu);
                 component.blocks = new Int16Array(blocksBufferSize);
                 component.blocksPerLine = blocksPerLine;
                 component.blocksPerColumn = blocksPerColumn;
