@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.24
+// @version      0.3.25
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -3511,7 +3511,7 @@ var jsf5steg = (function(){
                 var blocksPerColumn = Math.ceil(Math.ceil(frame.scanLines  / 8) * component.v / frame.maxV);
                 var blocksPerLineForMcu = mcusPerLine * component.h;
                 var blocksPerColumnForMcu = mcusPerColumn * component.v;
-                var blocksBufferSize = 64 * blocksPerColumnForMcu * (blocksPerLineForMcu);
+                var blocksBufferSize = 64 * blocksPerColumnForMcu * (blocksPerLineForMcu + 1);
                 component.blocks = new Int16Array(blocksBufferSize);
                 component.blocksPerLine = blocksPerLine;
                 component.blocksPerColumn = blocksPerColumn;
