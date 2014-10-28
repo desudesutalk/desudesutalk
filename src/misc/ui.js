@@ -214,6 +214,7 @@ var inject_ui = function() {
     $('#hidbord_btn_checknew').on('click', function() {
         $('#de-updater-btn').click();
         $('a#yukiForceUpdate').click();
+        $('a#update_thread').click();
         if(is4chan){
             $('a[data-cmd=update]').first().click();
         }
