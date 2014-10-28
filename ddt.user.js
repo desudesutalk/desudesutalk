@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.25
+// @version      0.3.26
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -4734,6 +4734,10 @@ var _sendBoardForm = function(file, formAddon) {
         fileInputName = 'file_1';
         fd.append('file_1_rating', 'SFW'); 
         formAction = '/' + Hanabira.URL.board + '/post/new.xhtml' + "?X-Progress-ID=" + upload_handler;   
+    }else if(($('form[name=post]').length !== 0)){
+        formData = $('form[name=post]').first().serializeArray();
+        fileInputName = $("form[name=post] input[type=file]")[0].name;
+        formAction = $("form[name=post]")[0].action; 
     }
 
     if(is4chan){
@@ -4823,6 +4827,7 @@ var _sendBoardForm = function(file, formAddon) {
                 $('#de-updater-btn').click();
                 $('#de-thrupdbtn').click();
                 $('a#yukiForceUpdate').click();
+                $('a#update_thread').click();
                 if(is4chan){
                     setTimeout(function() {$('a[data-cmd=update]').first().click(); $('.thread-refresh-shortcut.fa.fa-refresh').first().click();}, 2500);                    
                     $('#qrCapField').val('');
