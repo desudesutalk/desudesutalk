@@ -1,7 +1,7 @@
 # Desu Desu Talk!
 Добавляем немного стеганографии и криптографии в обычный картинкопостинг на имджбордах десу. 1024 битный RSA и 256 битный AES для защищённого *псевдонимного* общения.
 
-> 4chan? Refer to **[english guide](https://github.com/desudesutalk/desudesutalk/wiki/How-to-use-this-script)**!
+> 8chan? 4chan? Refer to **[english guide](https://github.com/desudesutalk/desudesutalk/wiki/How-to-use-this-script)**!
 
 ### Как установить
 Потербуется Google Chrome с [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo), Firefox с [Greasemonkey](https://addons.mozilla.org/firefox/addon/greasemonkey/) либо винтажная Opera c [Violentmonkey](https://addons.opera.com/ru/extensions/details/violent-monkey/)
