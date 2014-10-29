@@ -176,11 +176,11 @@ var _sendBoardForm = function(file, formAddon) {
                 $('#de-thrupdbtn').click();
                 $('a#yukiForceUpdate').click();
                 $('a#update_thread').click();
+                $('#recaptcha_response_field').val('');
+                $('#recaptcha_challenge_image').click();
                 if(is4chan){
                     setTimeout(function() {$('a[data-cmd=update]').first().click(); $('.thread-refresh-shortcut.fa.fa-refresh').first().click();}, 2500);                    
-                    $('#qrCapField').val('');
-                    $('#recaptcha_response_field').val('');
-                    $('#recaptcha_challenge_image').click();
+                    $('#qrCapField').val('');                    
                     $('#qrCaptcha').click();
                     $('textarea[name=com]').val('');                    
                     $('div#qr .captcha-input.field').val('');
