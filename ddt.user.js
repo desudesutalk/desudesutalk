@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.26
+// @version      0.3.27
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -4822,6 +4822,7 @@ var _sendBoardForm = function(file, formAddon) {
             if (p !== 0) {
                 $('#de-pform textarea').val('');
                 $('form#yukipostform textarea').val('');
+                $('form[name=post] textarea').val('');
                 $('#de-pform img[src*=captcha]').click();
                 $('#hidbord_replyform #c_file').val('');
                 $('#de-updater-btn').click();
