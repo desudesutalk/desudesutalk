@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.27
+// @version      0.3.28
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -4675,7 +4675,7 @@ var sendBoardForm = function(file) {
 
                 var l = $("form[action*=post]", doc).serializeArray();
                 l = l.filter(function(a){
-                    if(["name","email","subject","post","spoiler","body","file","file_url","password","thread","board"].indexOf(a.name) > -1) return false;
+                    if(["name","email","subject","post","spoiler","body","file","file_url","password","thread","board", "recaptcha_challenge_field", "recaptcha_response_field"].indexOf(a.name) > -1) return false;
                     return true;
                 });
 
@@ -4773,7 +4773,7 @@ var _sendBoardForm = function(file, formAddon) {
 
     if(formAddon.length > 0){
         formData = formData.filter(function(a){
-            if(["name","email","subject","post","spoiler","body","file","file_url","password","thread","board"].indexOf(a.name) > -1) return true;
+            if(["name","email","subject","post","spoiler","body","file","file_url","password","thread","board", "recaptcha_challenge_field", "recaptcha_response_field"].indexOf(a.name) > -1) return true;
             return false;
         });
         formData.push.apply(formData, formAddon);
