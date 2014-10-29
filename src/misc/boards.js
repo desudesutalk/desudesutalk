@@ -178,9 +178,11 @@ var _sendBoardForm = function(file, formAddon) {
                 $('a#update_thread').click();
                 $('#recaptcha_response_field').val('');
                 $('#recaptcha_challenge_image').click();
+                $('input[name=recaptcha_response_field]').val('');
+                $('.recaptcha_image').click();
                 if(is4chan){
                     setTimeout(function() {$('a[data-cmd=update]').first().click(); $('.thread-refresh-shortcut.fa.fa-refresh').first().click();}, 2500);                    
-                    $('#qrCapField').val('');                    
+                    $('#qrCapField').val('');
                     $('#qrCaptcha').click();
                     $('textarea[name=com]').val('');                    
                     $('div#qr .captcha-input.field').val('');
