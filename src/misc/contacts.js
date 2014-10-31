@@ -3,9 +3,15 @@ var contacts = {}, cont_groups = [];
 var add_contact = function(e) {
     "use strict";
 
-    var name = prompt("Name this contact:");
     var key = $(e.target).attr('alt');
     var rsa_hash = hex_sha1(key);
+    var temp_name = rsa_hash.substring(0,3) + "-" + rsa_hash.substring(3,6) + "-" + rsa_hash.substring(6,9);
+
+    var name = prompt("Name this contact:", temp_name);
+
+    if (ssGet(boardHostName + 'magic_desu_contacts', contactsInLocalStorage)) {
+        contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage));
+    }
 
     contacts[rsa_hash] = {
         key: key,
@@ -84,7 +90,7 @@ var render_contact = function() {
 
     var code = '<br><a href="data:text/plain;base64,' + strToDataUri(encodeURIComponent(JSON.stringify(contacts))) + 
                '" download="[DDT] Contacts - ' + document.location.host + ' - ' + dateToStr(new Date(), true) + 
-               '.txt">Download contacts as file</a> or import from file: <input type="file" id="cont_import_file" name="cont_import_file"><br/><br/>';
+               '.txt">Download contacts as file</a> or import from file: <input type="file" id="cont_import_file" name="cont_import_file"><br/><br/>', cnt = 1;
 
     for (var c in contacts) {
         var ren_action = ('hide' in contacts[c] && contacts[c].hide == 1) ? 'enable' : 'disable';
@@ -105,7 +111,7 @@ var render_contact = function() {
             '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">delete</a>]</sub> '+
             '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">' + ren_action + '</a>]</sub> '+
             '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">rename</a>]</sub> '+
-            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">groups</a>]</sub></div>'+groups_list+'<br style="clear: both;"/></div>';
+            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">groups</a>]</sub></div>'+groups_list+'<div style="float: right; color: #ccc;"><sup>#'+(cnt++)+'</sup></div><br style="clear: both;"/></div>';
     }
 
     var cont_list = $(code);
@@ -124,6 +130,10 @@ var render_contact = function() {
 
 var manage_contact = function(e) {
     "use strict";
+
+    if (ssGet(boardHostName + 'magic_desu_contacts', contactsInLocalStorage)) {
+        contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage));
+    }
 
     var action = $(e.target).text(),
         key = $(e.target).attr('alt'), name, prmpt;
