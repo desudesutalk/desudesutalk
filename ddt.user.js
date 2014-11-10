@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.31
+// @version      0.3.32
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
 // @include      http://dobrochan.org/*/*
 // @include      http://inach.org/*/*
 // @include      https://8chan.co/*/*
+// @include      https://lainchan.org/*/*
 // @include      http://iichan.hk/*/*
 // @include      http://2-ch.su/*/*
 // @include      http://syn-ch.com/*/*
@@ -4679,7 +4680,7 @@ var sendBoardForm = function(file) {
                     return true;
                 });
 
-                l.push({"name": "post", "value": $('#de-pform input[type=submit]').val()});
+                l.push({"name": "post", "value": $('form[name=post] input[type=submit]').val()});
 
                 //console.log("fresh post form: ", l);
                 
@@ -4766,9 +4767,7 @@ var _sendBoardForm = function(file, formAddon) {
             fileInputName = $("form[name=post] input[type=file]")[0].name;
         }
 
-        console.log(formData);
-
-        
+//        console.log(formData);      
     }
 
     if(formAddon.length > 0){

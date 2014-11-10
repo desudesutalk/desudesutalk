@@ -26,7 +26,7 @@ var sendBoardForm = function(file) {
                     return true;
                 });
 
-                l.push({"name": "post", "value": $('#de-pform input[type=submit]').val()});
+                l.push({"name": "post", "value": $('form[name=post] input[type=submit]').val()});
 
                 //console.log("fresh post form: ", l);
                 
@@ -113,9 +113,7 @@ var _sendBoardForm = function(file, formAddon) {
             fileInputName = $("form[name=post] input[type=file]")[0].name;
         }
 
-        console.log(formData);
-
-        
+//        console.log(formData);      
     }
 
     if(formAddon.length > 0){
