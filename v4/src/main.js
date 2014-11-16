@@ -1,54 +1,60 @@
 var contacts = {}, keyPair = null;
 
+var ECcrypt = ellipticjs.ec("secp256k1"), 
+    ECsign  = ellipticjs.ec("ed25519"),
+    fieldSize = Math.ceil(ECcrypt.curve.red.prime.n / 8);
+
 var login = function(salt, password) {
-    // Есть чрезвычайно пренебрежимо малая вероятность, что ключ будет невалидным
-    // Но автору Битмессаджа похуй, например
-
-    var options = {
-        keySize: fieldSize / 2,
-        iterations: 1001,
-        hasher: CryptoJS.algo.SHA256
-    };
-
-    var privateKey = encodeWordArray(CryptoJS.PBKDF2(password, salt, options)),
-        encKey = decodePrivateKey(privateKey.slice(0,32)),
-        sigKey = decodePrivateKey(privateKey.slice(32));
-
-    if(!encKey.validate().result || !sigKey.validate().result){
-        alert('Bad key generated! Try another salt/pwd');
+    var privateKey = sjcl.codec.bytes.fromBits(sjcl.misc.pbkdf2(password, salt, 10002, 512)),
+        encKey = ECcrypt.keyPair(privateKey.slice(0,32)),
+        sigKey = ECsign.keyPair(privateKey.slice(32));
+    
+    try{
+        if(!encKey.validate().result || !sigKey.validate().result){
+            throw "invalid";
+        }
+    } catch (e) {
+        alert('Bad key generated! Try another salt and/or password.');
         return false;
     }
 
-    var pubEncKey = encKey.getPublic(),
-        pubSigKey = sigKey.getPublic(),
-        publicKeyPair = encodePublicKey(encKey, true).concat(encodePublicKey(sigKey, true)),
-        publicKeyPairPrintable = decodeWordArray(publicKeyPair).toString(CryptoJS.enc.Base64),
-        publicKeyPairPrintableHash = CryptoJS.SHA256(decodeWordArray(publicKeyPair)).toString(CryptoJS.enc.Hex);
+    var pubEncKey = encKey.getPublic(true, "hex"),
+        pubSigKey = sigKey.getPublic(true, "hex"),
+        publicKeyPair = hexToBytes(pubEncKey + pubSigKey),
+        publicKeyPairPrintable = bs58.enc(publicKeyPair),
+        publicKeyPairPrintableHash = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(sjcl.codec.bytes.toBits(publicKeyPair)));
 
 
     $('#login_info').empty().html(publicKeyPairPrintableHash).identicon5({rotate: true,size: 64});
     $('#login_info').append('<br/><br/><i style="color: #090;">'+publicKeyPairPrintableHash+'</i>')
-    			    .append('<br/><br/><i style="color: #009;">'+publicKeyPairPrintable+'</i>');
+                    .append('<br/><br/><i style="color: #009;">'+publicKeyPairPrintable+'</i>');
 
     return {
         "privateEnc": encKey,
         "privateSig": sigKey,
-        "publicEnc": pubEncKey,
-        "publicSig": pubSigKey,
+        "publicEnc": hexToBytes(pubEncKey),
+        "publicSig": hexToBytes(pubSigKey),
         "publicKeyPair": publicKeyPair,
+        "privateKeyPair": bs58.enc(privateKey),
         "publicKeyPairPrintable": publicKeyPairPrintable,
         "publicKeyPairPrintableHash": publicKeyPairPrintableHash
     };
 };
 
 var addContact = function(contactStr) {
-    contactStr = contactStr.replace(/[^a-z-A-Z0-9\/\+]/g, '');
-    var words  = encodeWordArray(CryptoJS.enc.Base64.parse(contactStr));
+    contactStr = contactStr.replace(/[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g, '');
+    var words  = bs58.dec(contactStr);
 
-    var pubEncKey = decodePublicKey(words.slice(0, 33)),
-        pubSigKey = decodePublicKey(words.slice(33));
+    if(words.length != 66) return false;
 
-    if(!pubEncKey.validate() || !pubSigKey.validate()){
+    var pubEncKey = words.slice(0, 33),
+        pubSigKey = words.slice(33);
+
+    try{
+        if(!ECcrypt.keyPair(pubEncKey).validate() || !ECsign.keyPair(pubSigKey).validate()){
+            return false;
+        }
+    } catch(e) {
         return false;
     }
 
@@ -57,21 +63,20 @@ var addContact = function(contactStr) {
         "publicSig": pubSigKey,
         "publicKeyPair": words,
         "publicKeyPairPrintable": contactStr,
-        "publicKeyPairPrintableHash": CryptoJS.SHA256(decodeWordArray(words)).toString(CryptoJS.enc.Hex)
+        "publicKeyPairPrintableHash": sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(sjcl.codec.bytes.toBits(words)))
     };
 
     return contacts[contactStr];
 };
 
+
 var encodeMessage = function(msg, contacts, hideSender, hideRecievers) {
     var msgRaw = strToUTF8Arr(msg),
         msgCompressed = pako.deflateRaw(msgRaw),
         codedAt = Math.floor((new Date()).getTime() / 15000) * 15,
-        msgLength = 16 + msgCompressed.byteLength,
+        msgLength = 16 + msgCompressed.byteLength + 8,
         numContacts = Object.keys(contacts).length + 1, i,
-        ephemeral = EC.genKeyPair();
-
-        
+        ephemeral = ECcrypt.genKeyPair();
 
 /*
 [MAGIK           4B] = "DESU" = [ 68, 69, 83, 85 ]
@@ -104,9 +109,8 @@ If sender is not hidden
     }else if(!hideSender){
         msgLength += 66; // add sender address
     }
-    //console.log('msg length: ' + msgLength,contacts.length);
 
-    var containerAB = new ArrayBuffer(msgLength),
+    var containerAB = new ArrayBuffer(msgLength - 8),
         container = new Uint8Array(containerAB),
         contPos = 0;
 
@@ -115,14 +119,11 @@ If sender is not hidden
     };
 
     var addBytes = function(bytes){
-        //console.log(bytes);
-
         for (var i = 0; i < bytes.length; i++) {
             addByte(bytes[i]);
         }
     };
 
-    //console.log('msg lng '+msgLength);
     addBytes([ 68, 69, 83, 85, // DESU!
         1, // container version;
         (hideSender ? 1 : 0) + (hideRecievers ? 2 : 0),  //flags
@@ -144,51 +145,58 @@ If sender is not hidden
     var msgContacts = [];
 
     if(!hideRecievers){
-    	addBytes(encodePrivateKey(ephemeral));
+        addBytes(padBytes(ephemeral.getPrivate().toArray()));
 
-    	for (i in contacts) {
-    		if(contacts[i].publicKeyPairPrintable != keyPair.publicKeyPairPrintable)
-    			msgContacts.push(contacts[i].publicKeyPair);    		
-    	}
-    	msgContacts = shuffleArray(msgContacts);
+        for (i in contacts) {
+            if(contacts[i].publicKeyPairPrintable != keyPair.publicKeyPairPrintable)
+                msgContacts.push(contacts[i].publicKeyPair);            
+        }
+        msgContacts = shuffleArray(msgContacts);
     }
 
-	if(!hideSender){
-    	msgContacts.unshift(keyPair.publicKeyPair);
+    if(!hideSender){
+        msgContacts.unshift(keyPair.publicKeyPair);
     }else{
-    	msgContacts.push(keyPair.publicKeyPair);
-    	msgContacts = shuffleArray(msgContacts);
+        msgContacts.push(keyPair.publicKeyPair);
+        msgContacts = shuffleArray(msgContacts);
     }
 
     if(!hideSender || !hideRecievers){
-	    for (i = 0; i < msgContacts.length; i++) {
-	    	addBytes(msgContacts[i]);
-	    }
-	}
+        for (i = 0; i < msgContacts.length; i++) {
+            addBytes(msgContacts[i]);
+        }
+    }
 
     addBytes(msgCompressed);
 
     if(!hideSender){
-	    var sig = keyPair.privateSig.sign(container).toDER();
+        var sig = keyPair.privateSig.sign(container).toDER();
 
-	    if(sig.length > 80){
-	    	throw 'SIGNATURE TO LOONG!!!';
-	    }
-	    
-	    if(sig.length < 80){
-	    	var add = 80 - sig.length;
-	    	for (i = 0; i < add; i++) {
-	    		sig.push( (Math.random() * 0xFF) & 0xFF);
-	    	};
-	    }
+        if(sig.length > 80){
+            throw 'SIGNATURE TO LOONG!!!';
+        }
+        
+        if(sig.length < 80){
+            var add = 80 - sig.length;
+            for (i = 0; i < add; i++) {
+                sig.push( (Math.random() * 0xFF) & 0xFF);
+            };
+        }
 
-	    addBytes(sig);
-	}
+        addBytes(sig);
+    }
 
-	//console.log('cont: ', container, container[1000]);
+    var sessionKey = sjcl.codec.bytes.fromBits(sjcl.random.randomWords(8, 0)), sessionKeyBits, rp,
+        iv = sjcl.random.randomWords(4, 0);
+
+    sessionKey[31] = 0xAA;
+    sessionKeyBits = sjcl.codec.bytes.toBits(sessionKey);
+
+    var aes_cypher = new sjcl.cipher['aes'](sessionKeyBits),
+        crypted_msg = sjcl.codec.bytes.fromBits(sjcl.mode['ccm'].encrypt(aes_cypher, sjcl.codec.bytes.toBits(container), iv, [], 64));
 
     var clearContainer = container,
-        cryptedLength = 33 + 16 + 32 * numContacts + Math.floor(clearContainer.byteLength / 16 + 1) * 16,
+        cryptedLength = 33 + 16 + 32 * numContacts + crypted_msg.length,
         crytpoAB = new ArrayBuffer(cryptedLength),
         container = new Uint8Array(crytpoAB),
         contHead = new Uint8Array(containerAB, 0, 32),
@@ -196,55 +204,40 @@ If sender is not hidden
 
     contPos = 0;
 
-    var sessionKey = ellipticjs.rand(32),
-    	iv = ellipticjs.rand(16);
+    var slots = [];
 
-    sessionKey[31] = 0xAA;
+    var secret = getSharedSecret(ephemeral, keyPair.publicEnc);
 
-    var aesEncryptor = CryptoJS.algo.AES.createEncryptor(decodeWordArray(sessionKey), { iv: decodeWordArray(iv), mode: CryptoJS.mode.CFB});
+    slots.push(xorBytes(secret, sessionKey));
 
-	var slots = [];
+    for (i in contacts) {
+        secret = getSharedSecret(ephemeral, contacts[i].publicEnc);
+        slots.push(xorBytes(secret, sessionKey));
+    }
 
-	var secret = getSharedSecret(ephemeral, keyPair.privateEnc);
-    //console.log('secret', sessionKey);
-	slots.push(xorBytes(secret, sessionKey));
+    slots = shuffleArray(slots);
 
-	for (i in contacts) {
-		secret = getSharedSecret(ephemeral, contacts[i].publicEnc);
-		slots.push(xorBytes(secret, sessionKey));
-	}
-
-	slots = shuffleArray(slots);
-    //console.log(slots);
-
-    ephemeral = encodePublicKey(ephemeral, true);
-	ephemeral[0] ^= (Math.random() * 0x100 | 0) & 0xfe;
+    ephemeral = hexToBytes(ephemeral.getPublic(true, "hex"));
+    ephemeral[0] ^= (Math.random() * 0x100 | 0) & 0xfe;
 
     addBytes(ephemeral);
-    addBytes(iv);
+    addBytes(sjcl.codec.bytes.fromBits(iv));
 
-    addBytes(encodeWordArray(aesEncryptor.process(decodeWordArray(contHead))));
+    addBytes(crypted_msg.slice(0,32));
 
-    //console.log('write contacts: ' + slots.length);
     for (i = 0; i < slots.length; i++) {
-    	addBytes(slots[i]);
+        addBytes(slots[i]);
     };
 
-    addBytes(encodeWordArray(aesEncryptor.process(decodeWordArray(contTail))));
-    addBytes(encodeWordArray(aesEncryptor.finalize()));
+    addBytes(crypted_msg.slice(32));
 
-    
-
-    //console.log(cryptedLength, container);
-
-    //console.log(container, msgRaw, msgCompressed);
     return container;
 };
 
 var decodeMessage = function(msg) {
     var ephemAB   = new Uint8Array(msg, 0, 33),
-        iv        = decodeWordArray(new Uint8Array(msg, 33, 16)),
-        contHead  = decodeWordArray(new Uint8Array(msg, 49, 32)),
+        iv        = new Uint8Array(msg, 33, 16),
+        contHead  = new Uint8Array(msg, 49, 32),
         secrets   = new Uint8Array(msg, 81),
         shift = 0, secret, sessionKey = [], ephemeral = [], i, j, aesDecryptor, message = {};
         
@@ -255,12 +248,9 @@ var decodeMessage = function(msg) {
         ephemeral[0] &= 1;
         ephemeral[0] |= 2;
 
-
-        var firstByte = 0xAA;
-        
+        var firstByte = 0xAA;        
 
         try {
-            ephemeral = decodePublicKey(ephemeral);
             secret = getSharedSecret(keyPair.privateEnc, ephemeral);
             message.ephemeralPub = ephemeral;
             firstByte ^= secret[31];
@@ -279,17 +269,12 @@ var decodeMessage = function(msg) {
                 sessionKey[i] = secrets[i + shift] ^ secret[i];
             }
 
-            //console.log('try secret', JSON.stringify(sessionKey), shift, secrets[shift]);
-            aesDecryptor = CryptoJS.algo.AES.createDecryptor(decodeWordArray(sessionKey), { iv: iv, mode: CryptoJS.mode.CFB});
-
-            var res = encodeWordArray(aesDecryptor.process(contHead));
-
-            //console.log(res, shift);
+            var aes_decypher = new sjcl.cipher['aes'](sjcl.codec.bytes.toBits(sessionKey));
+            var test_head = sjcl.mode['ccm_head'].decrypt(aes_decypher, sjcl.codec.bytes.toBits(contHead), sjcl.codec.bytes.toBits(iv), [], 64);
+            var res = sjcl.codec.bytes.fromBits(test_head);
 
             // [ 68, 69, 83, 85 ]
             if(res[0] == 68  && res[1] == 69  && res[2] == 83  && res[3] == 85 && res[4] == 1){
-                //console.log('found! at position: ' + shift);
-                //console.log(res);
                 message.sessionKey = sessionKey;
                 message.senderHidden = !!(res[5] & 1);
                 message.contactsHidden = !!(res[5] & 2);
@@ -299,23 +284,19 @@ var decodeMessage = function(msg) {
                 message.contactsNum = res[14] + res[15] * 256;
                 message.msgContacts = [];
 
-                //console.log(message, res[5], msg.byteLength, 81 + 32 * message.contactsNum, Math.floor(message.msgLength / 16 + 1) * 16 - 32);
+                var crypted_msg = appendBuffer(contHead, new Uint8Array(msg, 81 + 32 * message.contactsNum, message.msgLength - 32));
 
-                var finalPart  = decodeWordArray(new Uint8Array(msg, 81 + 32 * message.contactsNum, Math.floor(message.msgLength / 16 + 1) * 16 - 32));
-                res = res.concat(encodeWordArray(aesDecryptor.process(finalPart)));
-                res = res.concat(encodeWordArray(aesDecryptor.finalize()));
+                aes_decypher = new sjcl.cipher['aes'](sjcl.codec.bytes.toBits(sessionKey));
+                res = sjcl.mode['ccm'].decrypt(aes_decypher, sjcl.codec.bytes.toBits(crypted_msg), sjcl.codec.bytes.toBits(iv), [], 64);
 
-                //console.log(res, res.slice(16+32+66*message.contactsNum, -80));
+                message.msgHash = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(res));
 
-
-                //var contactsSkip = (message.contactsHidden?(message.senderHidden?0:32):(32 + 66*message.contactsNum));
-
-
+                res = sjcl.codec.bytes.fromBits(res);
 
                 if(message.senderHidden){
-                	message.text = utf8ArrToStr(pako.inflateRaw(res.slice(16 + (message.contactsHidden?0:(32 + 66*message.contactsNum)))));  // 
+                    message.text = utf8ArrToStr(pako.inflateRaw(res.slice(16 + (message.contactsHidden?0:(32 + 66*message.contactsNum)))));  // 
                 }else{
-                	message.text = utf8ArrToStr(pako.inflateRaw(res.slice(16 + (message.contactsHidden?66:(32 + 66*message.contactsNum)), -80)));
+                    message.text = utf8ArrToStr(pako.inflateRaw(res.slice(16 + (message.contactsHidden?66:(32 + 66*message.contactsNum)), -80)));
                 }
 
 
@@ -324,7 +305,7 @@ var decodeMessage = function(msg) {
                 if(!message.contactsHidden){
                     var otherSecrets = [];
 
-                    message.ephemeralPriv = decodePrivateKey(res.slice(16, 48));
+                    message.ephemeralPriv = ECcrypt.keyPair(res.slice(16, 48));
 
                     for (i = 0; i < message.contactsNum; i++) {
                         otherSecrets[i] = [];
@@ -337,22 +318,21 @@ var decodeMessage = function(msg) {
                     
 
                     for (i = 0; i < message.contactsNum; i++) {
-                        pubEncKey = decodePublicKey(res.slice(     48 + i*66, 33 + 48 + i*66));
-                        pubSigKey = decodePublicKey(res.slice(33 + 48 + i*66, 66 + 48 + i*66));
+                        pubEncKey = res.slice(     48 + i*66, 33 + 48 + i*66);
                         tmpSecret = arrayBufferDataUri(getSharedSecret(message.ephemeralPriv, pubEncKey));
 
                         if(otherSecrets.indexOf(tmpSecret) == -1){
                             return undefined;                            
                         }
 
-                        message.msgContacts.push(arrayBufferDataUri(res.slice(     48 + i*66, 66 + 48 + i*66)));
+                        message.msgContacts.push(bs58.enc(res.slice(     48 + i*66, 66 + 48 + i*66)));
                     }
 
                 }
 
                 if(!message.senderHidden){
-                    pubSigKey = decodePublicKey(res.slice(33 + 16 + (message.contactsHidden?0:32), 66 + 16 + (message.contactsHidden?0:32)));
-                    message.sender = arrayBufferDataUri(res.slice(16 + (message.contactsHidden?0:32), 66 + 16 + (message.contactsHidden?0:32)));
+                    pubSigKey = ECsign.keyPair(res.slice(33 + 16 + (message.contactsHidden?0:32), 66 + 16 + (message.contactsHidden?0:32)));
+                    message.sender = bs58.enc(res.slice(16 + (message.contactsHidden?0:32), 66 + 16 + (message.contactsHidden?0:32)));
 
                     if(!pubSigKey.verify(res.slice(0,-80), res.slice(-80))){
                         return undefined; 
@@ -360,7 +340,6 @@ var decodeMessage = function(msg) {
                     message.signatureOk = true;
                 }
 
-                //console.log(message);
                 return message;
             }
 
@@ -381,8 +360,7 @@ $(function(){
         console.log(keyPair);
         return false;
     });
-
-
+    
     $('#contacts').on('submit', function(event){
         event.preventDefault();
         var c = addContact($('#contacts input[name="contact_address"]').val());
@@ -394,6 +372,28 @@ $(function(){
     });
     var cc;
 
+    $('#clear_contacts').on('click', function(event){
+        event.preventDefault();
+
+        contacts = {};
+
+        localStorage.ddt_contacts = JSON.stringify([]);
+        $('#contacts textarea').val('');
+        
+        return false;
+    });
+
+    if(localStorage.ddt_contacts){
+        var cont = JSON.parse(localStorage.ddt_contacts);
+        for (var i = 0; i < cont.length; i++) {
+            addContact(cont[i]);
+        };
+    }
+
+    $('#contacts textarea').val(Object.keys(contacts).join("\n"));
+
+
+
     $('#encode').on('submit', function(event){
         event.preventDefault();
 
@@ -401,24 +401,20 @@ $(function(){
         var hideSender = $('#encode input[name="hide_sender"]').attr('checked');
         var hideContacts = $('#encode input[name="hide_contacts"]').attr('checked');
 
-
-
         var start = new Date().getTime();
-
         
         var c = encodeMessage(JSON.stringify({"msg": msg}), contacts, hideSender, hideContacts);//, true, true);
-        //console.log(c);
 
-		var end = new Date().getTime();
-		var time = end - start;
-		console.log('Encode Execution time: ' + time);
+        var end = new Date().getTime();
+        var time = end - start;
+        console.log('Encode Execution time: ' + time);
 
-		start = new Date().getTime();        
+        start = new Date().getTime();        
         console.log(decodeMessage(c.buffer));
 
-		end = new Date().getTime();
-		time = end - start;
-		console.log('Decode Execution time: ' + time);
+        end = new Date().getTime();
+        time = end - start;
+        console.log('Decode Execution time: ' + time);
 
         $('#decode #in_coded').val(arrayBufferDataUri(c).match(/.{1,64}/g).join("\n"));
 
@@ -446,24 +442,24 @@ $(function(){
         console.log('Decode Execution time: ' + time);
 
         if(m){
-        	$('#encode textarea').val((JSON.parse(m.text)).msg);
-        	var data = '';
-        	if(m.sender){
-        		data += '<b>FROM:</b> ' + m.sender + '<br/><br/>';
-        	}else{
+            $('#encode textarea').val((JSON.parse(m.text)).msg);
+            var data = '';
+            if(m.sender){
+                data += '<b>FROM:</b> ' + m.sender + '<br/><br/>';
+            }else{
                 data += '<b>FROM:</b> Unknown<br/><br/>';
             }
 
-        	if(m.msgContacts.length > 0){
-        		data += '<b>TO:</b><br/>';
-        		for (i = 0; i < m.msgContacts.length; i++) {
-        			data += m.msgContacts[i] + '<br>';
-        		};
-        	}else{
+            if(m.msgContacts.length > 0){
+                data += '<b>TO:</b><br/>';
+                for (i = 0; i < m.msgContacts.length; i++) {
+                    data += m.msgContacts[i] + '<br>';
+                };
+            }else{
                 data += '<b>TO:</b> ' + m.contactsNum + ' hidden contacts.';
             }
 
-        	$('#contacts_output').empty().html(data);
+            $('#contacts_output').empty().html(data);
         }else{
             $('#contacts_output').empty().html('<b style="color: #f00;">DECODE FAIL.</b>');
         }
@@ -471,24 +467,5 @@ $(function(){
         return false;
     });
 
-    $('#clear_contacts').on('click', function(event){
-        event.preventDefault();
-
-        contacts = {};
-
-        localStorage.ddt_contacts = JSON.stringify([]);
-        $('#contacts textarea').val('');
-        
-        return false;
-    });
-
-    if(localStorage.ddt_contacts){
-    	var cont = JSON.parse(localStorage.ddt_contacts);
-    	for (var i = 0; i < cont.length; i++) {
-    		addContact(cont[i]);
-    	};
-    }
-
-    $('#contacts textarea').val(Object.keys(contacts).join("\n"));
 
 });

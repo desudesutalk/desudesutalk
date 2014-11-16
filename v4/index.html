@@ -7,18 +7,14 @@
 
 	<script language="JavaScript" type="text/javascript" src="src/libs/jquery.identicon5.js"></script>	
 
-	<script language="JavaScript" type="text/javascript" src="src/libs/cryptojs/components/core.js"></script>
-	<script language="JavaScript" type="text/javascript" src="src/libs/cryptojs/components/cipher-core.js"></script>
-	<script language="JavaScript" type="text/javascript" src="src/libs/cryptojs/components/aes.js"></script>
-	<script language="JavaScript" type="text/javascript" src="src/libs/cryptojs/components/mode-cfb.js"></script>
-	<script language="JavaScript" type="text/javascript" src="src/libs/cryptojs/components/hmac.js"></script>	
-	<script language="JavaScript" type="text/javascript" src="src/libs/cryptojs/components/sha256.js"></script>	
-	<script language="JavaScript" type="text/javascript" src="src/libs/cryptojs/components/pbkdf2.js"></script>	
-	<script language="JavaScript" type="text/javascript" src="src/libs/cryptojs/components/enc-base64.js"></script>
+	<script language="JavaScript" type="text/javascript" src="src/libs/sjcl.js"></script>
+	<script language="JavaScript" type="text/javascript" src="src/libs/sjcl.ccm_hack.js"></script>
 
-	<script language="JavaScript" type="text/javascript" src="src/libs/elliptic.js"></script>
+	<script language="JavaScript" type="text/javascript" src="src/libs/elliptic.min.js"></script>
 
 	<script language="JavaScript" type="text/javascript" src="src/libs/utf8array.js"></script>
+
+	<script language="JavaScript" type="text/javascript" src="src/libs/base58.js"></script>
 
 	<script language="JavaScript" type="text/javascript" src="src/helpers.js"></script>
 	<script language="JavaScript" type="text/javascript" src="src/main.js"></script>
@@ -49,8 +45,8 @@
 
 
 <td><form id="login">
-	<p><label>Salt: <input name="login_salt" type="text" style="color: #ddd;"/></label><br/>
-	   <label>Password: <input name="login_pwd" type="text" style="color: #ddd;"/></label></p>
+	<p><label>Password: <input name="login_pwd" type="text" style="color: #ddd;"/></label><br/>
+	   <label>Salt: <input name="login_salt" type="text" style="color: #ddd;"/></label></p>
 	<p><input type="submit" value="Log in!"/></p>
 	<p id="login_info" style="font-size: x-small;"></p>
 </form>
