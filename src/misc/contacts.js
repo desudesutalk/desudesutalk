@@ -9,7 +9,7 @@ var add_contact = function(e) {
 
     var name = prompt("Name this contact:", temp_name);
 
-    if (ssGet(boardHostName + 'magic_desu_contacts', contactsInLocalStorage)) {
+    if (ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage)) {
         contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage));
     }
 
@@ -80,7 +80,7 @@ var contactsSelector = function(){
 var render_contact = function() {
     "use strict";
 
-    if (ssGet(boardHostName + 'magic_desu_contacts', contactsInLocalStorage)) {
+    if (ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage)) {
         contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage));
     //    console.log(contacts);
     }
@@ -131,7 +131,7 @@ var render_contact = function() {
 var manage_contact = function(e) {
     "use strict";
 
-    if (ssGet(boardHostName + 'magic_desu_contacts', contactsInLocalStorage)) {
+    if (ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage)) {
         contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage));
     }
 
@@ -195,7 +195,7 @@ var import_contact = function(evt) {
                             contacts[c] = in_data[c];
                         }
                     }
-                    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
+                    ssSet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
                     render_contact();
                 }catch(err){
 //                    console.log(err);

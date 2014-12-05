@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.3.33
+// @version      0.3.34
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -4653,6 +4653,9 @@ var jpegExtract = function(inArBuf) {
 };
 
 var upload_handler = (new Date()).getTime() * 10000;
+
+var TinyBoardFields = ["name","email","subject","post","spoiler","body","file","file_url","password","thread","board", "recaptcha_challenge_field", "recaptcha_response_field", "user_flag"];
+
 ParseUrl = function(url){
     "use strict";
     var m = (url || document.location.href).match( /https?:\/\/([^\/]+)\/([^\/]+)\/((\d+)|res\/(\d+)|\w+)(\.x?html)?(#i?(\d+))?/);
@@ -4676,7 +4679,7 @@ var sendBoardForm = function(file) {
 
                 var l = $("form[action*=post]", doc).serializeArray();
                 l = l.filter(function(a){
-                    if(["name","email","subject","post","spoiler","body","file","file_url","password","thread","board", "recaptcha_challenge_field", "recaptcha_response_field"].indexOf(a.name) > -1) return false;
+                    if(TinyBoardFields.indexOf(a.name) > -1) return false;
                     return true;
                 });
 
@@ -4772,7 +4775,7 @@ var _sendBoardForm = function(file, formAddon) {
 
     if(formAddon.length > 0){
         formData = formData.filter(function(a){
-            if(["name","email","subject","post","spoiler","body","file","file_url","password","thread","board", "recaptcha_challenge_field", "recaptcha_response_field"].indexOf(a.name) > -1) return true;
+            if(TinyBoardFields.indexOf(a.name) > -1) return true;
             return false;
         });
         formData.push.apply(formData, formAddon);
@@ -5021,14 +5024,16 @@ var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
         }
         return;
     }
-
-    processedJpegs[jpgURL] = {'id': 'none'};
-    
+        
     getURLasAB(jpgURL, function(arrayBuffer, date) {
         var arc = jpegExtract(arrayBuffer);
         if(arc){
             var p = decodeMessage(arc);
-            if(p) processedJpegs[jpgURL].id = do_decode(p, null, thumbURL, date, post_id).id;
+            if(p){
+                processedJpegs[jpgURL] = {id: do_decode(p, null, thumbURL, date, post_id).id};
+            }else{
+                processedJpegs[jpgURL] = {'id': 'none'};
+            }
         }
 
         if (typeof(cb) == "function") {
@@ -5049,7 +5054,7 @@ var add_contact = function(e) {
 
     var name = prompt("Name this contact:", temp_name);
 
-    if (ssGet(boardHostName + 'magic_desu_contacts', contactsInLocalStorage)) {
+    if (ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage)) {
         contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage));
     }
 
@@ -5120,7 +5125,7 @@ var contactsSelector = function(){
 var render_contact = function() {
     "use strict";
 
-    if (ssGet(boardHostName + 'magic_desu_contacts', contactsInLocalStorage)) {
+    if (ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage)) {
         contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage));
     //    console.log(contacts);
     }
@@ -5171,7 +5176,7 @@ var render_contact = function() {
 var manage_contact = function(e) {
     "use strict";
 
-    if (ssGet(boardHostName + 'magic_desu_contacts', contactsInLocalStorage)) {
+    if (ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage)) {
         contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage));
     }
 
@@ -5235,7 +5240,7 @@ var import_contact = function(evt) {
                             contacts[c] = in_data[c];
                         }
                     }
-                    ssSet(boardHostName + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
+                    ssSet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
                     render_contact();
                 }catch(err){
 //                    console.log(err);
@@ -6422,7 +6427,8 @@ var imoticons = {
     "cake": '<img style="vertical-align:bottom;" alt="Delicious Cake" title="Delicious Cake" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAArlBMVEUAAAAAAAA4GRQ5GRRBHBtUIyqlJRSmJhSmJxV5OS6oLx1rQDerNiXUOyt9VkzZQzXfQzXiQzXlQzTmQzTmRDXnRDXjRziNal+rZETkVkesaEnhbF3CejXCejbEfDXAe2u4gmf+b125g2n/cF6th3iuiHmviXrChHSxjX63loe7m4zhn1jkolnlo1r/mrrWtqfSvK3Tvq/Vv7DVwLHe0L3e0rvg08Dz89j09Nn09O0mCXiuAAAAAXRSTlMAQObYZgAAASZJREFUOE/tkNlWwzAMRGuDG/ZdEDZDG8TasA1Q+/9/DElN2oTTwxtvzEsSzc2M7MHgX3+jEMLvPtFwKREaFamaLCNCMqGoqvpwGMKq933Aw3wUVNOk2PhIqU94oCxZESY64vsveeU+wTGWqStGH4h1HVkCzPxkhtR1CU8UBSh5ap6qoB4gC5JCU/Gv1vdIgKoDOEmgVIH45gx32zQiUsC1toOPSRKAdzrFye7ouSKtgDPEIWdfR0Po+AE7+wbIkjlDCMfytFPIBng5x9YBVZrm5cfMzgKQvSLCvD4Ca5vqw2dYhAHaosjkctycktkDTYcRDfJ03dpzX5bQMh1nv3Ixxq26ATbk2TEWyJs3obUXN6E3nDvSlrk9Q2ZQu6F+D37KdbSYfgM6VkDcNJNUdAAAAABJRU5ErkJggg=="/>',
     "tea":  '<img style="vertical-align:bottom;" alt="A cup of Tea" title="A cup of Tea" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAM1BMVEX4WBgAAQBDRUL/GgBUVVN2eHX/ZDSHiYb/mAD/mTSpq6i5u7j/zAbKzMnc3tvt7+v+//ytxHIVAAAAAXRSTlMAQObYZgAAAPpJREFUOMvtktluxDAIRU1qjx3wwv9/bS/eklTpQ997pZESnSMGCM7958+hld+orrw4ndaV7jy5aillC3juZbZFhi9jvGisVWgJgpyfldNeVSJCU2DgrytQWA/nZAlF653DUJWb4Cij813jc6LnBO42p5qydT5TmFM6qM4C2IGPtcAoGc1lAU3xqJtra81juJyS/SQnZo5e4uY2uh/j23zSufdcKs0Cl7F5YPCqNP+hmSHTuHi7BIR9EBM4BnDDbQisQymF/Qhw55i3N8FFV5V7bB1z0ZH7kp4UOO6vDYVvi7TjQKf3myFC24+En1eH6wlxJbwfLtHbWX8D14kVhZIALoUAAAAASUVORK5CYII="/>',
     "sarcasm": '<img style="vertical-align:bottom;" alt="SARCASM!" title="SARCASM!" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAuBAMAAACoiUZDAAAALVBMVEUAAAAQEBD/AACDWgCUWhAAqQB7e3vmpFLetFL/1Ur23ove3t7/5qT/7r3///8MKkFGAAAAAXRSTlMAQObYZgAAAbpJREFUKM9t071q40AQB/BdzrjWkIOVD/wKByaF7wIJDhEYN3mEAz3CgmBwKdwsBhciAjOQxqQxgXR5iQM1xk0QbBO4KuBnuP3QSrr4pvzt/PdjkBjrV8qGEftcKUvPEYbAzpGfNzKeDtN/IDHFI+jlB7NkSbRN+sYW5WNVEVHSj9Kiqqrfprc7aEAleSTZhWlBPk5FiyP6as9xFXXpm9PcHm6WAnIq3r+/EmUns5S1W3q8//PrleQsbFncfNxNHG5vyxYfYPw2yk4f89uyOV9QUdS6XokkyYpwKYHy+qif1rmJlLT1m3KcaK3Vpl6h7F56oS3qN4Giw2/a1Q7lyGDz/LHHHITpxAbjF2smjfNli3xjcW8RMSADo/scfTU4WIJSufiERADBMApjMhUM2snb2rostJOnnnq75A1Si18ux0C91swOievrA/VbAWZssrnSPwPKKaLAjMWxevGn04TGR4uScaXWR2cP+kIfLEYW1c59HoUZygEz96RYqedpg/UKpu5JNi/QYW1Swt8+Vusnd229N7OSfh6mdefRNEL4wEDlAHOUJp33fh+zPAD4odT5bxSr//xvPNhf1sQYU21hKHsAAAAASUVORK5CYII="/>',
-    "elita": '<span style="font-family: comic sans ms; font-style: italic;"><font style="font-size:32px" color="#ff0000">YA</font><font style="font-size:33px"> </font><font style="font-size:33px" color="#ff2b00">e</font><font style="font-size:26px" color="#ff5500">l</font><font style="font-size:40px" color="#ff8000">i</font><font style="font-size:20px" color="#ffaa00">t</font><font style="font-size:33px" color="#ffd500">a</font><font style="font-size:31px" color="#ffff00">,</font><font style="font-size:45px"> </font><font style="font-size:41px" color="#d4ff00">a</font><font style="font-size:25px"> </font><font style="font-size:28px" color="#aaff00">t</font><font style="font-size:33px" color="#7fff00">i</font><font style="font-size:50px"> </font><font style="font-size:21px" color="#55ff00">h</font><font style="font-size:24px" color="#2aff00">u</font><font style="font-size:47px" color="#00ff00">i</font><font style="font-size:39px" color="#00ff2b">!</font><font style="font-size:33px"> </font><font style="font-size:22px" color="#00ff55">S</font><font style="font-size:46px" color="#00ff80">a</font><font style="font-size:27px" color="#00ffaa">s</font><font style="font-size:41px" color="#00ffd5">a</font><font style="font-size:48px" color="#00ffff">i</font><font style="font-size:27px"> </font><font style="font-size:44px" color="#00d4ff">r</font><font style="font-size:38px" color="#00aaff">a</font><font style="font-size:47px" color="#007fff">i</font><font style="font-size:24px" color="#0055ff">n</font><font style="font-size:27px" color="#002aff">b</font><font style="font-size:39px" color="#0000ff">ow</font><font style="font-size:37px" color="#2400ff">,</font><font style="font-size:40px"> </font><font style="font-size:21px" color="#4900ff">l</font><font style="font-size:44px" color="#6d00ff">a</font><font style="font-size:29px" color="#9200ff">l</font><font style="font-size:21px" color="#b600ff">k</font><font style="font-size:26px" color="#db00ff">a</font><font style="font-size:41px" color="#ff00ff">!</font></span>'
+    "elita": '<span style="font-family: comic sans ms; font-style: italic;"><font style="font-size:32px" color="#ff0000">YA</font><font style="font-size:33px"> </font><font style="font-size:33px" color="#ff2b00">e</font><font style="font-size:26px" color="#ff5500">l</font><font style="font-size:40px" color="#ff8000">i</font><font style="font-size:20px" color="#ffaa00">t</font><font style="font-size:33px" color="#ffd500">a</font><font style="font-size:31px" color="#ffff00">,</font><font style="font-size:45px"> </font><font style="font-size:41px" color="#d4ff00">a</font><font style="font-size:25px"> </font><font style="font-size:28px" color="#aaff00">t</font><font style="font-size:33px" color="#7fff00">i</font><font style="font-size:50px"> </font><font style="font-size:21px" color="#55ff00">h</font><font style="font-size:24px" color="#2aff00">u</font><font style="font-size:47px" color="#00ff00">i</font><font style="font-size:39px" color="#00ff2b">!</font><font style="font-size:33px"> </font><font style="font-size:22px" color="#00ff55">S</font><font style="font-size:46px" color="#00ff80">a</font><font style="font-size:27px" color="#00ffaa">s</font><font style="font-size:41px" color="#00ffd5">a</font><font style="font-size:48px" color="#00ffff">i</font><font style="font-size:27px"> </font><font style="font-size:44px" color="#00d4ff">r</font><font style="font-size:38px" color="#00aaff">a</font><font style="font-size:47px" color="#007fff">i</font><font style="font-size:24px" color="#0055ff">n</font><font style="font-size:27px" color="#002aff">b</font><font style="font-size:39px" color="#0000ff">ow</font><font style="font-size:37px" color="#2400ff">,</font><font style="font-size:40px"> </font><font style="font-size:21px" color="#4900ff">l</font><font style="font-size:44px" color="#6d00ff">a</font><font style="font-size:29px" color="#9200ff">l</font><font style="font-size:21px" color="#b600ff">k</font><font style="font-size:26px" color="#db00ff">a</font><font style="font-size:41px" color="#ff00ff">!</font></span>',
+    "slow": '<img style="vertical-align:bottom;" alt="Slow Poke" title="Slow Poke" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADcAAAAgCAMAAACB1hBXAAAAM1BMVEWUcoIAAAAQEBB7ITH/AACtQlKMWhlrY2MAqQDeY3v/hJTepWP/paXvxYzWzs7/5rX///8p8wWNAAAAAXRSTlMAQObYZgAAAbNJREFUOMudlYGSgyAMRCU02MBJ8/9fe5sgSq0619tpRws8NgnRTpOLmeP0vThD1O5l15+wnKNTuPlpyiJ8z0kDBeGGDWso33KwkbY+gwyBhVcQvy+5gIDiHl0Q9+5gvgFpjw4Oa7or1hK/MOzVyGum+FDuugo1aJU8SCIh5Z0DGM7OhVXfuOinF4cR9ngOaNDHo58EjgLEkcNwSySPJNfOiapWC1H8u1Eiezw8cGVZSsGCqgbCjojkXfwBlrK8TKXA7vlU5eb2oW7fwJWClnLH8Qpa5sDShgFMPU5b9cltApiKre9kSlRZzjWMs3GL6dV8UR5KN1xn0UCUTIZ6bQBecFH6yXqgUbQuSzI/uJV0yYU3DkWiYrEmp8j9cHx8xm2DwbicLLyCmpBfqXX0geTAcd9jsi6U5IDWhuWxvzbRXLOM6fkClMZNC1E+5YDVuttN3Zu8rlT1vZ03zQoubxjOwW/R0ZWwJy6nxfSZlVuffm99exIqWZvpESHTrJ0bXho2YcTs9CEvf43P3rgAP/4OsOU8zTN2iHE0arPNDnO37+8YB6TtCgz7fi1S+gdlWRwGfgHYqi1M874NxAAAAABJRU5ErkJggg=="/>'
 };
 
 var wkbmrk = function(in_text) {
@@ -6696,7 +6702,7 @@ var parseOneLineTags = function(match, tag, str) {
 
     if (tag === null) {
         //imoticons
-        res = res.replace(/\[(gin|kana|desu|boku|dawa|hina|kira|bara|meat|cake|tea|sarcasm|elita)\]/ig, function(match, a, b) {
+        res = res.replace(/\[(gin|kana|desu|boku|dawa|hina|kira|bara|meat|cake|tea|sarcasm|elita|slow)\]/ig, function(match, a, b) {
             return imoticons[a.toLowerCase()];
         });
 
