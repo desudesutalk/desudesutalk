@@ -23,6 +23,7 @@
 // @include      https://2ch.wf/*/*
 // @include      https://2ch.yt/*/*
 // @include      https://2-ch.so/*/*
+// @exclude      *#dev
 // @copyright    2014+, Boku 
 // @icon         https://github.com/desudesutalk/desudesutalk/raw/master/icon.jpg
 // @updateURL    https://github.com/desudesutalk/desudesutalk/raw/master/ddt.meta.js
