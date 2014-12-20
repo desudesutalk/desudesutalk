@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="src/libs/zepto.min.js"></script>
+    <script src="src/libs/sjcl.js"></script>
+    <script src="src/libs/prng4.js"></script>
+    <script src="src/jsf5steg.js"></script>
+    <script src="src/main2.js"></script>
+    <title>f5</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  </head>
+  <body>
+    <table>
+    <tr><td>Password: </td><td><input name="passwd" type="text" value="secret" size="10"></td></tr>
+    <tr><td>Container: </td><td><input type="file" id="image-select"/></td></tr>
+    <tr><td>Data: </td><td><input type="file" id="data-select"/><br/></td></tr>    
+    </table>
+    <input type="button" value="embed data" id="do_embed"> <input type="button" value="extract data" id="do_extract"><br/>
+
+
+    <div id="outputdiv">
+    </div>
+  </body>
+</html>
