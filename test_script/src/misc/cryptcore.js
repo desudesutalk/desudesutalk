@@ -10,10 +10,17 @@ var cryptCore = (function(){
 		return sjcl.codec.bytes.fromBits(sjcl.hash.sha256.hash(sjcl.codec.bytes.toBits(sharedSecret)));
 	};
 
-	cryptCore.login = function login(salt, password) {
-	    var privateKey = sjcl.codec.bytes.fromBits(sjcl.misc.pbkdf2(password, salt, 500017, 256)),
-	        encKey = ECcrypt.keyPair(privateKey);
+	cryptCore.login = function login(password, salt, key) {
+	    var privateKey = null, encKey = null;
 	    
+	    if(key){
+	    	privateKey = bs58.dec(key);
+	    }else{
+	    	privateKey = sjcl.codec.bytes.fromBits(sjcl.misc.pbkdf2(password, salt, 500017, 256));
+	    }
+
+	    encKey = ECcrypt.keyPair(privateKey);
+
 	    try{
 	        if(!encKey.validate().result){
 	            throw "invalid";
@@ -44,7 +51,7 @@ var cryptCore = (function(){
 	        "privateKeyPair": bs58.enc(privateKey),
 	        "publicKeyPairPrintable": publicKeyPairPrintable,
 	        "publicKeyPairPrintableHash": publicKeyPairPrintableHash
-	    ;
+	    };
 	};
 
 	cryptCore.encodeMessage = function encodeMessage(msg, contacts, hideSender, hideRecievers) {
@@ -81,7 +88,7 @@ var cryptCore = (function(){
 	    
 	    for (i = 0; i < slots.length; i++) {
 	        msgHash.update(sjcl.codec.bytes.toBits(slots[i]));
-	    };
+	    }
 
 	    if(!hideSender){
 	        msgLength += 80; // Length of signature here!
@@ -167,18 +174,18 @@ var cryptCore = (function(){
 	            var add = 80 - sig.length;
 	            for (i = 0; i < add; i++) {
 	                sig.push( (Math.random() * 0xFF) & 0xFF);
-	            };
+	            }
 	        }
 
 	        addBytes(sig);
 	    }   
 
-	    var aes_cypher = new sjcl.cipher['aes'](sessionKeyBits),
-	        crypted_msg = sjcl.codec.bytes.fromBits(sjcl.mode['ccm'].encrypt(aes_cypher, sjcl.codec.bytes.toBits(container), iv, [], 64)),
+	    var aes_cypher = new sjcl.cipher.aes(sessionKeyBits),
+	        crypted_msg = sjcl.codec.bytes.fromBits(sjcl.mode.ccm.encrypt(aes_cypher, sjcl.codec.bytes.toBits(container), iv, [], 64)),
 	        clearContainer = container,
 	        cryptedLength = 33 + 16 + 32 * numContacts + crypted_msg.length,
-	        crytpoAB = new ArrayBuffer(cryptedLength),
-	        container = new Uint8Array(crytpoAB);
+	        crytpoAB = new ArrayBuffer(cryptedLength);
+	    container = new Uint8Array(crytpoAB);
 
 	    contPos = 0;
 
@@ -189,7 +196,7 @@ var cryptCore = (function(){
 
 	    for (i = 0; i < slots.length; i++) {
 	        addBytes(slots[i]);
-	    };
+	    }
 
 	    addBytes(crypted_msg.slice(32));
 
@@ -235,8 +242,8 @@ var cryptCore = (function(){
 	                sessionKey[i] = secrets[i + shift] ^ secret[i];
 	            }
 
-	            var aes_decypher = new sjcl.cipher['aes'](sjcl.codec.bytes.toBits(sessionKey));
-	            var test_head = sjcl.mode['ccm_head'].decrypt(aes_decypher, sjcl.codec.bytes.toBits(contHead), sjcl.codec.bytes.toBits(iv), [], 64);
+	            var aes_decypher = new sjcl.cipher.aes(sjcl.codec.bytes.toBits(sessionKey));
+	            var test_head = sjcl.mode.ccm_head.decrypt(aes_decypher, sjcl.codec.bytes.toBits(contHead), sjcl.codec.bytes.toBits(iv), [], 64);
 	            var res = sjcl.codec.bytes.fromBits(test_head);
 
 	            // [ 68, 69, 83, 85 ]
@@ -252,8 +259,12 @@ var cryptCore = (function(){
 
 	                var crypted_msg = appendBuffer(contHead, new Uint8Array(msg, 81 + 32 * message.contactsNum, message.msgLength - 32));
 
-	                aes_decypher = new sjcl.cipher['aes'](sjcl.codec.bytes.toBits(sessionKey));
-	                res = sjcl.mode['ccm'].decrypt(aes_decypher, sjcl.codec.bytes.toBits(crypted_msg), sjcl.codec.bytes.toBits(iv), [], 64);
+	                aes_decypher = new sjcl.cipher.aes(sjcl.codec.bytes.toBits(sessionKey));
+	                try{	                
+	                	res = sjcl.mode.ccm.decrypt(aes_decypher, sjcl.codec.bytes.toBits(crypted_msg), sjcl.codec.bytes.toBits(iv), [], 64);
+	                } catch(e){
+	                	return undefined;   
+	                }
 
 	                msgHash.update(sjcl.codec.bytes.toBits(new Uint8Array(msg, 81, 32 * message.contactsNum)));                
 

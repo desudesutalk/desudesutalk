@@ -180,7 +180,8 @@ var jsf5steg = (function(){
         		switch (successiveACState) {
         			case 0: // initial state
           				var rs = decodeHuffman(component.huffmanTableAC);
-          				var s = rs & 15, r = rs >> 4;
+          				var s = rs & 15; 
+                  r = rs >> 4;
           				if (s === 0) {
             				if (r < 15) {
               					eobrun = receive(r) + (1 << r);
@@ -419,7 +420,7 @@ var jsf5steg = (function(){
                         if (maxH < h) maxH = h;
                         if (maxV < v) maxV = v;
 	            		var qId = data[offset + 2];
-	            		var l = frame.components.push({
+	            		l = frame.components.push({
 		            		componentId: componentId,
 	            			h: h,
 	            			v: v,
@@ -583,7 +584,7 @@ var jsf5steg = (function(){
 	function computeHuffmanTbl(nrcodes, std_table){
 		var codevalue = 0;
 		var pos_in_table = 0;
-		var HT = new Array();
+		var HT = [];
 		for (var k = 1; k <= 16; k++) {
 			for (var j = 1; j <= nrcodes[k]; j++) {
 				HT[std_table[pos_in_table]] = [];
@@ -683,8 +684,8 @@ var jsf5steg = (function(){
 			writeWord(self.quantizationTables[i].length + 2); // length
 			for (var j = 0; j < self.quantizationTables[i].length; j++) {
 				writeByte(self.quantizationTables[i][j]);
-			};
-		};
+			}
+		}
 	}
 
 	function writeSOF0(self){
@@ -700,7 +701,7 @@ var jsf5steg = (function(){
 			writeByte(c.componentId);
 			writeByte(c.h << 4 | c.v);
 			writeByte(c.quantizationTable);
-		};
+		}
 	}
 
 	function writeDHT(self){
@@ -753,12 +754,12 @@ var jsf5steg = (function(){
 		for (var i = 0; i < self.frames[0].components.length; i++) {
 			var c = self.frames[0].components[i];
 			writeByte(c.componentId);
-			if(i == 0){
+			if(i === 0){
                 writeByte(0);
             }else{
                 writeByte(0x11);
             }
-		};
+		}
 
 		writeByte(0); // Ss
 		writeByte(0x3f); // Se
@@ -779,7 +780,7 @@ var jsf5steg = (function(){
 		}
 		var Diff = DU[0] - DC; DC = DU[0];
 		//Encode DC
-		if (Diff==0) {
+		if (Diff===0) {
 			writeBits(HTDC[0]); // Diff might be 0
 		} else {
 			pos = 32767+Diff;
@@ -788,9 +789,9 @@ var jsf5steg = (function(){
 		}
 		//Encode ACs
 		var end0pos = 63; // was const... which is crazy
-		for (; (end0pos>0)&&(DU[end0pos]==0); end0pos--) {};
+		for (; (end0pos>0)&&(DU[end0pos]===0); end0pos--) {}
 		//end0pos = first element in reverse order !=0
-		if ( end0pos == 0) {
+		if ( end0pos === 0) {
 			writeBits(EOB);
 			return DC;
 		}
@@ -798,7 +799,7 @@ var jsf5steg = (function(){
 		var lng;
 		while ( i <= end0pos ) {
 			var startpos = i;
-			for (; (DU[i]==0) && (i<=end0pos); ++i) {}
+			for (; (DU[i]===0) && (i<=end0pos); ++i) {}
 			var nrzeroes = i-startpos;
 			if ( nrzeroes >= I16 ) {
 				lng = nrzeroes>>4;
@@ -823,7 +824,7 @@ var jsf5steg = (function(){
 		initCategoryNumber();
 		
 		// Initialize bit writer
-		byteout = new Array();
+		byteout = [];
 		bytenew=0;
 		bytepos=7;
 
@@ -848,13 +849,13 @@ var jsf5steg = (function(){
 		var r, g, b;
 		var start,p, col,row,pos;
 
-		var DCdiff = Array(this.frames[0].components.length);
+		var DCdiff = new Array(this.frames[0].components.length);
 		for (var i = 0; i < this.frames[0].components.length; i++) {
 			DCdiff[i] = 0;
 		}
 
 		for (var mcu = 0; mcu < this.frames[0].mcusPerLine * this.frames[0].mcusPerColumn; mcu++){
-			for (var i = 0; i < this.frames[0].components.length; i++) {
+			for (i = 0; i < this.frames[0].components.length; i++) {
 				var c = this.frames[0].components[i];
 				for (var v = 0; v < c.v; v++) {
 					for (var h = 0; h < c.h; h++) {
@@ -862,15 +863,15 @@ var jsf5steg = (function(){
 						var mcuCol = mcu % this.frames[0].mcusPerLine;
 						var blockRow = mcuRow * c.v + v;
 						var blockCol = mcuCol * c.h + h;
-						if(i==0){
+						if(i===0){
 							DCdiff[i] = processDU(c.blocks, (blockRow * this.frames[0].mcusPerLine * c.h + blockCol) * 64, DCdiff[i], YDC_HT, YAC_HT);
 						}else{
 							DCdiff[i] = processDU(c.blocks, (blockRow * this.frames[0].mcusPerLine * c.h + blockCol) * 64, DCdiff[i], UVDC_HT, UVAC_HT);
 						}
-					};
-				};
-			};
-		};
+					}
+				}
+			}
+		}
 
 		// Do the bit alignment of the EOI marker
 		if ( bytepos >= 0 && bytepos != 7) {
@@ -882,7 +883,7 @@ var jsf5steg = (function(){
 
 		writeWord(0xFFD9); //EOI
 		
-		return byteout	
+		return byteout;
 	};
 
     function stegShuffle(key, data){
@@ -957,7 +958,7 @@ var jsf5steg = (function(){
     }
 
     constructor.prototype.f5embed = function(embedAB, iv){
-        var data = new Uint8Array(embedAB);
+        var data = new Uint8Array(embedAB.buffer);
         var coeff = this.frames[0].components[0].blocks;
         var coeff_count = coeff.length;
         console.log('got ' + coeff_count + ' DCT AC/DC coefficients');
@@ -966,16 +967,16 @@ var jsf5steg = (function(){
             changed, usable, i, n, k, ii;
         
         for (i = 0; i < coeff.length; i++) {
-            if(i % 64 == 0) continue;
+            if(i % 64 === 0) continue;
 
             if(coeff[i] == 1 || coeff[i] == -1){
                 _one++;
             }
 
-            if(coeff[i] == 0){
+            if(coeff[i] === 0){
                 _zero++;
             }
-        };
+        }
 
         _large = coeff_count - _zero - _one - coeff_count / 64;
         _expected = Math.floor(_large + (0.49 * _one));
@@ -992,11 +993,11 @@ var jsf5steg = (function(){
             changed = (changed + _one + _one / 2 - _one / (n + 1)) / (n + 1);
             
             usable = (_expected * i / n - _expected * i / n % n) / 8;
-            if(usable == 0) break;
+            if(usable === 0) break;
             console.log( (i==1 ? 'default' : '(1, '+n+', '+i+')') + ' code: ' + Math.floor(usable) + ' bytes (efficiency: '+(usable * 8 / changed).toFixed(2)+' bits per change)');
-        };
+        }
         
-        if(data && data.length != 0){
+        if(data && data.length !== 0){
             console.log('permutation starts');
             var pm = new Uint32Array(coeff_count); 
             for (i = 1; i < coeff_count; i++) pm[i] = i;
@@ -1017,12 +1018,11 @@ var jsf5steg = (function(){
                 if(usable < byte_to_embed + 4) break;
             }                
 
-            k = i - 1
-            n = (1 << k) - 1
+            k = i - 1;
+            n = (1 << k) - 1;
 
-            if(n == 0){
-                console.log('using default code, file will not fit');
-                n = 1;
+            if(n === 0){
+                throw 'data will not fit';
             }
             
             if(n == 1){
@@ -1031,18 +1031,19 @@ var jsf5steg = (function(){
                 console.log('using (1, '+n+', '+k+') code');
             }
 
-            byte_to_embed = data[data_idx++];
-            byte_to_embed ^= gamma[gammaI++];
-            next_bit_to_embed = byte_to_embed & 1;
-            byte_to_embed >>= 1;
-            available_bits_to_embed = 7;
-            _embedded += 1;
+            if(n == 1){
 
-            if(n = 1){
+                byte_to_embed = data[data_idx++];
+                byte_to_embed ^= gamma[gammaI++];
+                next_bit_to_embed = byte_to_embed & 1;
+                byte_to_embed >>= 1;
+                available_bits_to_embed = 7;
+                _embedded += 1;
+                
                 for (ii = 0; ii < coeff_count; ii++) {
-                    var shuffled_index = pm[ii];
+                    shuffled_index = pm[ii];
 
-                    if(shuffled_index % 64 == 0 || coeff[shuffled_index] == 0) continue;
+                    if(shuffled_index % 64 === 0 || coeff[shuffled_index] === 0) continue;
 
                     var cc = coeff[shuffled_index];
                     _examined++;
@@ -1055,8 +1056,8 @@ var jsf5steg = (function(){
                         _changed++;
                     }
 
-                    if(coeff[shuffled_index] != 0){
-                        if(available_bits_to_embed == 0){
+                    if(coeff[shuffled_index] !== 0){
+                        if(available_bits_to_embed === 0){
                             if(data_idx >= data.length) break;
                             byte_to_embed = data[data_idx++];
                             byte_to_embed ^= gamma[gammaI++];
@@ -1071,11 +1072,12 @@ var jsf5steg = (function(){
                     }
                 }
             }else{
+                ii = -1;
                 var is_last_byte = false;
-                while(!is_last_byte || (available_bits_to_embed != 0 && is_last_byte)){
+                while(!is_last_byte || (available_bits_to_embed !== 0 && is_last_byte)){
                     var k_bits_to_embed = 0;
                     for (i = 0; i < k; i++) {
-                        if(available_bits_to_embed == 0){
+                        if(available_bits_to_embed === 0){
                             if(data_idx >= data.length){
                                 is_last_byte = true;
                                 break;
@@ -1101,7 +1103,7 @@ var jsf5steg = (function(){
                             }
                             ci = pm[ii];
                             _examined++;
-                            if(ci % 64 != 0 && coeff[ci] != 0) break;
+                            if(ci % 64 !== 0 && coeff[ci] !== 0) break;
                         }
                         code_word.push(ci);
                     }
@@ -1127,7 +1129,7 @@ var jsf5steg = (function(){
                         coeff[code_word[i]] += coeff[code_word[i]] < 0 ? 1 : -1;
                         _changed++;
 
-                        if(coeff[code_word[i]] == 0){
+                        if(coeff[code_word[i]] === 0){
                             _thrown++;
                             code_word.splice(i,1);
                             
@@ -1137,7 +1139,7 @@ var jsf5steg = (function(){
                                 }
                                 ci = pm[ii];
                                 _examined++;
-                                if(ci % 64 != 0 && coeff[ci] != 0) break;
+                                if(ci % 64 !== 0 && coeff[ci] !== 0) break;
                             }
                             code_word.push(ci);
                         }else{
@@ -1186,12 +1188,12 @@ var jsf5steg = (function(){
 
             shuffled_index = pm[pos];
             
-            if(shuffled_index % 64 == 0) 
+            if(shuffled_index % 64 === 0) 
                 continue;
 
             cc = coeff[shuffled_index];
 
-            if(cc == 0){
+            if(cc === 0){
                 continue;
             }else if(cc > 0){
                 extracted_bit = cc & 1;
@@ -1233,8 +1235,8 @@ var jsf5steg = (function(){
             var vhash = 0, code;
 
             while(keep_extracting){
-                vhash = 0
-                code = 1
+                vhash = 0;
+                code = 1;
                 while(code <= n){
                     pos++;
                     if(pos >= coeff_count){
@@ -1243,11 +1245,11 @@ var jsf5steg = (function(){
                     }
 
                     shuffled_index = pm[pos];
-                    if(shuffled_index % 64 == 0) continue;
+                    if(shuffled_index % 64 === 0) continue;
 
                     cc = coeff[shuffled_index];
 
-                    if(cc == 0){
+                    if(cc === 0){
                         continue;
                     }else if(cc > 0){
                         extracted_bit = cc & 1;
