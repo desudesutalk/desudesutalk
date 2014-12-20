@@ -161,13 +161,12 @@ var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
     }
         
     getURLasAB(jpgURL, function(arrayBuffer, date) {
+        processedJpegs[jpgURL] = {'id': 'none'};
         var arc = jpegExtract(arrayBuffer);
         if(arc){
             var p = decodeMessage(arc);
             if(p){
                 processedJpegs[jpgURL] = {id: do_decode(p, null, thumbURL, date, post_id).id};
-            }else{
-                processedJpegs[jpgURL] = {'id': 'none'};
             }
         }
 
