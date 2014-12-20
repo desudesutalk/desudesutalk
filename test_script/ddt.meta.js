@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTest
 // @namespace    udp://desushelter/*
-// @version      0.4.0
+// @version      0.4.1
 // @description  Write something useful!
 // @include      https://8chan.co/ddt/res/1907.html
 // @exclude      *#dev

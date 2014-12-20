@@ -261,11 +261,15 @@ var do_popup = function(e) {
 
         msgTimeTxt = dateToStr(msgDate);
 
-        person = getContactHTML(msg.keyid, msg.pubkey);
+        if(msg.senderHidden){
+            person = '<b>Anonymous</b>';
+        }else{
+            person = getContactHTML(msg.keyid, msg.pubkey);
+        }
 
         var code = '<div class="hidbord_msg" id="msg_' + msg.id + '" style="margin: 0;">'+
                    '    <div style="overflow: hidden" class="hidbord_msg_header" >'+ 
-                   '<span style="background: #fff;" class="idntcn2">' + msg.keyid + '</span>&nbsp;' + person +
+                   (msg.keyid !=='' ? '<span style="background: #fff;" class="idntcn2">' + msg.keyid + '</span>&nbsp;' : '') + person +
                    ' <i style="color: #999;">(' + msgTimeTxt + ') <span href="javascript:;" class="hidbord_mnu_reply hidbord_clickable">#'+msg.id.substr(0, 8)+'</span></i>'+
                    '    </div>'+
                    '    <hr style="clear:both;">'+
