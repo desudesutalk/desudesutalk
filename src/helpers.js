@@ -72,6 +72,16 @@ var hexToBytes = function (hex, length) {
     return bytes;
 };
 
+// Convert a byte array to a hex string
+var bytesToHex = function (bytes) {
+    "use strict";
+    for (var hex = [], i = 0; i < bytes.length; i++) {
+        hex.push((bytes[i] >>> 4).toString(16));
+        hex.push((bytes[i] & 0xF).toString(16));
+    }
+    return hex.join("");
+};
+
 var padBytes = function (array, length) {
     if (length === undefined) {
         length = fieldSize;
@@ -102,11 +112,6 @@ var shuffleArray = function (array) {
     }
 
     return array;
-};
-
-var getSharedSecret = function (privateKey, publicKey) {
-    var sharedSecret = padBytes(privateKey.derive(ECcrypt.keyPair(publicKey).getPublic()).toArray());
-    return sjcl.codec.bytes.fromBits(sjcl.hash.sha256.hash(sjcl.codec.bytes.toBits(sharedSecret)));
 };
 
 var xorBytes = function (a, b) {

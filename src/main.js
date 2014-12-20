@@ -100,6 +100,36 @@ If sender is not hidden
 
 
 */
+
+    var sessionKey = sjcl.codec.bytes.fromBits(sjcl.random.randomWords(8, 0)), sessionKeyBits, rp,
+        iv = sjcl.random.randomWords(4, 0),
+        slots = [],
+        msgHash = new sjcl.hash.sha256(),
+        ephemeral_byte = hexToBytes(ephemeral.getPublic(true, "hex"));
+
+    ephemeral_byte[0] ^= (Math.random() * 0x100 | 0) & 0xfe;
+
+    sessionKey[31] = 0xAA;
+    sessionKeyBits = sjcl.codec.bytes.toBits(sessionKey);
+
+    var secret = getSharedSecret(ephemeral, keyPair.publicEnc);
+
+    slots.push(xorBytes(secret, sessionKey));
+
+    for (i in contacts) {
+        secret = getSharedSecret(ephemeral, contacts[i].publicEnc);
+        slots.push(xorBytes(secret, sessionKey));
+    }
+
+    slots = shuffleArray(slots);
+
+    msgHash.update(sjcl.codec.bytes.toBits(ephemeral_byte));
+    msgHash.update(iv);
+    
+    for (i = 0; i < slots.length; i++) {
+        msgHash.update(sjcl.codec.bytes.toBits(slots[i]));
+    };
+
     if(!hideSender){
         msgLength += 80; // Length of signature here!
     }
@@ -111,7 +141,7 @@ If sender is not hidden
     }
 
     var containerAB = new ArrayBuffer(msgLength - 8),
-        container = new Uint8Array(containerAB),
+        container = new Uint8Array(containerAB), container2sig = new Uint8Array(containerAB, 0, msgLength - 88),
         contPos = 0;
 
     var addByte = function(byte){
@@ -170,9 +200,8 @@ If sender is not hidden
     addBytes(msgCompressed);
 
     if(!hideSender){
-        // FIXME: sign function needs hash and not message itslef!!!
-        var sig = keyPair.privateSig.sign(container).toDER();
-
+        var sig = keyPair.privateSig.sign(sjcl.codec.bytes.fromBits(msgHash.update(sjcl.codec.bytes.toBits(container2sig)).finalize())).toDER();
+        
         if(sig.length > 80){
             throw 'SIGNATURE TO LOONG!!!';
         }
@@ -187,11 +216,7 @@ If sender is not hidden
         addBytes(sig);
     }
 
-    var sessionKey = sjcl.codec.bytes.fromBits(sjcl.random.randomWords(8, 0)), sessionKeyBits, rp,
-        iv = sjcl.random.randomWords(4, 0);
-
-    sessionKey[31] = 0xAA;
-    sessionKeyBits = sjcl.codec.bytes.toBits(sessionKey);
+    
 
     var aes_cypher = new sjcl.cipher['aes'](sessionKeyBits),
         crypted_msg = sjcl.codec.bytes.fromBits(sjcl.mode['ccm'].encrypt(aes_cypher, sjcl.codec.bytes.toBits(container), iv, [], 64));
@@ -205,23 +230,9 @@ If sender is not hidden
 
     contPos = 0;
 
-    var slots = [];
 
-    var secret = getSharedSecret(ephemeral, keyPair.publicEnc);
 
-    slots.push(xorBytes(secret, sessionKey));
-
-    for (i in contacts) {
-        secret = getSharedSecret(ephemeral, contacts[i].publicEnc);
-        slots.push(xorBytes(secret, sessionKey));
-    }
-
-    slots = shuffleArray(slots);
-
-    ephemeral = hexToBytes(ephemeral.getPublic(true, "hex"));
-    ephemeral[0] ^= (Math.random() * 0x100 | 0) & 0xfe;
-
-    addBytes(ephemeral);
+    addBytes(ephemeral_byte);
     addBytes(sjcl.codec.bytes.fromBits(iv));
 
     addBytes(crypted_msg.slice(0,32));
@@ -240,8 +251,12 @@ var decodeMessage = function(msg) {
         iv        = new Uint8Array(msg, 33, 16),
         contHead  = new Uint8Array(msg, 49, 32),
         secrets   = new Uint8Array(msg, 81),
+        msgHash   = new sjcl.hash.sha256(),
         shift = 0, secret, sessionKey = [], ephemeral = [], i, j, aesDecryptor, message = {};
         
+        msgHash.update(sjcl.codec.bytes.toBits(ephemAB));
+        msgHash.update(sjcl.codec.bytes.toBits(iv));
+
         for (i = 0; i < 33; i++) {
             ephemeral.push(ephemAB[i]);
         }
@@ -290,16 +305,19 @@ var decodeMessage = function(msg) {
                 aes_decypher = new sjcl.cipher['aes'](sjcl.codec.bytes.toBits(sessionKey));
                 res = sjcl.mode['ccm'].decrypt(aes_decypher, sjcl.codec.bytes.toBits(crypted_msg), sjcl.codec.bytes.toBits(iv), [], 64);
 
-                message.msgHash = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(res));
+                msgHash.update(sjcl.codec.bytes.toBits(new Uint8Array(msg, 81, 32 * message.contactsNum)));                
 
                 res = sjcl.codec.bytes.fromBits(res);
 
                 if(message.senderHidden){
                     message.text = utf8ArrToStr(pako.inflateRaw(res.slice(16 + (message.contactsHidden?0:(32 + 66*message.contactsNum)))));  // 
+                    msgHash.update(sjcl.codec.bytes.toBits(res));
                 }else{
                     message.text = utf8ArrToStr(pako.inflateRaw(res.slice(16 + (message.contactsHidden?66:(32 + 66*message.contactsNum)), -80)));
+                    msgHash.update(sjcl.codec.bytes.toBits(res.slice(0, -80)));
                 }
 
+                message.msgHash = sjcl.codec.bytes.fromBits(msgHash.finalize());
 
                 var pubEncKey, pubSigKey, tmpSecret;
 
@@ -335,11 +353,13 @@ var decodeMessage = function(msg) {
                     pubSigKey = ECsign.keyPair(res.slice(33 + 16 + (message.contactsHidden?0:32), 66 + 16 + (message.contactsHidden?0:32)));
                     message.sender = bs58.enc(res.slice(16 + (message.contactsHidden?0:32), 66 + 16 + (message.contactsHidden?0:32)));
 
-                    if(!pubSigKey.verify(res.slice(0,-80), res.slice(-80))){
+                    if(!pubSigKey.verify(message.msgHash, res.slice(-80))){
                         return undefined; 
                     }
                     message.signatureOk = true;
                 }
+
+                message.msgHash = bytesToHex(message.msgHash);
 
                 return message;
             }

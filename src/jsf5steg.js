@@ -74,7 +74,7 @@ var jsf5steg = (function(){
       		if (bitsData == 0xFF) {
         		var nextByte = data[offset++];
         		if (nextByte) {          			
-				    throw "unexpected marker: " + ((bitsData << 8) | nextByte).toString(16) + " at " + offset.toString(16);
+				    throw "Bad jpeg. (unexpected marker: " + ((bitsData << 8) | nextByte).toString(16) + " at " + offset.toString(16) + ")";
         		}
         		// unstuff 0
       		}
@@ -89,7 +89,7 @@ var jsf5steg = (function(){
         		if (typeof node === 'number')
           			return node;
         		if (typeof node !== 'object')
-          			throw "invalid huffman sequence";
+          			throw "Bad jpeg. (invalid huffman sequence)";
       		}
       		return null;
     	}
@@ -190,7 +190,7 @@ var jsf5steg = (function(){
               					successiveACState = 1;
             				}
           				} else {
-            				if (s !== 1) throw "invalid ACn encoding";
+            				if (s !== 1) throw "Bad jpeg. (invalid ACn encoding)";
             				successiveACNextValue = receive(s);
                             if(!successiveACNextValue)
                                 successiveACNextValue = -1;                            
@@ -298,7 +298,7 @@ var jsf5steg = (function(){
       		bitsCount = 0;
       		marker = (data[offset] << 8) | data[offset + 1];
       		if (marker <= 0xFF00) {
-        		throw "marker was not found";
+        		throw "Bad jpeg. (marker was not found)";
       		}
 
       		if (marker >= 0xFFD0 && marker <= 0xFFD7) { // RSTx
@@ -358,7 +358,7 @@ var jsf5steg = (function(){
 		this.quantizationTables = [];
 	    
 	    if (fileMarker != 0xFFD8) { // SOI (Start of Image)
-	      	throw "SOI not found";
+	      	throw "Bad jpeg. (SOI not found)";
 	    }
 
 	    fileMarker = readUint16();
@@ -405,6 +405,11 @@ var jsf5steg = (function(){
 	            	frame.samplesPerLine = readUint16();
 	            	frame.components = [];
 	            	frame.componentIds = {};
+
+                    if(frame.scanLines * frame.samplesPerLine > 16777216){
+                        throw "Image is too big.";
+                    }
+
 	            	var componentsCount = data[offset++], componentId;
 	            	var maxH = 0, maxV = 0;
 	            	for (i = 0; i < componentsCount; i++) {
@@ -481,7 +486,7 @@ var jsf5steg = (function(){
                         offset -= 3;
                         break;
                     }
-	          		throw "unknown JPEG marker " + fileMarker.toString(16);
+	          		throw "Bad jpeg. (unknown JPEG marker " + fileMarker.toString(16) + ")";
 	      	}
 	      	fileMarker = readUint16();
 	  	}
@@ -490,6 +495,7 @@ var jsf5steg = (function(){
 			throw "only single frame JPEGs supported";
 
 		this.frames = frames;
+        console.log(frames);
 
 		return true;
 	};
@@ -880,34 +886,76 @@ var jsf5steg = (function(){
 		return byteout	
 	};
 
-    var Permutaion = function(prng, size){
-        this.prng = prng;
-        this.ids = Array(size);
+    function stegShuffle(key, data){
+        var i = 0, j = 0, t = 0, k = 0,
+            S = new Uint8Array(256),
+            max_random = data.length, random_index = 0,
+            gamma = new Uint8Array(Math.ceil(data.length / 8));
+        
+        // init state from key
+        for(i = 0; i < 256; ++i) S[i] = i;
 
-        //this.ids[0] = -1;
-        for (var i = 0; i < size; i++) this.ids[i] = i;
-
-        var max_random = this.ids.length;
-        for (var i = 0; i < this.ids.length; i++) {
-            var random_index = this.get_next(max_random);
-            max_random--;
-            var tmp = this.ids[random_index];
-            this.ids[random_index] = this.ids[max_random];
-            this.ids[max_random] = tmp;
+        for(i = 0; i < 256; ++i) {
+            j = (j + S[i] + key[i % key.length]) & 255;
+            t = S[i];
+            S[i] = S[j];
+            S[j] = t;
         }
-    };
+        i = 0;
+        j = 0;
 
-    Permutaion.prototype.get_next = function(max){
-        var ret_val = this.prng.next() | this.prng.next() << 8 | 
-                this.prng.next() << 16 | this.prng.next() << 24;
-        ret_val %= max;
-        if(ret_val < 0) ret_val += max;
-        return ret_val;
-    };
+        // shuffle data
+        for(k = 0; k < data.length; ++k) {
+            i = (i + 1) & 255;
+            j = (j + S[i]) & 255;
+            t = S[i];
+            S[i] = S[j];
+            S[j] = t;
+            random_index = S[(t + S[i]) & 255] << 24;
 
-    Permutaion.prototype.get_shuffled = function(i){
-        return this.ids[i];
-    };
+            i = (i + 1) & 255;
+            j = (j + S[i]) & 255;
+            t = S[i];
+            S[i] = S[j];
+            S[j] = t;
+            random_index |= S[(t + S[i]) & 255] << 16;
+
+            i = (i + 1) & 255;
+            j = (j + S[i]) & 255;
+            t = S[i];
+            S[i] = S[j];
+            S[j] = t;
+            random_index |= S[(t + S[i]) & 255] << 8;
+
+            i = (i + 1) & 255;
+            j = (j + S[i]) & 255;
+            t = S[i];
+            S[i] = S[j];
+            S[j] = t;
+            random_index |= S[(t + S[i]) & 255];
+
+            random_index %= max_random;
+            if(random_index < 0) random_index += max_random;
+
+            max_random--;
+
+            t = data[random_index];
+            data[random_index] = data[max_random];
+            data[max_random] = t;
+        }
+
+        // prepare gamma
+        for(k = 0; k < Math.ceil(data.length / 8); ++k) {
+            i = (i + 1) & 255;
+            j = (j + S[i]) & 255;
+            t = S[i];
+            S[i] = S[j];
+            S[j] = t;
+            gamma[k] = S[(t + S[i]) & 255];
+        }
+
+        return gamma;
+    }
 
     constructor.prototype.f5embed = function(embedAB, iv){
         var data = new Uint8Array(embedAB);
@@ -951,9 +999,9 @@ var jsf5steg = (function(){
         
         if(data && data.length != 0){
             console.log('permutation starts');
-            var prng = prng_newstate();
-            prng.init(iv);
-            var pm = new Permutaion(prng, coeff_count);
+            var pm = new Uint32Array(coeff_count); 
+            for (i = 1; i < coeff_count; i++) pm[i] = i;
+            var gamma = stegShuffle(iv, pm), gammaI = 0;
 
             var next_bit_to_embed = 0,
                 byte_to_embed = data.length,
@@ -984,58 +1032,46 @@ var jsf5steg = (function(){
                 console.log('using (1, '+n+', '+k+') code');
             }
 
-/*            byte_to_embed |= k << 24;
-            byte_to_embed ^= prng.next();
-            byte_to_embed ^= prng.next() << 8;
-            byte_to_embed ^= prng.next() << 16;
-            byte_to_embed ^= prng.next() << 24;
-
+            byte_to_embed = data[data_idx++];
+            byte_to_embed ^= gamma[gammaI++];
             next_bit_to_embed = byte_to_embed & 1;
             byte_to_embed >>= 1;
-            available_bits_to_embed = 31;
-            _embedded += 1;*/
-
-            byte_to_embed = k;
-            byte_to_embed ^= prng.next();
-
-            next_bit_to_embed = byte_to_embed & 1;
-            byte_to_embed >>= 1;
-            available_bits_to_embed = 2;
+            available_bits_to_embed = 7;
             _embedded += 1;
 
-            for (ii = 0; ii < coeff_count; ii++) {
-                var shuffled_index = pm.get_shuffled(ii);
+            if(n = 1){
+                for (ii = 0; ii < coeff_count; ii++) {
+                    var shuffled_index = pm[ii];
 
-                if(shuffled_index % 64 == 0 || coeff[shuffled_index] == 0) continue;
+                    if(shuffled_index % 64 == 0 || coeff[shuffled_index] == 0) continue;
 
-                var cc = coeff[shuffled_index];
-                _examined++;
+                    var cc = coeff[shuffled_index];
+                    _examined++;
 
-                if(cc > 0 && (cc & 1) != next_bit_to_embed){
-                    coeff[shuffled_index]--;
-                    _changed++;
-                }else if(cc < 0 && (cc & 1) == next_bit_to_embed){
-                    coeff[shuffled_index]++;
-                    _changed++;
-                }
-
-                if(coeff[shuffled_index] != 0){
-                    if(available_bits_to_embed == 0){
-                        if(n > 1 || data_idx >= data.length) break;
-                        byte_to_embed = data[data_idx++];
-                        byte_to_embed ^= prng.next();
-                        available_bits_to_embed = 8;
+                    if(cc > 0 && (cc & 1) != next_bit_to_embed){
+                        coeff[shuffled_index]--;
+                        _changed++;
+                    }else if(cc < 0 && (cc & 1) == next_bit_to_embed){
+                        coeff[shuffled_index]++;
+                        _changed++;
                     }
-                    next_bit_to_embed = byte_to_embed & 1;
-                    byte_to_embed >>= 1;
-                    available_bits_to_embed--;
-                    _embedded++;
-                }else{
-                    _thrown++;
-                }
-            }
 
-            if(n > 1){
+                    if(coeff[shuffled_index] != 0){
+                        if(available_bits_to_embed == 0){
+                            if(data_idx >= data.length) break;
+                            byte_to_embed = data[data_idx++];
+                            byte_to_embed ^= gamma[gammaI++];
+                            available_bits_to_embed = 8;
+                        }
+                        next_bit_to_embed = byte_to_embed & 1;
+                        byte_to_embed >>= 1;
+                        available_bits_to_embed--;
+                        _embedded++;
+                    }else{
+                        _thrown++;
+                    }
+                }
+            }else{
                 var is_last_byte = false;
                 while(!is_last_byte || (available_bits_to_embed != 0 && is_last_byte)){
                     var k_bits_to_embed = 0;
@@ -1046,7 +1082,7 @@ var jsf5steg = (function(){
                                 break;
                             }
                             byte_to_embed = data[data_idx++];
-                            byte_to_embed ^= prng.next();
+                            byte_to_embed ^= gamma[gammaI++];
                             available_bits_to_embed = 8;
                         }
                         next_bit_to_embed = byte_to_embed & 1;
@@ -1064,7 +1100,7 @@ var jsf5steg = (function(){
                             if(++ii >= coeff_count){
                                 throw 'capacity exceeded';
                             }
-                            ci = pm.get_shuffled(ii);
+                            ci = pm[ii];
                             _examined++;
                             if(ci % 64 != 0 && coeff[ci] != 0) break;
                         }
@@ -1100,7 +1136,7 @@ var jsf5steg = (function(){
                                 if(++ii >= coeff_count){
                                     throw 'capacity exceeded';
                                 }
-                                ci = pm.get_shuffled(ii);
+                                ci = pm[ii];
                                 _examined++;
                                 if(ci % 64 != 0 && coeff[ci] != 0) break;
                             }
@@ -1122,32 +1158,40 @@ var jsf5steg = (function(){
     };
 
     constructor.prototype.f5extract = function(iv){
+        var ret = [];
         var coeff = this.frames[0].components[0].blocks;
         var coeff_count = coeff.length;
 
-        console.log('permutation starts');
-        var prng = prng_newstate();
-        prng.init(iv);
-        var pm = new Permutaion(prng, coeff_count);
-        console.log(coeff_count + ' indices shuffled');
-
+        var pm = new Uint32Array(coeff_count);
+        for (i = 1; i < coeff_count; i++) pm[i] = i;
+        var gamma = stegShuffle(iv, pm), gammaI = 0;
+                
         var extracted_byte = 0,
             available_extracted_bits = 0,
             n_bytes_extracted = 0,
             extracted_bit = 0;
 
-        console.log('extraction starts');
+        var extracted_file_length = Math.floor(coeff_count / 8),
+            pos = -1, i = 0, cc = 0, shuffled_index = 0,
+            k = 1, n = 1;
 
-        var extracted_file_length = 0,
-            pos = -1, i = 0, cc = 0, shuffled_index = 0;
+        var data = new Uint8Array(extracted_file_length),
+            data_idx = 0, keep_extracting = true;
 
-        while(i < 3){
+
+        while(pos < coeff_count){
             pos++;
-            shuffled_index = pm.get_shuffled(pos);
-            if(shuffled_index % 64 == 0) continue;
+
+            if(pos >= coeff_count)
+                break;
+
+            shuffled_index = pm[pos];
+            
+            if(shuffled_index % 64 == 0) 
+                continue;
 
             cc = coeff[shuffled_index];
-            
+
             if(cc == 0){
                 continue;
             }else if(cc > 0){
@@ -1156,54 +1200,50 @@ var jsf5steg = (function(){
                 extracted_bit = 1 - (cc & 1);
             }
 
-            extracted_file_length |= extracted_bit << i;
-            i++;
+            extracted_byte |= extracted_bit << available_extracted_bits;
+            available_extracted_bits++;
+
+            if(available_extracted_bits == 8){
+                data[data_idx++] = extracted_byte ^ gamma[gammaI++];
+                extracted_byte = 0;
+                available_extracted_bits = 0;
+                n_bytes_extracted++;
+
+                if(data_idx >= extracted_file_length){
+                    break;
+                }
+            }
         }
 
-        console.log(extracted_file_length);
+        ret[1] = new Uint8Array(data.buffer, 0, data_idx);
 
-        extracted_file_length ^= prng.next();
-/*        extracted_file_length ^= prng.next() << 8;
-        extracted_file_length ^= prng.next() << 16;
-        extracted_file_length ^= prng.next() << 24;
-*/
-console.log(extracted_file_length);
-        var k = (extracted_file_length & 7),
+        for (k = 2; k < 8; k++) {
             n = (1 << k) - 1;
-
-        if(n == 0) {
-            n = 1;
-            extracted_file_length = Math.floor(coeff_count / 8);
-        }else{
             extracted_file_length = Math.floor(k * coeff_count / n / 8);
-        }
+            data = new Uint8Array(extracted_file_length);
+            data_idx = 0;
+            keep_extracting = true;
+            gammaI = 0;
+            pos = -1;
+            extracted_byte = 0;
+            available_extracted_bits = 0;
+            n_bytes_extracted = 0;
+            extracted_bit = 0;
 
-        
 
-        console.log(k,n, extracted_file_length);
-
-        if(extracted_file_length > coeff_count || k > 7){
-            throw 'embeded data is bigger than container';
-        }
-
-        console.log('length of embedded file: ' + extracted_file_length + ' bytes');
-        var data = new Uint8Array(extracted_file_length),
-            data_idx = 0, keep_extracting = true;
-
-        if(n > 1){
             var vhash = 0, code;
-            console.log('(1, '+n+', '+k+') code used');
 
             while(keep_extracting){
                 vhash = 0
                 code = 1
                 while(code <= n){
                     pos++;
-                    if(pos >= coeff_count)
-                        //throw 'end of coefficients';
-                        return new Uint8Array(data.buffer, 0, data_idx);
+                    if(pos >= coeff_count){
+                        keep_extracting = false;
+                        break;
+                    }
 
-                    shuffled_index = pm.get_shuffled(pos);
+                    shuffled_index = pm[pos];
                     if(shuffled_index % 64 == 0) continue;
 
                     cc = coeff[shuffled_index];
@@ -1225,7 +1265,7 @@ console.log(extracted_file_length);
                     extracted_byte |= (vhash >> i & 1) << available_extracted_bits;
                     available_extracted_bits++;
                     if(available_extracted_bits == 8){
-                        data[data_idx++] = extracted_byte ^ prng.next();
+                        data[data_idx++] = extracted_byte ^ gamma[gammaI++];
                         extracted_byte = 0;
                         available_extracted_bits = 0;
                         n_bytes_extracted++;
@@ -1238,42 +1278,10 @@ console.log(extracted_file_length);
                 }
             }
 
-        }else{
-            console.log('default code used')
-
-            while(pos < coeff_count){
-                pos++;
-
-                shuffled_index = pm.get_shuffled(pos);
-                if(shuffled_index % 64 == 0) continue;
-
-                cc = coeff[shuffled_index];
-
-                if(cc == 0){
-                    continue;
-                }else if(cc > 0){
-                    extracted_bit = cc & 1;
-                }else{
-                    extracted_bit = 1 - (cc & 1);
-                }
-
-                extracted_byte |= extracted_bit << available_extracted_bits;
-                available_extracted_bits++;
-
-                if(available_extracted_bits == 8){
-                    data[data_idx++] = extracted_byte ^ prng.next();
-                    extracted_byte = 0;
-                    available_extracted_bits = 0;
-                    n_bytes_extracted++;
-
-                    if(data_idx >= extracted_file_length){
-                        break;
-                    }
-                }
-            }
+            ret[k] = new Uint8Array(data.buffer, 0, data_idx);
         }
 
-        return new Uint8Array(data.buffer, 0, data_idx);
+        return ret;
     };
 
 	return constructor;

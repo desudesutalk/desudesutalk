@@ -17,26 +17,33 @@
 	<script language="JavaScript" type="text/javascript" src="src/libs/base58.js"></script>
 
 	<script language="JavaScript" type="text/javascript" src="src/helpers.js"></script>
-	<script language="JavaScript" type="text/javascript" src="src/main.js"></script>
+	<script language="JavaScript" type="text/javascript" src="src/cryptcore.js"></script>
+	<script language="JavaScript" type="text/javascript" src="src/jsf5steg.js"></script>
+	<script language="JavaScript" type="text/javascript" src="src/main_sk.js"></script>
 </head>
 <body>
 
 
 <table style="width: 100%; text-align: center;" border=1>
 <tr><td rowspan=2><form id="encode">	
-	<p style="text-align: center;"><textarea id="in_message" rows=30 cols=60></textarea><br/>
-	<input type="submit" value="Encode"/>
+	<p style="text-align: center;"><textarea id="in_message" rows=10 cols=60></textarea><br/>
+    <br><label>Steg password: <input name="passwd" type="text" value="desu" size="10"></label>
+    <br><label>Container: <input type="file" id="image-select"/></label>
+	<br><input type="submit" value="Encode"/>
 	<br><label>Hide Sender: <input name="hide_sender" type="checkbox" /></label>
 	<br><label>Hide Contacts: <input name="hide_contacts" type="checkbox" /></label>
+	<br><br>
+	<div id="outputdiv"></div>
 	</p>
 </form>
 </td>
 
 
 <td rowspan=2><form id="decode">	
-	<p style="text-align: center;"><textarea id="in_coded" rows=40 cols=65 style="font-size: x-small;"></textarea><br/>
+	<p><label>Container: <input type="file" id="image-read"/></label><br/>
 	<input type="submit" value="Decode"/></p>
 	<p id="contacts_output" style="font-size: x-small;"></p>
+	<textarea id="out_message" rows=10 cols=60 disabled></textarea>
 </form>
 
 </td>

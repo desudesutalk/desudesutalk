@@ -160,11 +160,11 @@ var doExtract = function(evt) {
     time_start = new Date().getTime();
     var hidData = j.f5extract(iv);
     duration = new Date().getTime() - time_start;
-    console.log('Unpack '+ duration + 'ms', hidData);
+    console.log('Extraxt '+ duration + 'ms', hidData);
 
-    var hidDataUri = 'data:application/octet-stream;base64,' + arrayBufferDataUri(hidData);
+    //var hidDataUri = 'data:application/octet-stream;base64,' + arrayBufferDataUri(hidData);
 
-    $('#outputdiv').append('<a href="'+hidDataUri+'" download="data.dat">download extracted data</a><br/>');
+    //$('#outputdiv').append('<a href="'+hidDataUri+'" download="data.dat">download extracted data</a><br/>');
 };
 
 
