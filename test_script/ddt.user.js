@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTest
 // @namespace    udp://desushelter/*
-// @version      0.4.1
+// @version      0.4.2
 // @description  Write something useful!
 // @include      https://8chan.co/ddt/res/1907.html
 // @exclude      *#dev
@@ -3562,10 +3562,9 @@ var inject_ui = function() {
             '    <div class="hidbord_config hidbord_maincontent" style="display: none">'+
             '    <div class="hidbord_msg"><p id="identi" style="text-align: center;"></p>'+
             '        <form name="loginform">'+
-            '            <p  style="text-align: center;">'+
-            '                    Password: <input name="passwd" type="text" value="" size=10> Magic number:'+
-            '                    <input name="magik_num" type="text" value="" size=10>'+
-            '                    <input type="button" value="log in" id="do_login">'+
+            '                    <table style="margin-left:auto; margin-right:auto; text-align: right;"><tr><td>Password: </td><td><input name="passwd" type="text" value=""  style="width: 300px; color: rgb(221, 221, 221);"></td></tr><tr><td>Salt: </td>'+
+            '                    <td><input name="magik_num" type="text" value="" style="width: 300px; color: rgb(221, 221, 221);"></td></tr>'+
+            '                    <tr><td>&nbsp;</td><td style="text-align: left;"><input type="button" value="log in" id="do_login"></td></tr></table>'+
             '            </p>'+
             '        </form></div>'+
 
