@@ -60,7 +60,7 @@ var inject_ui = function() {
                         '<span style="color: #900">De</span>'+
                         '<span style="color: #090">su</span> '+
                         '<span style="color: #900">De</span>'+
-                        '<span style="color: #090">su</span> Talk!</h3>'+
+                        '<span style="color: #090">su</span> Test?</h3>'+
                     '<div class="hidbord_nav">'+
             '            <div class="hidbord_clickable active" id="hidbord_show_msgs">Messages</div>'+
             '            <div class="hidbord_clickable" id="hidbord_show_cntc">Contacts</div>'+
