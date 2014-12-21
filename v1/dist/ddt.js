@@ -3394,6 +3394,7 @@ $(function($){
 
   $('#do_encode').on('click', do_encode);
   $('#do_decode').on('click', do_decode);
+  $('#do_login').on('click', do_login);
   render_contact();
 
 })
