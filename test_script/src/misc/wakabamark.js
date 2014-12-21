@@ -297,7 +297,7 @@ var parseOneLineTags = function(match, tag, str) {
 
         //userlinks
         res = res.replace(/(\{)([123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{40,50})\}/ig, function(match, a, b) {
-            return '<span style="background: #fff; vertical-align:middle;" class="idntcn2">' + b + '</span>&nbsp;' + getContactHTML(b);
+            return '<span style="vertical-align:middle;" class="idntcn2">' + b + '</span>&nbsp;' + getContactHTML(b);
         });
     }
 
