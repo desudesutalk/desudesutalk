@@ -37,6 +37,8 @@ var cryptCore = (function(){
 	        "publicKeyPairPrintableHash": publicKeyPairPrintableHash
 	    };
 
+	    console.log(keyPair);
+
 	    return {
 	        "privateEnc": privateKey,
 	        "publicEnc": hexToBytes(pubEncKey),
@@ -44,7 +46,7 @@ var cryptCore = (function(){
 	        "privateKeyPair": bs58.enc(privateKey),
 	        "publicKeyPairPrintable": publicKeyPairPrintable,
 	        "publicKeyPairPrintableHash": publicKeyPairPrintableHash
-	    ;
+	    }
 	};
 
 	cryptCore.encodeMessage = function encodeMessage(msg, contacts, hideSender, hideRecievers) {

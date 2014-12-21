@@ -135,6 +135,10 @@ var getContactHTML = function(hash, key) {
         return '<strong style="color: #090; font-style: italic" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">Me</strong>';
     }
 
+    if (hash == broad_hashB64) {
+        return '<strong style="color: #900; font-style: italic" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">BROADCAST</strong>';
+    }
+
     if (!(hash in contacts)) {
         return '<em style="color: #00f" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">Unknown</em> [<a href="javascript:;" alt="' + hash + '" class="hidbord_addcntct_link">add</a>]';
     }
@@ -149,7 +153,7 @@ var getContactHTML = function(hash, key) {
 
 var contactsSelector = function(){
     "use strict";
-    var code = '<div id="hidbord_contacts_select"><strong>to:</strong>&nbsp;<select id="hidbord_cont_type"><option selected="selected" value="all">All</option><option value="direct">Direct</option><option disabled="disabled">Groups:</option>';
+    var code = '<div id="hidbord_contacts_select"><strong>to:</strong>&nbsp;<select id="hidbord_cont_type"><option selected="selected" value="all">All</option><option value="direct">Direct</option><option value="broadcast">Broadcast</option><option disabled="disabled">Groups:</option>';
 
     for (var i = 0; i < cont_groups.length; i++) {
         code += '<option value="group_'+safe_tags(cont_groups[i])+'">'+safe_tags(cont_groups[i])+'</option>';

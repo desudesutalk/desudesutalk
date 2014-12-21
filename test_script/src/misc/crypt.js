@@ -10,11 +10,24 @@ var encodeMessage = function(message, keys, msg_type, hideSender, hideContacts){
 
 var decodeMessage = function(hidData){
     'use strict';
-    var m = null;
+    var m = null, i;
 
-    for (var i = 1; i < 8; i++) {
+    for (i = 1; i < 8; i++) {
+        if(!hidData[i]) continue;
+        m = cryptCore.decodeMessage(hidData[i].buffer, true);
+        if(m) {
+        	m.isBroad = true;
+        	return m;
+        }
+    }
+
+    for (i = 1; i < 8; i++) {
+    	if(!hidData[i]) continue;
         m = cryptCore.decodeMessage(hidData[i].buffer);
-        if(m) return m;            
+        if(m) {
+        	m.isBroad = false;
+        	return m;
+        }
     }
     return false;
 };

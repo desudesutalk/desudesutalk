@@ -66,12 +66,8 @@ $(function($) {
 
     inject_ui();
 
-    if (ssGet(boardHostName + 'magic_desu_numbers')) {
-        rsaProfile = ssGet(boardHostName + 'magic_desu_numbers');
-        rsa_hash = rsaProfile.publicKeyPairPrintableHash;
-        rsa_hashB64 = rsaProfile.publicKeyPairPrintable;
-        do_login(false, rsaProfile.privateKeyPair);
-    }
+    do_login(false, true);
+    do_loginBroadcast(false, true);
 
     if (ssGet(boardHostName + 'magic_desu_pwd')) {
         $('#steg_pwd').val(ssGet(boardHostName + 'magic_desu_pwd'));

@@ -81,7 +81,7 @@ $(function(){
         event.preventDefault();
         pubKey = cryptCore.login($('#login input[name="login_salt"]').val(), $('#login input[name="login_pwd"]').val());
 
-        var publicKeyPairPrintableHash = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(bs58.dec(pubKey)));
+        var publicKeyPairPrintableHash = pubKey.publicKeyPairPrintableHash;
 
         $('#login_info').empty().html(publicKeyPairPrintableHash).identicon5({rotate: true,size: 64});
         $('#login_info').append('<br/><br/><i style="color: #090;">'+publicKeyPairPrintableHash+'</i>')

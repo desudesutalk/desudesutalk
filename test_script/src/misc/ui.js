@@ -22,7 +22,7 @@ var inject_ui = function() {
             '    </div>'+
             '    <div class="hidbord_contacts hidbord_maincontent" style="display: none"></div>'+
             '    <div class="hidbord_config hidbord_maincontent" style="display: none">'+
-            '    <div class="hidbord_msg"><p id="identi" style="text-align: center;"></p>'+
+            '    <div class="hidbord_msg"><h3 style="text-align: center;">Your key:</h3><p id="identi" style="text-align: center;"></p>'+
             '        <form name="loginform" style="margin: 0;">'+
             '                    <table style="margin-left:auto; margin-right:auto; text-align: right;"><tr><td>Password: </td><td><input name="passwd" type="text" value=""  style="width: 300px; color: rgb(221, 221, 221); max-width: none;"></td></tr><tr><td>Salt: </td>'+
             '                    <td><input name="magik_num" type="text" value="" style="width: 300px; color: rgb(221, 221, 221); max-width: none;"></td></tr>'+
@@ -31,9 +31,6 @@ var inject_ui = function() {
             '        </form></div>'+
 
             '    <div class="hidbord_msg"><p id="identi" style="text-align: center;"></p>'+
-            '            <p  style="text-align: center;">'+
-            '                    Steg Password: <input name="steg_pwd" type="text" value="desu" size=10 id="steg_pwd">'+
-            '            </p>'+
 
             '            <p  style="text-align: center;">'+
             '                    <label>Use global contacts: <input type="checkbox" id="hidboard_option_globalcontacts" style="vertical-align:middle;" checked></label>'+
@@ -50,6 +47,20 @@ var inject_ui = function() {
 
 
             '        </div>'+
+
+            '    <div class="hidbord_msg">'+
+            '        <p style="text-align: center; background: #f00; color: #fff;"><b>DANGER ZONE!!!</b></p>'+
+            '        <p style="text-align: center;">Change this only when you know what you\'re doing!</p><hr/>'+
+            '        <h3 style="text-align: center;">Broadcast address:</h3><p id="identi_broad" style="text-align: center;"></p>'+
+            '        <form name="broadcastform" style="margin: 0;">'+
+            '                    <table style="margin-left:auto; margin-right:auto; text-align: right;"><tr><td>Password: </td><td><input name="passwd" type="text" value=""  style="width: 300px; color: rgb(221, 221, 221); max-width: none;"></td></tr><tr><td>Salt: </td>'+
+            '                    <td><input name="magik_num" type="text" value="" style="width: 300px; color: rgb(221, 221, 221); max-width: none;"></td></tr>'+
+            '                    <tr><td>&nbsp;</td><td style="text-align: left;"><input type="button" value="set" id="do_login_broadcast"></td></tr></table>'+
+            '            </p>'+
+            '            <hr/><p  style="text-align: center;">'+
+            '                    Steg Password: <input name="steg_pwd" type="text" value="desu" size=10 id="steg_pwd">'+
+            '            </p>'+
+            '        </form></div>'+
 
 
             '    </div>'+
@@ -193,15 +204,6 @@ var inject_ui = function() {
         ssSet(boardHostName + 'autoscanDefault', !!$('#hidboard_option_autoscanison').attr('checked'));
     });
 
-    if ("n" in rsaProfile) {
-        $('#identi').html(rsa_hash).identicon5({
-            rotate: true,
-            size: 64
-        });
-        $('#identi').append('<br/><br/><i style="color: #090;">'+rsa_hash+'</i>');
-        $('#pub_key_info').val(linebrk(rsa.n.toString(16), 64));
-    }
-
     $('#hidbord_btn_reply').on('click', function() {
         $('.hidbord_maincontent').hide();
         $('.hidbord_thread').show();
@@ -220,6 +222,8 @@ var inject_ui = function() {
     });
 
     $('#do_login').on('click', do_login);
+    $('#do_login_broadcast').on('click', do_loginBroadcast);
+
     $('#hidbord_btn_getold').on('click', read_old_messages);
 
     $('#steg_pwd').on('change', function() {
@@ -538,9 +542,10 @@ var push_msg = function(msg, msgPrepend, thumb) {
     }
 
     var isDirect = msg.contactsNum == 2;
+    if(msg.isBroad) isDirect = false;
 
-    var code = '<div class="hidbord_msg hidbord_msg_new" id="msg_' + msg.id + '" ' + (isDirect? '  style="border-left: 8px solid #090;"' : '') + '>'+
-            '    <div class="hidbord_mnu"><a href="javascript:;" id="hidbord_mnu_info">info</a> <a href="javascript:;" class="hidbord_mnu_replydirect">direct</a>'+ (isDirect? '': '<a href="javascript:;" class="hidbord_mnu_reply">reply</a>')+'</div>'+
+    var code = '<div class="hidbord_msg hidbord_msg_new" id="msg_' + msg.id + '" ' + (isDirect? '  style="border-left: 8px solid #090;"' : '') + (msg.isBroad? '  style="border-left: 8px solid #900;"' : '') + '>'+
+            '    <div class="hidbord_mnu"><a href="javascript:;" id="hidbord_mnu_info">info</a> <a href="javascript:;" class="hidbord_mnu_replydirect">' + (msg.isBroad? 'BROADCAST' : 'direct') + '</a>'+ ((isDirect || msg.isBroad)? '': '<a href="javascript:;" class="hidbord_mnu_reply">reply</a>')+'</div>'+
             '    <div class="hidbord_msg_header hidbord_hidden" >'+
             (msg.keyid !=='' ? '        <div style="float:left; width:40px; background: #fff;" class="idntcn">' + msg.keyid + '</div>' : '')+
             '        <div style="float:left;padding-left: 5px;">' + person + ' <i style="color: #999;">(' + msgTimeTxt + ')  <span href="javascript:;" class="hidbord_mnu_reply hidbord_clickable">#'+msg.id.substr(0, 8)+'</span></i>'+
@@ -702,6 +707,12 @@ var replytoMsgDirect = function(e) {
     var msg_id = $(e.target).closest('.hidbord_msg').first().attr('id').replace(/^msg\_/, ''),
         usr_id = $(e.target).closest('.hidbord_msg').first().find('.hidbord_usr_reply').attr('alt');
 
+    if($(e.target).text() == 'BROADCAST'){
+        showReplyform('#msg_' + msg_id, '>>' + msg_id);
+        $('#hidbord_cont_type').val('broadcast').trigger('change');
+        return true;
+    }
+
     if(rsa_hashB64 == usr_id){
         alert('So ronery?');
         return false;
@@ -712,7 +723,7 @@ var replytoMsgDirect = function(e) {
         return false;
     }
 
-    console.log(usr_id);
+    
     showReplyform('#msg_' + msg_id, '>>' + msg_id);
     $('#hidbord_cont_type').val('direct').trigger('change');
     $('#hidbord_cont_direct').val(usr_id);
@@ -839,10 +850,9 @@ var showReplyform = function(msg_id, textInsert) {
             '      </div>  ' +
             '      <textarea style="max-width: none; margin: 2px; width: 580px; height: 136px; resize: vertical; background-image: none; background-position: 0% 0%; background-repeat: repeat repeat;" id="hidbord_reply_text"></textarea>  ' +
             '      <div style="width: 590px;">' +
+            '        <span>Hide: <label><input id="hidboard_hide_sender" type="checkbox" checked/> sender</label>; <label><input id="hidboard_hide_contacts" type="checkbox"  checked/> contacts</label></span><br>'+
             '        <input type="button" value="crypt and send" id="do_encode">  ' +
             '        <span style="float: right;"><a href="javascript:;" id="hidbordform_preview" alt="msg_preview">message preview</a></span>  ' +
-            '        <br><label>Hide Sender: <input id="hidboard_hide_sender" type="checkbox" checked/></label>'+
-            '        <br><label>Hide Contacts: <input id="hidboard_hide_contacts" type="checkbox"  checked/></label>'+
             '      </div>' +
             '    </div>' +
             '  </div>' +
@@ -872,11 +882,18 @@ var showReplyform = function(msg_id, textInsert) {
 
 
         $('#hidbord_cont_type').on('change',function(){
+            $('#hidbord_replyform').css('border-left', 'none');
+            
             if($('#hidbord_cont_type').val()=='direct'){
                 $('#hidbord_cont_direct').show();
+                $('#hidbord_replyform').css('border-left', '8px solid #090');
             }else{
                 $('#hidbord_cont_direct').hide();
             }
+
+            if($('#hidbord_cont_type').val()=='broadcast')
+                $('#hidbord_replyform').css('border-left', '8px solid #900');
+
         });
 
         if(prev_to !== null){

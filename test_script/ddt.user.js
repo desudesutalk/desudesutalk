@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTest
 // @namespace    udp://desushelter/*
-// @version      0.4.5
+// @version      0.4.6
 // @description  Write something useful!
 // @include      https://8chan.co/ddt/res/1907.html
 // @exclude      *#dev
@@ -748,7 +748,7 @@ var fieldSize = 32, ECcrypt = ellipticjs.ec("secp256k1");
 var cryptCore = (function(){
 	"use strict";
 
-	var keyPair = null, cryptCore = {};
+	var keyPair = null, keyPairBroadcast = null, cryptCore = {};
 
 	var getSharedSecret = function (privateKey, publicKey) {
 		var sharedSecret = padBytes(privateKey.derive(ECcrypt.keyPair(publicKey).getPublic()).toArray());
@@ -757,9 +757,13 @@ var cryptCore = (function(){
 
 	cryptCore.login = function login(password, salt, key) {
 	    var privateKey = null, encKey = null;
-	    
+
 	    if(key){
-	    	privateKey = bs58.dec(key);
+		    if (ssGet(boardHostName + 'magic_desu_numbers')) {
+		        privateKey = bs58.dec(ssGet(boardHostName + 'magic_desu_numbers').privateKeyPair);
+		    }else{
+		    	return false;	
+		    }
 	    }else{
 	    	privateKey = sjcl.codec.bytes.fromBits(sjcl.misc.pbkdf2(password, salt, 500017, 256));
 	    }
@@ -781,19 +785,67 @@ var cryptCore = (function(){
 	        publicKeyPairPrintableHash = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(sjcl.codec.bytes.toBits(publicKeyPair)));
 
 	    keyPair = {
-	        "privateEnc": encKey,
+	    	"privateEnc": encKey,
+	        "privateKeyPair": bs58.enc(privateKey),
 	        "publicEnc": hexToBytes(pubEncKey),
 	        "publicKeyPair": publicKeyPair,
-	        "privateKeyPair": bs58.enc(privateKey),
 	        "publicKeyPairPrintable": publicKeyPairPrintable,
 	        "publicKeyPairPrintableHash": publicKeyPairPrintableHash
 	    };
 
+	    ssSet(boardHostName + 'magic_desu_numbers', keyPair);
+
 	    return {
-	        "privateEnc": privateKey,
 	        "publicEnc": hexToBytes(pubEncKey),
 	        "publicKeyPair": publicKeyPair,
+	        "publicKeyPairPrintable": publicKeyPairPrintable,
+	        "publicKeyPairPrintableHash": publicKeyPairPrintableHash
+	    };
+	};
+
+	cryptCore.loginBroadcast = function login(password, salt, key) {
+	    var privateKey = null, encKey = null;
+
+	    if(key){
+		    if (ssGet(boardHostName + 'magic_desu_numbers2')) {
+		        privateKey = bs58.dec(ssGet(boardHostName + 'magic_desu_numbers2').privateKeyPair);
+		    }else{
+		    	privateKey = bs58.dec('5n24WDyUV5b41fkk8eoocKxZuWTHxpYqDekMwo4MvDv1'); // pass: desu   salt: desu
+		    }
+	    }else{
+	    	privateKey = sjcl.codec.bytes.fromBits(sjcl.misc.pbkdf2(password, salt, 500017, 256));
+	    }
+
+	    encKey = ECcrypt.keyPair(privateKey);
+
+	    try{
+	        if(!encKey.validate().result){
+	            throw "invalid";
+	        }
+	    } catch (e) {
+	        alert('Bad key generated! Try another salt and/or password.');
+	        return false;
+	    }
+
+	    var pubEncKey = encKey.getPublic(true, "hex"),
+	        publicKeyPair = hexToBytes(pubEncKey),
+	        publicKeyPairPrintable = bs58.enc(publicKeyPair),
+	        publicKeyPairPrintableHash = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(sjcl.codec.bytes.toBits(publicKeyPair)));
+
+	    keyPairBroadcast = {
+	    	"privateEnc": encKey,
 	        "privateKeyPair": bs58.enc(privateKey),
+	        "publicEnc": hexToBytes(pubEncKey),
+	        "publicKeyPair": publicKeyPair,
+	        "publicKeyPairPrintable": publicKeyPairPrintable,
+	        "publicKeyPairPrintableHash": publicKeyPairPrintableHash
+	    };
+
+	    ssSet(boardHostName + 'magic_desu_numbers2', keyPairBroadcast);
+
+	    return {
+	        "publicEnc": hexToBytes(pubEncKey),
+	        "publicKeyPair": publicKeyPair,
 	        "publicKeyPairPrintable": publicKeyPairPrintable,
 	        "publicKeyPairPrintableHash": publicKeyPairPrintableHash
 	    };
@@ -948,7 +1000,7 @@ var cryptCore = (function(){
 	    return container;
 	};
 
-	cryptCore.decodeMessage = function decodeMessage(msg) {
+	cryptCore.decodeMessage = function decodeMessage(msg, forBroadcast) {
 	    var ephemAB   = new Uint8Array(msg, 0, 33),
 	        iv        = new Uint8Array(msg, 33, 16),
 	        contHead  = new Uint8Array(msg, 49, 32),
@@ -969,7 +1021,7 @@ var cryptCore = (function(){
 	        var firstByte = 0xAA;        
 
 	        try {
-	            secret = getSharedSecret(keyPair.privateEnc, ephemeral);
+	            secret = getSharedSecret(forBroadcast ? keyPairBroadcast.privateEnc : keyPair.privateEnc, ephemeral);
 	            message.ephemeralPub = ephemeral;
 	            firstByte ^= secret[31];
 	        } catch (exception) {
@@ -3057,31 +3109,48 @@ var _sendBoardForm = function(file, formAddon) {
 
 var rsaProfile = {},
     rsa = null,
-    rsa_hash, rsa_hashB64;
+    rsa_hash, rsa_hashB64, broadProfile = {}, broad_hashB64;
 
 var do_login = function(e, key) {
     "use strict";
-    
-    if(!key){
-        var lf = document.loginform;
+    var lf = document.loginform;
+    if(!key){     
         rsaProfile = cryptCore.login(lf.passwd.value, lf.magik_num.value, false);
-        lf.magik_num.value = lf.passwd.value = '';
-
-        rsa_hash = rsaProfile.publicKeyPairPrintableHash;
-        rsa_hashB64 = rsaProfile.publicKeyPairPrintable;
-
-        ssSet(boardHostName + 'magic_desu_numbers', rsaProfile);
     }else{
-        cryptCore.login(null, null, key);
+        rsaProfile = cryptCore.login(null, null, true);
     }
+    lf.magik_num.value = lf.passwd.value = '';
+
+    rsa_hash = rsaProfile.publicKeyPairPrintableHash;
+    rsa_hashB64 = rsaProfile.publicKeyPairPrintable;        
+
 
     $('#identi').html(rsa_hashB64).identicon5({
         rotate: true,
         size: 64
     });
-    $('#identi').append('<br/><br/><i style="color: #009;">'+rsa_hashB64+'</i>');
-    //$('#identi').append('<br/><br/><i style="color: #090;">'+rsa_hash+'</i>');    
+    $('#identi').append('<br/><br/><i style="color: #009;">'+rsa_hashB64+'</i>');  
 };
+
+var do_loginBroadcast = function(e, key) {
+    "use strict";
+    var lf = document.broadcastform;
+    if(!key){     
+        broadProfile = cryptCore.loginBroadcast(lf.passwd.value, lf.magik_num.value, false);
+    }else{
+        broadProfile = cryptCore.loginBroadcast(null, null, true);
+    }
+    lf.magik_num.value = lf.passwd.value = '';
+
+    broad_hashB64 = broadProfile.publicKeyPairPrintable;
+
+    $('#identi_broad').html(broad_hashB64).identicon5({
+        rotate: true,
+        size: 64
+    });
+    $('#identi_broad').append('<br/><br/><i style="color: #009;">'+broad_hashB64+'</i>');  
+};
+
 
 var do_encode = function() {
     "use strict";
@@ -3112,27 +3181,31 @@ var do_encode = function() {
 
     var keys = {};
 
-    for (var c in contacts) {
-        if(c == rsa_hashB64) continue;
+    if(prev_to == 'broadcast'){
+        keys[broad_hashB64] = broadProfile;
+    }else{
+        for (var c in contacts) {
+            if(c == rsa_hashB64) continue;
 
-        if(prev_to == 'direct' && c == prev_cont){
+            if(prev_to == 'direct' && c == prev_cont){
+                keys[c] = contacts[c];
+                continue;
+            }
+            
+            if('hide' in contacts[c] && contacts[c].hide == 1){
+                continue;
+            }
+
+            if(to_group !== null && contacts[c].groups && $.isArray(contacts[c].groups) && contacts[c].groups.indexOf(to_group) != -1){
+                keys[c] = contacts[c];
+            }
+
+            if(prev_to == 'direct' || to_group !== null){
+                continue;
+            }
+
             keys[c] = contacts[c];
-            continue;
         }
-        
-        if('hide' in contacts[c] && contacts[c].hide == 1){
-            continue;
-        }
-
-        if(to_group !== null && contacts[c].groups && $.isArray(contacts[c].groups) && contacts[c].groups.indexOf(to_group) != -1){
-            keys[c] = contacts[c];
-        }
-
-        if(prev_to == 'direct' || to_group !== null){
-            continue;
-        }
-
-        keys[c] = contacts[c];
     }
 
     var p = encodeMessage(payLoad,keys, 0);
@@ -3172,6 +3245,7 @@ var do_decode = function(message, msgPrepend, thumb, fdate, post_id) {
         contactsHidden: message.contactsHidden,
         contactsNum: message.contactsNum,
         senderHidden: message.senderHidden,
+        isBroad: message.isBroad
     };
 
     push_msg(out_msg, msgPrepend, thumb);
@@ -3352,6 +3426,10 @@ var getContactHTML = function(hash, key) {
         return '<strong style="color: #090; font-style: italic" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">Me</strong>';
     }
 
+    if (hash == broad_hashB64) {
+        return '<strong style="color: #900; font-style: italic" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">BROADCAST</strong>';
+    }
+
     if (!(hash in contacts)) {
         return '<em style="color: #00f" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">Unknown</em> [<a href="javascript:;" alt="' + hash + '" class="hidbord_addcntct_link">add</a>]';
     }
@@ -3366,7 +3444,7 @@ var getContactHTML = function(hash, key) {
 
 var contactsSelector = function(){
     "use strict";
-    var code = '<div id="hidbord_contacts_select"><strong>to:</strong>&nbsp;<select id="hidbord_cont_type"><option selected="selected" value="all">All</option><option value="direct">Direct</option><option disabled="disabled">Groups:</option>';
+    var code = '<div id="hidbord_contacts_select"><strong>to:</strong>&nbsp;<select id="hidbord_cont_type"><option selected="selected" value="all">All</option><option value="direct">Direct</option><option value="broadcast">Broadcast</option><option disabled="disabled">Groups:</option>';
 
     for (var i = 0; i < cont_groups.length; i++) {
         code += '<option value="group_'+safe_tags(cont_groups[i])+'">'+safe_tags(cont_groups[i])+'</option>';
@@ -3528,11 +3606,24 @@ var encodeMessage = function(message, keys, msg_type, hideSender, hideContacts){
 
 var decodeMessage = function(hidData){
     'use strict';
-    var m = null;
+    var m = null, i;
 
-    for (var i = 1; i < 8; i++) {
+    for (i = 1; i < 8; i++) {
+        if(!hidData[i]) continue;
+        m = cryptCore.decodeMessage(hidData[i].buffer, true);
+        if(m) {
+        	m.isBroad = true;
+        	return m;
+        }
+    }
+
+    for (i = 1; i < 8; i++) {
+    	if(!hidData[i]) continue;
         m = cryptCore.decodeMessage(hidData[i].buffer);
-        if(m) return m;            
+        if(m) {
+        	m.isBroad = false;
+        	return m;
+        }
     }
     return false;
 };
@@ -3560,7 +3651,7 @@ var inject_ui = function() {
             '    </div>'+
             '    <div class="hidbord_contacts hidbord_maincontent" style="display: none"></div>'+
             '    <div class="hidbord_config hidbord_maincontent" style="display: none">'+
-            '    <div class="hidbord_msg"><p id="identi" style="text-align: center;"></p>'+
+            '    <div class="hidbord_msg"><h3 style="text-align: center;">Your key:</h3><p id="identi" style="text-align: center;"></p>'+
             '        <form name="loginform" style="margin: 0;">'+
             '                    <table style="margin-left:auto; margin-right:auto; text-align: right;"><tr><td>Password: </td><td><input name="passwd" type="text" value=""  style="width: 300px; color: rgb(221, 221, 221); max-width: none;"></td></tr><tr><td>Salt: </td>'+
             '                    <td><input name="magik_num" type="text" value="" style="width: 300px; color: rgb(221, 221, 221); max-width: none;"></td></tr>'+
@@ -3569,9 +3660,6 @@ var inject_ui = function() {
             '        </form></div>'+
 
             '    <div class="hidbord_msg"><p id="identi" style="text-align: center;"></p>'+
-            '            <p  style="text-align: center;">'+
-            '                    Steg Password: <input name="steg_pwd" type="text" value="desu" size=10 id="steg_pwd">'+
-            '            </p>'+
 
             '            <p  style="text-align: center;">'+
             '                    <label>Use global contacts: <input type="checkbox" id="hidboard_option_globalcontacts" style="vertical-align:middle;" checked></label>'+
@@ -3588,6 +3676,20 @@ var inject_ui = function() {
 
 
             '        </div>'+
+
+            '    <div class="hidbord_msg">'+
+            '        <p style="text-align: center; background: #f00; color: #fff;"><b>DANGER ZONE!!!</b></p>'+
+            '        <p style="text-align: center;">Change this only when you know what you\'re doing!</p><hr/>'+
+            '        <h3 style="text-align: center;">Broadcast address:</h3><p id="identi_broad" style="text-align: center;"></p>'+
+            '        <form name="broadcastform" style="margin: 0;">'+
+            '                    <table style="margin-left:auto; margin-right:auto; text-align: right;"><tr><td>Password: </td><td><input name="passwd" type="text" value=""  style="width: 300px; color: rgb(221, 221, 221); max-width: none;"></td></tr><tr><td>Salt: </td>'+
+            '                    <td><input name="magik_num" type="text" value="" style="width: 300px; color: rgb(221, 221, 221); max-width: none;"></td></tr>'+
+            '                    <tr><td>&nbsp;</td><td style="text-align: left;"><input type="button" value="set" id="do_login_broadcast"></td></tr></table>'+
+            '            </p>'+
+            '            <hr/><p  style="text-align: center;">'+
+            '                    Steg Password: <input name="steg_pwd" type="text" value="desu" size=10 id="steg_pwd">'+
+            '            </p>'+
+            '        </form></div>'+
 
 
             '    </div>'+
@@ -3731,15 +3833,6 @@ var inject_ui = function() {
         ssSet(boardHostName + 'autoscanDefault', !!$('#hidboard_option_autoscanison').attr('checked'));
     });
 
-    if ("n" in rsaProfile) {
-        $('#identi').html(rsa_hash).identicon5({
-            rotate: true,
-            size: 64
-        });
-        $('#identi').append('<br/><br/><i style="color: #090;">'+rsa_hash+'</i>');
-        $('#pub_key_info').val(linebrk(rsa.n.toString(16), 64));
-    }
-
     $('#hidbord_btn_reply').on('click', function() {
         $('.hidbord_maincontent').hide();
         $('.hidbord_thread').show();
@@ -3758,6 +3851,8 @@ var inject_ui = function() {
     });
 
     $('#do_login').on('click', do_login);
+    $('#do_login_broadcast').on('click', do_loginBroadcast);
+
     $('#hidbord_btn_getold').on('click', read_old_messages);
 
     $('#steg_pwd').on('change', function() {
@@ -4076,9 +4171,10 @@ var push_msg = function(msg, msgPrepend, thumb) {
     }
 
     var isDirect = msg.contactsNum == 2;
+    if(msg.isBroad) isDirect = false;
 
-    var code = '<div class="hidbord_msg hidbord_msg_new" id="msg_' + msg.id + '" ' + (isDirect? '  style="border-left: 8px solid #090;"' : '') + '>'+
-            '    <div class="hidbord_mnu"><a href="javascript:;" id="hidbord_mnu_info">info</a> <a href="javascript:;" class="hidbord_mnu_replydirect">direct</a>'+ (isDirect? '': '<a href="javascript:;" class="hidbord_mnu_reply">reply</a>')+'</div>'+
+    var code = '<div class="hidbord_msg hidbord_msg_new" id="msg_' + msg.id + '" ' + (isDirect? '  style="border-left: 8px solid #090;"' : '') + (msg.isBroad? '  style="border-left: 8px solid #900;"' : '') + '>'+
+            '    <div class="hidbord_mnu"><a href="javascript:;" id="hidbord_mnu_info">info</a> <a href="javascript:;" class="hidbord_mnu_replydirect">' + (msg.isBroad? 'BROADCAST' : 'direct') + '</a>'+ ((isDirect || msg.isBroad)? '': '<a href="javascript:;" class="hidbord_mnu_reply">reply</a>')+'</div>'+
             '    <div class="hidbord_msg_header hidbord_hidden" >'+
             (msg.keyid !=='' ? '        <div style="float:left; width:40px; background: #fff;" class="idntcn">' + msg.keyid + '</div>' : '')+
             '        <div style="float:left;padding-left: 5px;">' + person + ' <i style="color: #999;">(' + msgTimeTxt + ')  <span href="javascript:;" class="hidbord_mnu_reply hidbord_clickable">#'+msg.id.substr(0, 8)+'</span></i>'+
@@ -4240,6 +4336,12 @@ var replytoMsgDirect = function(e) {
     var msg_id = $(e.target).closest('.hidbord_msg').first().attr('id').replace(/^msg\_/, ''),
         usr_id = $(e.target).closest('.hidbord_msg').first().find('.hidbord_usr_reply').attr('alt');
 
+    if($(e.target).text() == 'BROADCAST'){
+        showReplyform('#msg_' + msg_id, '>>' + msg_id);
+        $('#hidbord_cont_type').val('broadcast').trigger('change');
+        return true;
+    }
+
     if(rsa_hashB64 == usr_id){
         alert('So ronery?');
         return false;
@@ -4250,7 +4352,7 @@ var replytoMsgDirect = function(e) {
         return false;
     }
 
-    console.log(usr_id);
+    
     showReplyform('#msg_' + msg_id, '>>' + msg_id);
     $('#hidbord_cont_type').val('direct').trigger('change');
     $('#hidbord_cont_direct').val(usr_id);
@@ -4377,10 +4479,9 @@ var showReplyform = function(msg_id, textInsert) {
             '      </div>  ' +
             '      <textarea style="max-width: none; margin: 2px; width: 580px; height: 136px; resize: vertical; background-image: none; background-position: 0% 0%; background-repeat: repeat repeat;" id="hidbord_reply_text"></textarea>  ' +
             '      <div style="width: 590px;">' +
+            '        <span>Hide: <label><input id="hidboard_hide_sender" type="checkbox" checked/> sender</label>; <label><input id="hidboard_hide_contacts" type="checkbox"  checked/> contacts</label></span><br>'+
             '        <input type="button" value="crypt and send" id="do_encode">  ' +
             '        <span style="float: right;"><a href="javascript:;" id="hidbordform_preview" alt="msg_preview">message preview</a></span>  ' +
-            '        <br><label>Hide Sender: <input id="hidboard_hide_sender" type="checkbox" checked/></label>'+
-            '        <br><label>Hide Contacts: <input id="hidboard_hide_contacts" type="checkbox"  checked/></label>'+
             '      </div>' +
             '    </div>' +
             '  </div>' +
@@ -4410,11 +4511,18 @@ var showReplyform = function(msg_id, textInsert) {
 
 
         $('#hidbord_cont_type').on('change',function(){
+            $('#hidbord_replyform').css('border-left', 'none');
+            
             if($('#hidbord_cont_type').val()=='direct'){
                 $('#hidbord_cont_direct').show();
+                $('#hidbord_replyform').css('border-left', '8px solid #090');
             }else{
                 $('#hidbord_cont_direct').hide();
             }
+
+            if($('#hidbord_cont_type').val()=='broadcast')
+                $('#hidbord_replyform').css('border-left', '8px solid #900');
+
         });
 
         if(prev_to !== null){
@@ -4906,12 +5014,8 @@ $(function($) {
 
     inject_ui();
 
-    if (ssGet(boardHostName + 'magic_desu_numbers')) {
-        rsaProfile = ssGet(boardHostName + 'magic_desu_numbers');
-        rsa_hash = rsaProfile.publicKeyPairPrintableHash;
-        rsa_hashB64 = rsaProfile.publicKeyPairPrintable;
-        do_login(false, rsaProfile.privateKeyPair);
-    }
+    do_login(false, true);
+    do_loginBroadcast(false, true);
 
     if (ssGet(boardHostName + 'magic_desu_pwd')) {
         $('#steg_pwd').val(ssGet(boardHostName + 'magic_desu_pwd'));

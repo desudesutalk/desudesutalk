@@ -3,7 +3,7 @@ var fieldSize = 32, ECcrypt = ellipticjs.ec("secp256k1");
 var cryptCore = (function(){
 	"use strict";
 
-	var keyPair = null, cryptCore = {};
+	var keyPair = null, keyPairBroadcast = null, cryptCore = {};
 
 	var getSharedSecret = function (privateKey, publicKey) {
 		var sharedSecret = padBytes(privateKey.derive(ECcrypt.keyPair(publicKey).getPublic()).toArray());
@@ -12,9 +12,13 @@ var cryptCore = (function(){
 
 	cryptCore.login = function login(password, salt, key) {
 	    var privateKey = null, encKey = null;
-	    
+
 	    if(key){
-	    	privateKey = bs58.dec(key);
+		    if (ssGet(boardHostName + 'magic_desu_numbers')) {
+		        privateKey = bs58.dec(ssGet(boardHostName + 'magic_desu_numbers').privateKeyPair);
+		    }else{
+		    	return false;	
+		    }
 	    }else{
 	    	privateKey = sjcl.codec.bytes.fromBits(sjcl.misc.pbkdf2(password, salt, 500017, 256));
 	    }
@@ -36,19 +40,67 @@ var cryptCore = (function(){
 	        publicKeyPairPrintableHash = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(sjcl.codec.bytes.toBits(publicKeyPair)));
 
 	    keyPair = {
-	        "privateEnc": encKey,
+	    	"privateEnc": encKey,
+	        "privateKeyPair": bs58.enc(privateKey),
 	        "publicEnc": hexToBytes(pubEncKey),
 	        "publicKeyPair": publicKeyPair,
-	        "privateKeyPair": bs58.enc(privateKey),
 	        "publicKeyPairPrintable": publicKeyPairPrintable,
 	        "publicKeyPairPrintableHash": publicKeyPairPrintableHash
 	    };
 
+	    ssSet(boardHostName + 'magic_desu_numbers', keyPair);
+
 	    return {
-	        "privateEnc": privateKey,
 	        "publicEnc": hexToBytes(pubEncKey),
 	        "publicKeyPair": publicKeyPair,
+	        "publicKeyPairPrintable": publicKeyPairPrintable,
+	        "publicKeyPairPrintableHash": publicKeyPairPrintableHash
+	    };
+	};
+
+	cryptCore.loginBroadcast = function login(password, salt, key) {
+	    var privateKey = null, encKey = null;
+
+	    if(key){
+		    if (ssGet(boardHostName + 'magic_desu_numbers2')) {
+		        privateKey = bs58.dec(ssGet(boardHostName + 'magic_desu_numbers2').privateKeyPair);
+		    }else{
+		    	privateKey = bs58.dec('5n24WDyUV5b41fkk8eoocKxZuWTHxpYqDekMwo4MvDv1'); // pass: desu   salt: desu
+		    }
+	    }else{
+	    	privateKey = sjcl.codec.bytes.fromBits(sjcl.misc.pbkdf2(password, salt, 500017, 256));
+	    }
+
+	    encKey = ECcrypt.keyPair(privateKey);
+
+	    try{
+	        if(!encKey.validate().result){
+	            throw "invalid";
+	        }
+	    } catch (e) {
+	        alert('Bad key generated! Try another salt and/or password.');
+	        return false;
+	    }
+
+	    var pubEncKey = encKey.getPublic(true, "hex"),
+	        publicKeyPair = hexToBytes(pubEncKey),
+	        publicKeyPairPrintable = bs58.enc(publicKeyPair),
+	        publicKeyPairPrintableHash = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(sjcl.codec.bytes.toBits(publicKeyPair)));
+
+	    keyPairBroadcast = {
+	    	"privateEnc": encKey,
 	        "privateKeyPair": bs58.enc(privateKey),
+	        "publicEnc": hexToBytes(pubEncKey),
+	        "publicKeyPair": publicKeyPair,
+	        "publicKeyPairPrintable": publicKeyPairPrintable,
+	        "publicKeyPairPrintableHash": publicKeyPairPrintableHash
+	    };
+
+	    ssSet(boardHostName + 'magic_desu_numbers2', keyPairBroadcast);
+
+	    return {
+	        "publicEnc": hexToBytes(pubEncKey),
+	        "publicKeyPair": publicKeyPair,
 	        "publicKeyPairPrintable": publicKeyPairPrintable,
 	        "publicKeyPairPrintableHash": publicKeyPairPrintableHash
 	    };
@@ -203,7 +255,7 @@ var cryptCore = (function(){
 	    return container;
 	};
 
-	cryptCore.decodeMessage = function decodeMessage(msg) {
+	cryptCore.decodeMessage = function decodeMessage(msg, forBroadcast) {
 	    var ephemAB   = new Uint8Array(msg, 0, 33),
 	        iv        = new Uint8Array(msg, 33, 16),
 	        contHead  = new Uint8Array(msg, 49, 32),
@@ -224,7 +276,7 @@ var cryptCore = (function(){
 	        var firstByte = 0xAA;        
 
 	        try {
-	            secret = getSharedSecret(keyPair.privateEnc, ephemeral);
+	            secret = getSharedSecret(forBroadcast ? keyPairBroadcast.privateEnc : keyPair.privateEnc, ephemeral);
 	            message.ephemeralPub = ephemeral;
 	            firstByte ^= secret[31];
 	        } catch (exception) {
