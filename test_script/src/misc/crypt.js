@@ -5,7 +5,7 @@ var hidboard_hide_sender = false, hidboard_hide_contacts = false;
 var encodeMessage = function(message, keys, msg_type, hideSender, hideContacts){
     'use strict';
 
-    return cryptCore.encodeMessage(JSON.stringify(message), contacts, hidboard_hide_sender, hidboard_hide_contacts);
+    return cryptCore.encodeMessage(JSON.stringify(message), keys, hidboard_hide_sender, hidboard_hide_contacts);
 };
 
 var decodeMessage = function(hidData){

@@ -700,7 +700,7 @@ var replytoMsgDirect = function(e) {
     var msg_id = $(e.target).closest('.hidbord_msg').first().attr('id').replace(/^msg\_/, ''),
         usr_id = $(e.target).closest('.hidbord_msg').first().find('.hidbord_usr_reply').attr('alt');
 
-    if(rsa_hash == usr_id){
+    if(rsa_hashB64 == usr_id){
         alert('So ronery?');
         return false;
     }

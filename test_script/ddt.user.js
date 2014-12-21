@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTest
 // @namespace    udp://desushelter/*
-// @version      0.4.3
+// @version      0.4.4
 // @description  Write something useful!
 // @include      https://8chan.co/ddt/res/1907.html
 // @exclude      *#dev
@@ -3116,7 +3116,7 @@ var do_encode = function() {
         if(c == rsa_hashB64) continue;
 
         if(prev_to == 'direct' && c == prev_cont){
-            keys[c] = contacts[c].key;
+            keys[c] = contacts[c];
             continue;
         }
         
@@ -3125,14 +3125,14 @@ var do_encode = function() {
         }
 
         if(to_group !== null && contacts[c].groups && $.isArray(contacts[c].groups) && contacts[c].groups.indexOf(to_group) != -1){
-            keys[c] = contacts[c].key;
+            keys[c] = contacts[c];
         }
 
         if(prev_to == 'direct' || to_group !== null){
             continue;
         }
 
-        keys[c] = contacts[c].key;
+        keys[c] = contacts[c];
     }
 
     var p = encodeMessage(payLoad,keys, 0);
@@ -3523,7 +3523,7 @@ var hidboard_hide_sender = false, hidboard_hide_contacts = false;
 var encodeMessage = function(message, keys, msg_type, hideSender, hideContacts){
     'use strict';
 
-    return cryptCore.encodeMessage(JSON.stringify(message), contacts, hidboard_hide_sender, hidboard_hide_contacts);
+    return cryptCore.encodeMessage(JSON.stringify(message), keys, hidboard_hide_sender, hidboard_hide_contacts);
 };
 
 var decodeMessage = function(hidData){
@@ -4238,7 +4238,7 @@ var replytoMsgDirect = function(e) {
     var msg_id = $(e.target).closest('.hidbord_msg').first().attr('id').replace(/^msg\_/, ''),
         usr_id = $(e.target).closest('.hidbord_msg').first().find('.hidbord_usr_reply').attr('alt');
 
-    if(rsa_hash == usr_id){
+    if(rsa_hashB64 == usr_id){
         alert('So ronery?');
         return false;
     }

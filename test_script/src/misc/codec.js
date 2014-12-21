@@ -59,7 +59,7 @@ var do_encode = function() {
         if(c == rsa_hashB64) continue;
 
         if(prev_to == 'direct' && c == prev_cont){
-            keys[c] = contacts[c].key;
+            keys[c] = contacts[c];
             continue;
         }
         
@@ -68,14 +68,14 @@ var do_encode = function() {
         }
 
         if(to_group !== null && contacts[c].groups && $.isArray(contacts[c].groups) && contacts[c].groups.indexOf(to_group) != -1){
-            keys[c] = contacts[c].key;
+            keys[c] = contacts[c];
         }
 
         if(prev_to == 'direct' || to_group !== null){
             continue;
         }
 
-        keys[c] = contacts[c].key;
+        keys[c] = contacts[c];
     }
 
     var p = encodeMessage(payLoad,keys, 0);
