@@ -181,7 +181,7 @@ var jsf5steg = (function(){
         			case 0: // initial state
           				var rs = decodeHuffman(component.huffmanTableAC);
           				var s = rs & 15; 
-                  r = rs >> 4;
+                        r = rs >> 4;
           				if (s === 0) {
             				if (r < 15) {
               					eobrun = receive(r) + (1 << r);
@@ -888,9 +888,9 @@ var jsf5steg = (function(){
 
     function stegShuffle(key, data){
         var i = 0, j = 0, t = 0, k = 0,
-            S = new Uint8Array(256),
+            S = makeUin8(256),
             max_random = data.length, random_index = 0,
-            gamma = new Uint8Array(Math.ceil(data.length / 8));
+            gamma = makeUin8(math_ceil(data.length / 8));
         
         // init state from key
         for(i = 0; i < 256; ++i) S[i] = i;
@@ -945,7 +945,7 @@ var jsf5steg = (function(){
         }
 
         // prepare gamma
-        for(k = 0; k < Math.ceil(data.length / 8); ++k) {
+        for(k = 0; k < gamma.length; ++k) {
             i = (i + 1) & 255;
             j = (j + S[i]) & 255;
             t = S[i];
@@ -1163,7 +1163,7 @@ var jsf5steg = (function(){
         var coeff = this.frames[0].components[0].blocks;
         var coeff_count = coeff.length;
 
-        var pm = new Uint32Array(coeff_count);
+        var pm = makeUin32(coeff_count);
         for (i = 1; i < coeff_count; i++) pm[i] = i;
         var gamma = stegShuffle(iv, pm), gammaI = 0;
                 
@@ -1172,11 +1172,11 @@ var jsf5steg = (function(){
             n_bytes_extracted = 0,
             extracted_bit = 0;
 
-        var extracted_file_length = Math.floor(coeff_count / 8),
+        var extracted_file_length = math_floor(coeff_count / 8),
             pos = -1, i = 0, cc = 0, shuffled_index = 0,
             k = 1, n = 1;
 
-        var data = new Uint8Array(extracted_file_length),
+        var data = makeUin8(extracted_file_length),
             data_idx = 0, keep_extracting = true;
 
 
@@ -1216,12 +1216,12 @@ var jsf5steg = (function(){
             }
         }
 
-        ret[1] = new Uint8Array(data.buffer, 0, data_idx);
+        ret[1] = makeUin8(data.buffer, 0, data_idx);
 
         for (k = 2; k < 8; k++) {
             n = (1 << k) - 1;
-            extracted_file_length = Math.floor(k * coeff_count / n / 8);
-            data = new Uint8Array(extracted_file_length);
+            extracted_file_length = math_floor(k * coeff_count / n / 8);
+            data = makeUin8(extracted_file_length);
             data_idx = 0;
             keep_extracting = true;
             gammaI = 0;
@@ -1279,7 +1279,7 @@ var jsf5steg = (function(){
                 }
             }
 
-            ret[k] = new Uint8Array(data.buffer, 0, data_idx);
+            ret[k] = makeUin8(data.buffer, 0, data_idx);
         }
 
         return ret;

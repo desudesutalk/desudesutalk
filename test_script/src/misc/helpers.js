@@ -81,7 +81,7 @@ var strToDataUri = function(str){
 var stringToByteArray = function(str) {
     "use strict";
 
-    var array = new Uint8Array(str.length), i, il;
+    var array = makeUin8(str.length), i, il;
 
     for (i = 0, il = str.length; i < il; ++i) {
         array[i] = str.charCodeAt(i) & 0xff;
