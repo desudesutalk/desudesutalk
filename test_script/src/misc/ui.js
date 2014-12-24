@@ -928,7 +928,8 @@ var showReplyform = function(msg_id, textInsert) {
         });
 
         $('#hidbordTextControls').on('mouseover', function(e) {
-            quotedText = window.getSelection().toString();
+            //quotedText = window.getSelection().toString();
+            quotedText = quoteSelection(window.getSelection().getRangeAt(0).cloneContents());
         });
 
         $('#hidbordTextControls input').on('click', function(e) {
@@ -943,7 +944,7 @@ var showReplyform = function(msg_id, textInsert) {
                     quotedText = ta.val().substring(taStart, taEnd);
                 }
                 if (quotedText.length > 0) {
-                    quotedText = '> ' + quotedText.replace(/\n/gm, "\n> ") + "\n";
+                    //quotedText = '> ' + quotedText.replace(/\n/gm, "\n> ") + "\n";
                     ta.val(ta.val().substring(0, taStart) + quotedText + ta.val().substring(taEnd));
                 }
             }
