@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTest
 // @namespace    udp://desushelter/*
-// @version      0.4.8
+// @version      0.4.9
 // @description  Write something useful!
 // @include      https://8chan.co/ddt/res/1907.html
 // @exclude      *#dev
@@ -695,7 +695,7 @@ Usage with options: $('li').identicon5({rotate:true, size:100});
                     draw(ctx, hash, settings.size, settings.rotate);
                 }		
 				$(this).html('');				
-				$(this).append($('<img src="'+canvas.toDataURL()+'" title="'+hash+'" alt="'+hash+'" style="vertical-align: bottom;"/>'));				
+				$(this).append($('<img src="'+canvas.toDataURL()+'" title="'+key+'" alt="'+key+'" style="vertical-align: bottom;"/>'));				
             }			
         });
     };
