@@ -17,7 +17,7 @@ var cryptCore = (function(){
 		    if (ssGet(boardHostName + profileStoreName)) {
 		        privateKey = bs58.dec(ssGet(boardHostName + profileStoreName).privateKeyPair);
 		    }else{
-		    	return false;	
+		    	return false;
 		    }
 	    }else{
 	    	privateKey = sjcl.codec.bytes.fromBits(sjcl.misc.pbkdf2(password, salt, 500017, 256));

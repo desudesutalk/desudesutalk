@@ -10,6 +10,10 @@ var do_login = function(e, key) {
     }else{
         rsaProfile = cryptCore.login(null, null, true);
     }
+    if(!rsaProfile) {
+        rsaProfile = {};
+        return false;
+    }
     lf.magik_num.value = lf.passwd.value = '';
 
     rsa_hash = rsaProfile.publicKeyPairPrintableHash;

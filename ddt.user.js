@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTest
 // @namespace    udp://desushelter/*
-// @version      0.4.9
+// @version      0.4.10
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -828,7 +828,7 @@ var cryptCore = (function(){
 		    if (ssGet(boardHostName + profileStoreName)) {
 		        privateKey = bs58.dec(ssGet(boardHostName + profileStoreName).privateKeyPair);
 		    }else{
-		    	return false;	
+		    	return false;
 		    }
 	    }else{
 	    	privateKey = sjcl.codec.bytes.fromBits(sjcl.misc.pbkdf2(password, salt, 500017, 256));
@@ -3185,6 +3185,10 @@ var do_login = function(e, key) {
     }else{
         rsaProfile = cryptCore.login(null, null, true);
     }
+    if(!rsaProfile) {
+        rsaProfile = {};
+        return false;
+    }
     lf.magik_num.value = lf.passwd.value = '';
 
     rsa_hash = rsaProfile.publicKeyPairPrintableHash;
@@ -3765,7 +3769,7 @@ var inject_ui = function() {
                         '<span style="color: #900">De</span>'+
                         '<span style="color: #090">su</span> '+
                         '<span style="color: #900">De</span>'+ /*jshint newcap: false  */
-                        '<span style="color: #090">su</span> Test?<span style="font-size: x-small;">&nbsp;(v'+(typeof GM_info !== 'undefined' ? GM_info.script.version : GM_getMetadata("version"))+')</span></h3>'+
+                        '<span style="color: #090">su</span> Talk!<span style="font-size: x-small;">&nbsp;(v'+(typeof GM_info !== 'undefined' ? GM_info.script.version : GM_getMetadata("version"))+')</span></h3>'+
                     '<div class="hidbord_nav">'+
             '            <div class="hidbord_clickable active" id="hidbord_show_msgs">Messages</div>'+
             '            <div class="hidbord_clickable" id="hidbord_show_cntc">Contacts</div>'+
