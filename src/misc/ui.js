@@ -192,7 +192,7 @@ var inject_ui = function() {
             useGlobalContacts = true;
             contactsInLocalStorage = false;
             $('#hidboard_option_pubstore').attr('checked', null);
-            ssSet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
+            ssSet((useGlobalContacts?'':boardHostName) + contactStoreName, JSON.stringify(contacts), contactsInLocalStorage);
             render_contact();
         }else{
             useGlobalContacts = false;

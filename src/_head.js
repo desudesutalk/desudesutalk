@@ -45,3 +45,6 @@
     function makeArr(size){
         return new Array(size);
     } 
+
+    var contactStoreName = 'magic_desu4_contacts',
+        profileStoreName = 'magic_desu4_numbers';

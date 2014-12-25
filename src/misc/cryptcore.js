@@ -14,8 +14,8 @@ var cryptCore = (function(){
 	    var privateKey = null, encKey = null;
 
 	    if(key){
-		    if (ssGet(boardHostName + 'magic_desu_numbers')) {
-		        privateKey = bs58.dec(ssGet(boardHostName + 'magic_desu_numbers').privateKeyPair);
+		    if (ssGet(boardHostName + profileStoreName)) {
+		        privateKey = bs58.dec(ssGet(boardHostName + profileStoreName).privateKeyPair);
 		    }else{
 		    	return false;	
 		    }
@@ -48,7 +48,7 @@ var cryptCore = (function(){
 	        "publicKeyPairPrintableHash": publicKeyPairPrintableHash
 	    };
 
-	    ssSet(boardHostName + 'magic_desu_numbers', keyPair);
+	    ssSet(boardHostName + profileStoreName, keyPair);
 
 	    return {
 	        "publicEnc": hexToBytes(pubEncKey),
@@ -62,8 +62,8 @@ var cryptCore = (function(){
 	    var privateKey = null, encKey = null;
 
 	    if(key){
-		    if (ssGet(boardHostName + 'magic_desu_numbers2')) {
-		        privateKey = bs58.dec(ssGet(boardHostName + 'magic_desu_numbers2').privateKeyPair);
+		    if (ssGet(boardHostName + profileStoreName + '2')) {
+		        privateKey = bs58.dec(ssGet(boardHostName + profileStoreName + '2').privateKeyPair);
 		    }else{
 		    	privateKey = bs58.dec('5n24WDyUV5b41fkk8eoocKxZuWTHxpYqDekMwo4MvDv1'); // pass: desu   salt: desu
 		    }
@@ -96,7 +96,7 @@ var cryptCore = (function(){
 	        "publicKeyPairPrintableHash": publicKeyPairPrintableHash
 	    };
 
-	    ssSet(boardHostName + 'magic_desu_numbers2', keyPairBroadcast);
+	    ssSet(boardHostName + profileStoreName + '2', keyPairBroadcast);
 
 	    return {
 	        "publicEnc": hexToBytes(pubEncKey),
