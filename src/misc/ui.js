@@ -14,6 +14,14 @@ var inject_ui = function() {
 
     var ui = '<div class="hidbord_main" style="display: none">'+
             '    <div class="hidbord_thread hidbord_maincontent">'+
+
+            '    <div class="hidbord_msg">'+
+            '      <p><strong>WARNING!</strong></p>'+
+            '      <p>Next script version will bring major changes in cryptography.</p>'+
+            '      <p>Old keys will be invalid.</p>'+
+            '      <p>Read more on <a href="https://github.com/desudesutalk/desudesutalk/wiki/Changes-in-v4#changes-in-version-04" target="_blank">Github wiki</a></p>'+
+            '    </div>'+
+
             '        <p style="text-align: center; display: none;" id="allgetter_button">'+
             '        </p>'+
             '        <p style="text-align: center; display: none;" id="hidbord_reply_button">'+
@@ -75,7 +83,7 @@ var inject_ui = function() {
             '</div>'+
             '<div class="hidbord_notifer">'+
             '    <img id="hidbord_show" class="hidbord_clickable" alt="Moshi moshi!" title="Moshi moshi!" src="' + desudesuicon +'" width="32" style="margin:0; z-index:1050;vertical-align: bottom;"/>'+
-            '<span id="hidbord_notify_counter" class="hidbord_clickable" style="position: absolute;background: #f00;z-index: 100;bottom: 4px;right: 4px;font-weight: bold;padding: 2px 7px;border-radius: 30px; color: #fff;box-shadow: 0 0 1px #f00;font-size: 15px;display: none;">1</span>'+
+            '<span id="hidbord_notify_counter" class="hidbord_clickable" style="position: absolute;background: #f00;z-index: 100;bottom: 4px;right: 4px;font-weight: bold;padding: 2px 7px;border-radius: 30px; color: #fff;box-shadow: 0 0 1px #f00;font-size: 15px;">1</span>'+
             '</div>';
     
     injectCSS('.hidbord_popup a, .hidbord_main a {color: #ff6600;} .hidbord_popup a:hover, .hidbord_main a:hover {color: #0066ff;}'+
