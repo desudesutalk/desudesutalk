@@ -3,30 +3,11 @@
 // @namespace    udp://desushelter/*
 // @version      0.4.10
 // @description  Write something useful!
-// @include      http://dobrochan.com/*/*
-// @include      http://dobrochan.ru/*/*
-// @include      http://dobrochan.org/*/*
-// @include      http://inach.org/*/*
-// @include      https://8chan.co/*/*
-// @include      https://lainchan.org/*/*
-// @include      http://iichan.hk/*/*
-// @include      http://2-ch.su/*/*
-// @include      http://syn-ch.com/*/*
-// @include      http://syn-ch.org/*/*
-// @include      http://syn-ch.ru/*/*
-// @include      http://krautchan.net/*/*
-// @include      https://boards.4chan.org/*/*
-// @include      http://boards.4chan.org/*/*
-// @include      https://2ch.hk/*/*
-// @include      https://2ch.re/*/*
-// @include      https://2ch.tf/*/*
-// @include      https://2ch.wf/*/*
-// @include      https://2ch.yt/*/*
-// @include      https://2-ch.so/*/*
+// @include      https://8chan.co/ddt/res/1907.html
 // @exclude      *#dev
 // @copyright    2014+, Boku 
 // @icon         https://github.com/desudesutalk/desudesutalk/raw/master/icon.jpg
-// @updateURL    https://github.com/desudesutalk/desudesutalk/raw/master/ddt.meta.js
+// @updateURL    https://github.com/desudesutalk/desudesutalk/raw/prepareV4/ddt.meta.js
 // @run-at       document-start
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
@@ -3769,7 +3750,7 @@ var inject_ui = function() {
                         '<span style="color: #900">De</span>'+
                         '<span style="color: #090">su</span> '+
                         '<span style="color: #900">De</span>'+ /*jshint newcap: false  */
-                        '<span style="color: #090">su</span> Talk!<span style="font-size: x-small;">&nbsp;(v'+(typeof GM_info !== 'undefined' ? GM_info.script.version : GM_getMetadata("version"))+')</span></h3>'+
+                        '<span style="color: #090">su</span> Test?<span style="font-size: x-small;">&nbsp;(v'+(typeof GM_info !== 'undefined' ? GM_info.script.version : GM_getMetadata("version"))+')</span></h3>'+
                     '<div class="hidbord_nav">'+
             '            <div class="hidbord_clickable active" id="hidbord_show_msgs">Messages</div>'+
             '            <div class="hidbord_clickable" id="hidbord_show_cntc">Contacts</div>'+
