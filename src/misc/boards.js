@@ -46,24 +46,6 @@ var sendBoardForm = function(file) {
     }
 };
 
-var getRandPhrase = function(){
-    "use strict";
-    var wl = [["time", "person", "year", "way", "day", "thing", "man", "world", "life", "hand", "part", "child", "eye", "woman", "place", "work", "week", "case", "point", "government", "company", "number", "group", "problem", "fact"],
-            ["be", "have", "do", "say", "get", "make", "go", "know", "take", "see", "come", "think", "look", "want", "give", "use", "find", "tell", "ask", "work", "seem", "feel", "try", "leave", "call"],
-            ["good", "new", "first", "last", "long", "great", "little", "own", "other", "old", "right", "big", "high", "different", "small", "large", "next", "early", "young", "important", "few", "public", "bad", "same", "able"],
-            ["to", "of", "in", "for", "on", "with", "at", "by", "from", "up", "about", "into", "over", "after", "beneath", "under", "above"],
-            ["the", "and", "a", "that", "I", "it", "not", "he", "as", "you", "this", "but", "his", "they", "her", "she", "or", "an", "will", "my", "one", "all", "would", "there", "their"],
-            ["information", "back", "parent", "face", "others", "level", "office", "door", "health", "person", "art", "war", "history", "party", "result", "change", "morning", "reason", "research", "girl", "guy", "food", "moment", "air", "teacher"]],
-        res = [];       
-
-
-    for (var i = 0; i < wl.length; i++) {
-        res.push(wl[i][Math.floor(Math.random() * wl[i].length)]);
-    }
-
-    return '**' + res.join(' ') + '**';
-};
-
 var _sendBoardForm = function(file, formAddon) {
     "use strict";
     

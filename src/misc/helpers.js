@@ -81,7 +81,7 @@ var strToDataUri = function(str){
 var stringToByteArray = function(str) {
     "use strict";
 
-    var array = new Uint8Array(str.length), i, il;
+    var array = makeUin8(str.length), i, il;
 
     for (i = 0, il = str.length; i < il; ++i) {
         array[i] = str.charCodeAt(i) & 0xff;
@@ -223,4 +223,54 @@ var getURLasAB = function(rawURL, cb) {
         };
         oReq.send(null);        
     }
+};
+
+var padBytes = function (array, length) {
+    "use strict";
+
+    if (length === undefined) {
+        length = fieldSize;
+    }
+
+    for (var i = 0; array.length < length; ++i) {
+        array.unshift(0);
+    }
+
+    return array;
+};
+
+var shuffleArray = function (array) {
+    "use strict";
+
+    var counter = array.length, temp, index;
+
+    // While there are elements in the array
+    while (counter > 0) {
+        // Pick a random index
+        index = Math.floor(Math.random() * counter);
+
+        // Decrease counter by 1
+        counter--;
+
+        // And swap the last element with it
+        temp = array[counter];
+        array[counter] = array[index];
+        array[index] = temp;
+    }
+
+    return array;
+};
+
+var xorBytes = function (a, b) {
+    "use strict";
+    
+    if (a.length != b.length) {
+        throw new Error("Длины не сходятся");
+    }
+
+    for (var i in a) {
+        a[i] ^= b[i];
+    }
+
+    return a;
 };

@@ -1,11 +1,57 @@
 var contacts = {}, cont_groups = [];
 
+
+var add_contact_key = function(contactStr) {
+    "use strict";
+
+    contactStr = contactStr.replace(/[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g, '');
+    var words  = bs58.dec(contactStr);
+
+    if(words.length != 33) return false;
+
+    var pubEncKey = words;
+
+    try{
+        if(!ECcrypt.keyPair(pubEncKey).validate()){
+            return false;
+        }
+    } catch(e) {
+        return false;
+    }
+
+    var name = contactStr.substring(0,3) + "-" + contactStr.substring(3,6) + "-" + contactStr.substring(6,9);
+
+    if (ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage)) {
+        contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage));
+    }
+
+    contacts[contactStr] = {
+        key: contactStr,
+        name: name,
+        hide: 0,
+        groups: [],
+        "publicEnc": pubEncKey,
+        "publicKeyPair": words,
+        "publicKeyPairPrintable": contactStr,
+        "publicKeyPairPrintableHash": sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(sjcl.codec.bytes.toBits(words)))        
+    };
+
+    ssSet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
+
+    return contactStr;
+};
+
 var add_contact = function(e) {
     "use strict";
 
     var key = $(e.target).attr('alt');
-    var rsa_hash = hex_sha1(key);
+    var rsa_hash = key;
     var temp_name = rsa_hash.substring(0,3) + "-" + rsa_hash.substring(3,6) + "-" + rsa_hash.substring(6,9);
+
+    if(!add_contact_key(key)){
+        alert('Invalid key!');
+        return false;
+    }
 
     var name = prompt("Name this contact:", temp_name);
 
@@ -13,12 +59,59 @@ var add_contact = function(e) {
         contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage));
     }
 
-    contacts[rsa_hash] = {
-        key: key,
-        name: '' + name,
-        hide: 0,
-        groups: []
-    };
+    contacts[rsa_hash].name = '' + name;
+
+    ssSet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
+    render_contact();
+    $('em[alt="'+rsa_hash+'"]').text('' + name).css({"color": '', "font-weight": "bold", "font-style": 'normal'});
+};
+
+var add_contact_string = function(e) {
+    "use strict";
+
+    var key = $('#contact_address').val();
+    var rsa_hash = key;
+    var temp_name = rsa_hash.substring(0,3) + "-" + rsa_hash.substring(3,6) + "-" + rsa_hash.substring(6,9);
+
+    if(!add_contact_key(key)){
+        alert('Invalid key!');
+        return false;
+    }
+
+    var name = prompt("Name this contact:", temp_name);
+
+    if (ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage)) {
+        contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage));
+    }
+
+    contacts[rsa_hash].name = '' + name;
+
+    ssSet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
+    render_contact();
+    $('em[alt="'+rsa_hash+'"]').text('' + name).css({"color": '', "font-weight": "bold", "font-style": 'normal'});
+};
+
+
+
+var add_contact = function(e) {
+    "use strict";
+
+    var key = $(e.target).attr('alt');
+    var rsa_hash = key;
+    var temp_name = rsa_hash.substring(0,3) + "-" + rsa_hash.substring(3,6) + "-" + rsa_hash.substring(6,9);
+
+    if(!add_contact_key(key)){
+        alert('Invalid key!');
+        return false;
+    }
+
+    var name = prompt("Name this contact:", temp_name);
+
+    if (ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage)) {
+        contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', contactsInLocalStorage));
+    }
+
+    contacts[rsa_hash].name = '' + name;
 
     ssSet((useGlobalContacts?'':boardHostName) + 'magic_desu_contacts', JSON.stringify(contacts), contactsInLocalStorage);
     render_contact();
@@ -38,16 +131,16 @@ function safe_tags(str) {
 var getContactHTML = function(hash, key) {
     "use strict";
 
-    if (hash == rsa_hash) {
+    if (hash == rsa_hashB64) {
         return '<strong style="color: #090; font-style: italic" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">Me</strong>';
     }
 
-    if (!(hash in contacts) && key) {
-        return '<em style="color: #00f" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">Unknown</em> [<a href="javascript:;" alt="' + key + '" class="hidbord_addcntct_link">add</a>]';
+    if (hash == broad_hashB64) {
+        return '<strong style="color: #900; font-style: italic" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">BROADCAST</strong>';
     }
 
     if (!(hash in contacts)) {
-        return '<em style="color: #00f" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">Unknown</em>';
+        return '<em style="color: #00f" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">Unknown</em> [<a href="javascript:;" alt="' + hash + '" class="hidbord_addcntct_link">add</a>]';
     }
 
     if ('hide' in contacts[hash] && contacts[hash].hide == 1) {
@@ -60,7 +153,7 @@ var getContactHTML = function(hash, key) {
 
 var contactsSelector = function(){
     "use strict";
-    var code = '<div id="hidbord_contacts_select"><strong>to:</strong>&nbsp;<select id="hidbord_cont_type"><option selected="selected" value="all">All</option><option value="direct">Direct</option><option disabled="disabled">Groups:</option>';
+    var code = '<div id="hidbord_contacts_select"><strong>to:</strong>&nbsp;<select id="hidbord_cont_type"><option selected="selected" value="all">All</option><option value="direct">Direct</option><option value="broadcast">Broadcast</option><option disabled="disabled">Groups:</option>';
 
     for (var i = 0; i < cont_groups.length; i++) {
         code += '<option value="group_'+safe_tags(cont_groups[i])+'">'+safe_tags(cont_groups[i])+'</option>';
@@ -90,7 +183,8 @@ var render_contact = function() {
 
     var code = '<br><a href="data:text/plain;base64,' + strToDataUri(encodeURIComponent(JSON.stringify(contacts))) + 
                '" download="[DDT] Contacts - ' + document.location.host + ' - ' + dateToStr(new Date(), true) + 
-               '.txt">Download contacts as file</a> or import from file: <input type="file" id="cont_import_file" name="cont_import_file"><br/><br/>', cnt = 1;
+               '.txt">Download contacts as file</a> or import from file: <input type="file" id="cont_import_file" name="cont_import_file"><br/>' +
+               '<p><label>Addres: <input name="contact_address" type="text" length=90 id="contact_address" style="width: 400px;"/></label><input type="button" value="Add" id="add_contact_key"/></p>', cnt = 1;
 
     for (var c in contacts) {
         var ren_action = ('hide' in contacts[c] && contacts[c].hide == 1) ? 'enable' : 'disable';
@@ -107,7 +201,7 @@ var render_contact = function() {
 
         code += '<div class="hidbord_msg">' +
             '<div class="cont_identi" style="float: left">' + c + '</div>' +
-            '<div  style="float: left; padding: 5px;">' + getContactHTML(c) + '<br/><i style="color: #090">' + c + '</i><br/>' +
+            '<div  style="float: left; padding: 5px;">' + getContactHTML(c) + '<br/><i style="color: #009">' + c + '</i><br/>' +
             '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">delete</a>]</sub> '+
             '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">' + ren_action + '</a>]</sub> '+
             '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">rename</a>]</sub> '+
@@ -124,6 +218,7 @@ var render_contact = function() {
 
     $('.hidbord_contacts').empty().append(cont_list);
     $('.hidbord_contacts #cont_import_file').on('change', import_contact);
+    $('#add_contact_key').on('click', add_contact_string);
 
     cont_groups = Object.keys(cont_groups).sort();
 };

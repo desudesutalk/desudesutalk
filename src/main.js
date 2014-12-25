@@ -64,14 +64,10 @@ $(function($) {
         $(document).bind('animationstart', jpegInserted).bind('MSAnimationStart', jpegInserted).bind('webkitAnimationStart', jpegInserted);
     }, 10000);
 
-    if (ssGet(boardHostName + 'magic_desu_numbers')) {
-        rsaProfile = ssGet(boardHostName + 'magic_desu_numbers');
-        rsa.setPrivateEx(rsaProfile.n, '10001', rsaProfile.d, rsaProfile.p, rsaProfile.q, rsaProfile.dmp1, rsaProfile.dmq1, rsaProfile.coeff);
-        rsa_hash = hex_sha1(rsaProfile.n);
-        rsa_hashB64 = hex2b64(rsa_hash);
-    }
-
     inject_ui();
+
+    do_login(false, true);
+    do_loginBroadcast(false, true);
 
     if (ssGet(boardHostName + 'magic_desu_pwd')) {
         $('#steg_pwd').val(ssGet(boardHostName + 'magic_desu_pwd'));

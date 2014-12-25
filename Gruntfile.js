@@ -6,14 +6,13 @@ module.exports = function(grunt) {
             basic: {
                 "options": { "separator": "\n" },
                 "files": {
-                    "dist/crypto.js": ["src/crypto/jsbn.js","src/crypto/jsbn2.js","src/crypto/prng4.js","src/crypto/rng.js","src/crypto/sha1.js","src/crypto/sha256.js",
-                                       "src/crypto/rsa.js","src/crypto/rsa2.js","src/crypto/rsa-sign.js","src/crypto/sjcl.js"],
-                    "dist/libs.js": ["src/libs/zepto.min.js","src/libs/jquery.identicon5.js",
+                    "dist/crypto.js": ["src/crypto/elliptic.min.js","src/crypto/sjcl.js","src/crypto/sjcl.ccm_hack.js"],
+                    "dist/libs.js": ["src/libs/zepto.min.js","src/libs/jquery.identicon5.js","src/libs/base58.js",
                                      "src/libs/pako.min.js",
                                      "src/libs/highlight.pack.js"],
 
                     "ddt.user.js": ["src/metablock.js", 'src/_head.js', "dist/crypto.js","dist/libs.js",
-                                    //"src/misc/*.js",
+                                    "src/misc/cryptcore.js",
                                     "src/misc/storage.js",
                                     "src/misc/helpers.js",
                                     "src/misc/utf8array.js",

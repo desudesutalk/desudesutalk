@@ -22,19 +22,15 @@ var inject_ui = function() {
             '    </div>'+
             '    <div class="hidbord_contacts hidbord_maincontent" style="display: none"></div>'+
             '    <div class="hidbord_config hidbord_maincontent" style="display: none">'+
-            '    <div class="hidbord_msg"><p id="identi" style="text-align: center;"></p>'+
-            '        <form name="loginform">'+
-            '            <p  style="text-align: center;">'+
-            '                    Password: <input name="passwd" type="text" value="" size=10> Magic number:'+
-            '                    <input name="magik_num" type="text" value="" size=10>'+
-            '                    <input type="button" value="log in" id="do_login">'+
+            '    <div class="hidbord_msg"><h3 style="text-align: center;">Your key:</h3><p id="identi" style="text-align: center;"></p>'+
+            '        <form name="loginform" style="margin: 0;">'+
+            '                    <table style="margin-left:auto; margin-right:auto; text-align: right;"><tr><td>Password: </td><td><input name="passwd" type="text" value=""  style="width: 300px; color: rgb(221, 221, 221); max-width: none;"></td></tr><tr><td>Salt: </td>'+
+            '                    <td><input name="magik_num" type="text" value="" style="width: 300px; color: rgb(221, 221, 221); max-width: none;"></td></tr>'+
+            '                    <tr><td>&nbsp;</td><td style="text-align: left;"><input type="button" value="log in" id="do_login"></td></tr></table>'+
             '            </p>'+
             '        </form></div>'+
 
             '    <div class="hidbord_msg"><p id="identi" style="text-align: center;"></p>'+
-            '            <p  style="text-align: center;">'+
-            '                    Steg Password: <input name="steg_pwd" type="text" value="desu" size=10 id="steg_pwd">'+
-            '            </p>'+
 
             '            <p  style="text-align: center;">'+
             '                    <label>Use global contacts: <input type="checkbox" id="hidboard_option_globalcontacts" style="vertical-align:middle;" checked></label>'+
@@ -52,6 +48,20 @@ var inject_ui = function() {
 
             '        </div>'+
 
+            '    <div class="hidbord_msg">'+
+            '        <p style="text-align: center; background: #f00; color: #fff;"><b>DANGER ZONE!!!</b></p>'+
+            '        <p style="text-align: center;">Change this only when you know what you\'re doing!</p><hr/>'+
+            '        <h3 style="text-align: center;">Broadcast address:</h3><p id="identi_broad" style="text-align: center;"></p>'+
+            '        <form name="broadcastform" style="margin: 0;">'+
+            '                    <table style="margin-left:auto; margin-right:auto; text-align: right;"><tr><td>Password: </td><td><input name="passwd" type="text" value=""  style="width: 300px; color: rgb(221, 221, 221); max-width: none;"></td></tr><tr><td>Salt: </td>'+
+            '                    <td><input name="magik_num" type="text" value="" style="width: 300px; color: rgb(221, 221, 221); max-width: none;"></td></tr>'+
+            '                    <tr><td>&nbsp;</td><td style="text-align: left;"><input type="button" value="set" id="do_login_broadcast"></td></tr></table>'+
+            '            </p>'+
+            '            <hr/><p  style="text-align: center;">'+
+            '                    Steg Password: <input name="steg_pwd" type="text" value="desu" size=10 id="steg_pwd">'+
+            '            </p>'+
+            '        </form></div>'+
+
 
             '    </div>'+
             '    <div class="hidbord_head">'+
@@ -59,8 +69,8 @@ var inject_ui = function() {
             '        <h3 class="hidbord_clickable" style="text-shadow: 0 1px 0 #fff;">'+
                         '<span style="color: #900">De</span>'+
                         '<span style="color: #090">su</span> '+
-                        '<span style="color: #900">De</span>'+
-                        '<span style="color: #090">su</span> Talk!</h3>'+
+                        '<span style="color: #900">De</span>'+ /*jshint newcap: false  */
+                        '<span style="color: #090">su</span> Test?<span style="font-size: x-small;">&nbsp;(v'+(typeof GM_info !== 'undefined' ? GM_info.script.version : GM_getMetadata("version"))+')</span></h3>'+
                     '<div class="hidbord_nav">'+
             '            <div class="hidbord_clickable active" id="hidbord_show_msgs">Messages</div>'+
             '            <div class="hidbord_clickable" id="hidbord_show_cntc">Contacts</div>'+
@@ -75,7 +85,7 @@ var inject_ui = function() {
             '</div>'+
             '<div class="hidbord_notifer">'+
             '    <img id="hidbord_show" class="hidbord_clickable" alt="Moshi moshi!" title="Moshi moshi!" src="' + desudesuicon +'" width="32" style="margin:0; z-index:1050;vertical-align: bottom;"/>'+
-            '<span id="hidbord_notify_counter" class="hidbord_clickable" style="position: absolute;background: #f00;z-index: 100;bottom: 4px;right: 4px;font-weight: bold;padding: 2px 7px;border-radius: 30px; color: #fff;box-shadow: 0 0 1px #f00;font-size: 15px;display:none;">1</span>'+
+            '<span id="hidbord_notify_counter" class="hidbord_clickable" style="position: absolute;background: #f00;z-index: 100;bottom: 4px;right: 4px;font-weight: bold;padding: 2px 7px;border-radius: 30px; color: #fff;box-shadow: 0 0 1px #f00;font-size: 15px;display: none;">1</span>'+
             '</div>';
     
     injectCSS('.hidbord_popup a, .hidbord_main a {color: #ff6600;} .hidbord_popup a:hover, .hidbord_main a:hover {color: #0066ff;}'+
@@ -97,7 +107,7 @@ var inject_ui = function() {
             '.hidbord_nav{ position: absolute; bottom: 0; margin: auto; width: 370px; left: 0; right: 0; } '+
             '.hidbord_nav div{ display: inline-block; background: #eee; width: 120px; } '+
             '.hidbord_nav .active{ background: #fff; box-shadow: 0 0 5px #999; } '+
-            '.hidbord_msg { font-family: calibri; display: block; border-right: 1px solid #999; border-bottom: 1px solid #999; border-left: 1px solid #fafafa; border-top: 1px solid #fafafa; margin: 2px 10px 10px 2px; background-color: #fafafa; padding: 5px; word-wrap: break-word;} '+
+            '.hidbord_msg { font-family: calibri; display: block; border-right: 1px solid #999; border-bottom: 1px solid #999; border-left: 1px solid #fafafa; border-top: 0; margin: 2px 10px 10px 2px; background-color: #fafafa; padding: 5px; word-wrap: break-word;} '+
             '.hidbord_msg_focused { border: 1px dashed #e00; } '+
             '.hidbord_msg_new { background-color: #ffe; } '+
             '.hidbord_main hr, .hidbord_popup hr { background:#ddd; border:0; height:1px } '+
@@ -194,15 +204,6 @@ var inject_ui = function() {
         ssSet(boardHostName + 'autoscanDefault', !!$('#hidboard_option_autoscanison').attr('checked'));
     });
 
-    if ("n" in rsaProfile) {
-        $('#identi').html(rsa_hash).identicon5({
-            rotate: true,
-            size: 64
-        });
-        $('#identi').append('<br/><br/><i style="color: #090;">'+rsa_hash+'</i>');
-        $('#pub_key_info').val(linebrk(rsa.n.toString(16), 64));
-    }
-
     $('#hidbord_btn_reply').on('click', function() {
         $('.hidbord_maincontent').hide();
         $('.hidbord_thread').show();
@@ -221,6 +222,8 @@ var inject_ui = function() {
     });
 
     $('#do_login').on('click', do_login);
+    $('#do_login_broadcast').on('click', do_loginBroadcast);
+
     $('#hidbord_btn_getold').on('click', read_old_messages);
 
     $('#steg_pwd').on('change', function() {
@@ -261,11 +264,15 @@ var do_popup = function(e) {
 
         msgTimeTxt = dateToStr(msgDate);
 
-        person = getContactHTML(msg.keyid, msg.pubkey);
+        if(msg.senderHidden){
+            person = '<b>Anonymous</b>';
+        }else{
+            person = getContactHTML(msg.keyid, msg.pubkey);
+        }
 
         var code = '<div class="hidbord_msg" id="msg_' + msg.id + '" style="margin: 0;">'+
                    '    <div style="overflow: hidden" class="hidbord_msg_header" >'+ 
-                   '<span style="background: #fff;" class="idntcn2">' + msg.keyid + '</span>&nbsp;' + person +
+                   (msg.keyid !=='' ? '<span style="background: #fff;" class="idntcn2">' + msg.keyid + '</span>&nbsp;' : '') + person +
                    ' <i style="color: #999;">(' + msgTimeTxt + ') <span href="javascript:;" class="hidbord_mnu_reply hidbord_clickable">#'+msg.id.substr(0, 8)+'</span></i>'+
                    '    </div>'+
                    '    <hr style="clear:both;">'+
@@ -521,22 +528,33 @@ var push_msg = function(msg, msgPrepend, thumb) {
     for (i = 0; i < msg.to.length; i++) {
         recipients += '<span style="background: #fff;" class="idntcn2">' + msg.to[i] + '</span>&nbsp;' + getContactHTML(msg.to[i]) + '; ';
     }
+    
+    if(msg.contactsHidden){
+        recipients = msg.contactsNum + ' unknown contacts.';
+    }
 
     msgTimeTxt = dateToStr(msgDate);
 
-    person = getContactHTML(msg.keyid, msg.pubkey);
+    if(msg.senderHidden){
+        person = '<b>Anonymous</b>';
+    }else{
+        person = getContactHTML(msg.keyid, msg.pubkey);
+    }
 
-    var code = '<div class="hidbord_msg hidbord_msg_new" id="msg_' + msg.id + '">'+
-            '    <div class="hidbord_mnu"><a href="javascript:;" id="hidbord_mnu_info">info</a> <a href="javascript:;" class="hidbord_mnu_replydirect">direct</a> <a href="javascript:;" class="hidbord_mnu_reply">reply</a></div>'+
+    var isDirect = msg.contactsNum == 2;
+    if(msg.isBroad) isDirect = false;
+
+    var code = '<div class="hidbord_msg hidbord_msg_new" id="msg_' + msg.id + '" ' + (isDirect? '  style="border-left: 8px solid #090;"' : '') + (msg.isBroad? '  style="border-left: 8px solid #900;"' : '') + '>'+
+            '    <div class="hidbord_mnu"><a href="javascript:;" id="hidbord_mnu_info">info</a> <a href="javascript:;" class="hidbord_mnu_replydirect">' + (msg.isBroad? 'BROADCAST' : 'direct') + '</a>'+ ((isDirect || msg.isBroad)? '': '<a href="javascript:;" class="hidbord_mnu_reply">reply</a>')+'</div>'+
             '    <div class="hidbord_msg_header hidbord_hidden" >'+
-            '        <div style="float:left; width:40px; background: #fff;" class="idntcn">' + msg.keyid + '</div>'+
+            (msg.keyid !=='' ? '        <div style="float:left; width:40px; background: #fff;" class="idntcn">' + msg.keyid + '</div>' : '')+
             '        <div style="float:left;padding-left: 5px;">' + person + ' <i style="color: #999;">(' + msgTimeTxt + ')  <span href="javascript:;" class="hidbord_mnu_reply hidbord_clickable">#'+msg.id.substr(0, 8)+'</span></i>'+
-            '            <br/><i style="color: #090; font-size: x-small;" class="hidbord_clickable hidbord_usr_reply" alt="'+msg.keyid+'">' + msg.keyid + '</i>'+
+            '            <br/><i style="color: #009; font-size: x-small;" class="hidbord_clickable hidbord_usr_reply" alt="'+msg.keyid+'">' + msg.keyid + '</i>'+
             '        </div>'+
             '        <div style="clear: both; padding: 5px;"><strong>Sent to:</strong> ' + recipients + '</div>'+
             '    </div>'+
             '    <div style="overflow: hidden" class="hidbord_msg_header" >'+ 
-            '<span style="background: #fff;" class="idntcn2">' + msg.keyid + '</span>&nbsp;' + person +
+            (msg.keyid !=='' ? '<span style="background: #fff;" class="idntcn2">' + msg.keyid + '</span>&nbsp;' : '') + person +
             ' <i style="color: #999;">(' + msgTimeTxt + ') <span href="javascript:;" class="hidbord_mnu_reply hidbord_clickable">#'+msg.id.substr(0, 8)+'</span></i>'+
             '    </div>'+
             '    <hr style="clear:both;">'+
@@ -689,7 +707,13 @@ var replytoMsgDirect = function(e) {
     var msg_id = $(e.target).closest('.hidbord_msg').first().attr('id').replace(/^msg\_/, ''),
         usr_id = $(e.target).closest('.hidbord_msg').first().find('.hidbord_usr_reply').attr('alt');
 
-    if(rsa_hash == usr_id){
+    if($(e.target).text() == 'BROADCAST'){
+        showReplyform('#msg_' + msg_id, '>>' + msg_id);
+        $('#hidbord_cont_type').val('broadcast').trigger('change');
+        return true;
+    }
+
+    if(rsa_hashB64 == usr_id){
         alert('So ronery?');
         return false;
     }
@@ -699,7 +723,7 @@ var replytoMsgDirect = function(e) {
         return false;
     }
 
-    console.log(usr_id);
+    
     showReplyform('#msg_' + msg_id, '>>' + msg_id);
     $('#hidbord_cont_type').val('direct').trigger('change');
     $('#hidbord_cont_direct').val(usr_id);
@@ -711,7 +735,7 @@ var replytoUsr = function(e) {
 	"use strict";
 
     var msg_id = $(e.target).closest('.hidbord_msg').first().attr('id').replace(/^msg\_/, '');
-    var usr_id = $(e.target).attr('alt').replace(/[^0-9a-f]/, '');
+    var usr_id = $(e.target).attr('alt').replace(/[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/, '');
 //    console.log(msg_id);
     showReplyform('#msg_' + msg_id, '{' + usr_id + '}');
 };
@@ -801,10 +825,10 @@ var showReplyform = function(msg_id, textInsert) {
 //    console.log(msg_id, $(msg_id));
     if (!replyForm) {
         $(msg_id).after('<div class="hidbord_msg" id="hidbord_replyform"><div style="height: 40px;">' +
-            '  <div style="float:left; width:40px; background: #fff;" class="idntcn">' + rsa_hash + '</div>' +
+            '  <div style="float:left; width:40px; background: #fff;" class="idntcn">' + rsa_hashB64 + '</div>' +
             '  <div style="float:left;padding-left: 5px;">' +
             '    <strong style="color: #090; font-style: italic">Me</strong><br/>' +
-            '    <i style="color: #090; font-size: x-small;">' + rsa_hash + '</i>' +
+            '    <i style="color: #009; font-size: x-small;">' + rsa_hashB64 + '</i>' +
             '  </div>' +
             '  <div class="hidbord_mnu"><a href="javascript:;" id="hidbordform_hide">hide</a></div>' +
             '  </div>' +
@@ -826,6 +850,7 @@ var showReplyform = function(msg_id, textInsert) {
             '      </div>  ' +
             '      <textarea style="max-width: none; margin: 2px; width: 580px; height: 136px; resize: vertical; background-image: none; background-position: 0% 0%; background-repeat: repeat repeat;" id="hidbord_reply_text"></textarea>  ' +
             '      <div style="width: 590px;">' +
+            '        <span>Hide: <label><input id="hidboard_hide_sender" type="checkbox" checked/> sender</label>; <label><input id="hidboard_hide_contacts" type="checkbox"  checked/> contacts</label></span><br>'+
             '        <input type="button" value="crypt and send" id="do_encode">  ' +
             '        <span style="float: right;"><a href="javascript:;" id="hidbordform_preview" alt="msg_preview">message preview</a></span>  ' +
             '      </div>' +
@@ -837,12 +862,38 @@ var showReplyform = function(msg_id, textInsert) {
 //        console.log('ddd', $('#hidbord_replyform'));
 
 
+        if(!hidboard_hide_sender){
+            $('#hidboard_hide_sender').attr('checked', null);        
+        }
+
+        if(!hidboard_hide_contacts){
+            $('#hidboard_hide_contacts').attr('checked', null);        
+        }
+
+        $('#hidboard_hide_sender').on('change', function() {
+            hidboard_hide_sender = !!$('#hidboard_hide_sender').attr('checked');
+        });
+
+        $('#hidboard_hide_contacts').on('change', function() {
+            hidboard_hide_contacts = !!$('#hidboard_hide_contacts').attr('checked');
+            console.log(hidboard_hide_contacts);
+        });
+
+
+
         $('#hidbord_cont_type').on('change',function(){
+            $('#hidbord_replyform').css('border-left', 'none');
+            
             if($('#hidbord_cont_type').val()=='direct'){
                 $('#hidbord_cont_direct').show();
+                $('#hidbord_replyform').css('border-left', '8px solid #090');
             }else{
                 $('#hidbord_cont_direct').hide();
             }
+
+            if($('#hidbord_cont_type').val()=='broadcast')
+                $('#hidbord_replyform').css('border-left', '8px solid #900');
+
         });
 
         if(prev_to !== null){
@@ -877,7 +928,8 @@ var showReplyform = function(msg_id, textInsert) {
         });
 
         $('#hidbordTextControls').on('mouseover', function(e) {
-            quotedText = window.getSelection().toString();
+            //quotedText = window.getSelection().toString();
+            quotedText = quoteSelection(window.getSelection().getRangeAt(0).cloneContents());
         });
 
         $('#hidbordTextControls input').on('click', function(e) {
@@ -892,7 +944,7 @@ var showReplyform = function(msg_id, textInsert) {
                     quotedText = ta.val().substring(taStart, taEnd);
                 }
                 if (quotedText.length > 0) {
-                    quotedText = '> ' + quotedText.replace(/\n/gm, "\n> ") + "\n";
+                    //quotedText = '> ' + quotedText.replace(/\n/gm, "\n> ") + "\n";
                     ta.val(ta.val().substring(0, taStart) + quotedText + ta.val().substring(taEnd));
                 }
             }

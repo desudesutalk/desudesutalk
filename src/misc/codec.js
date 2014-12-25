@@ -1,53 +1,47 @@
 var rsaProfile = {},
-    rsa = new RSAKey(),
-    rsa_hash, rsa_hashB64;
+    rsa = null,
+    rsa_hash, rsa_hashB64, broadProfile = {}, broad_hashB64;
 
-var do_login = function() {
+var do_login = function(e, key) {
     "use strict";
-
     var lf = document.loginform;
-
-    rng_state = null;
-
-    var buffer = new ArrayBuffer(256);
-    var int32View = new Int32Array(buffer);
-    var Uint8View = new Uint8Array(buffer);
-
-    var key_from_pass = sjcl.misc.pbkdf2(lf.passwd.value, parseInt(lf.magik_num.value) + "_salt", 10000, 256 * 8);
-
-    int32View.set(key_from_pass);
-
-    for (var i = 0; i < rng_psize; i++) {
-        rng_pool[i] = Uint8View[i];
+    if(!key){     
+        rsaProfile = cryptCore.login(lf.passwd.value, lf.magik_num.value, false);
+    }else{
+        rsaProfile = cryptCore.login(null, null, true);
     }
+    lf.magik_num.value = lf.passwd.value = '';
 
-    rng_prefetch = parseInt(lf.magik_num.value);
+    rsa_hash = rsaProfile.publicKeyPairPrintableHash;
+    rsa_hashB64 = rsaProfile.publicKeyPairPrintable;        
 
-    rsa.generate(1024, '10001');
 
-    rsaProfile = {
-        n: rsa.n.toString(16),
-        d: rsa.d.toString(16),
-        p: rsa.p.toString(16),
-        q: rsa.q.toString(16),
-        dmp1: rsa.dmp1.toString(16),
-        dmq1: rsa.dmq1.toString(16),
-        coeff: rsa.coeff.toString(16)
-    };
-
-    rsa_hash = hex_sha1(rsaProfile.n);
-    rsa_hashB64 = hex2b64(rsa_hash);
-
-    ssSet(boardHostName + 'magic_desu_numbers', rsaProfile);
-
-    $('#identi').html(rsa_hash).identicon5({
+    $('#identi').html(rsa_hashB64).identicon5({
         rotate: true,
         size: 64
     });
-    $('#identi').append('<br/><br/><i style="color: #090;">'+rsa_hash+'</i>');
-    $('#pub_key_info').val(linebrk(rsa.n.toString(16), 64));
-    lf.magik_num.value = lf.passwd.value = '';
+    $('#identi').append('<br/><br/><i style="color: #009;">'+rsa_hashB64+'</i>');  
 };
+
+var do_loginBroadcast = function(e, key) {
+    "use strict";
+    var lf = document.broadcastform;
+    if(!key){     
+        broadProfile = cryptCore.loginBroadcast(lf.passwd.value, lf.magik_num.value, false);
+    }else{
+        broadProfile = cryptCore.loginBroadcast(null, null, true);
+    }
+    lf.magik_num.value = lf.passwd.value = '';
+
+    broad_hashB64 = broadProfile.publicKeyPairPrintable;
+
+    $('#identi_broad').html(broad_hashB64).identicon5({
+        rotate: true,
+        size: 64
+    });
+    $('#identi_broad').append('<br/><br/><i style="color: #009;">'+broad_hashB64+'</i>');  
+};
+
 
 var do_encode = function() {
     "use strict";
@@ -68,7 +62,7 @@ var do_encode = function() {
         return false;
     }
 
-    if(!("n" in rsaProfile)){
+    if(!("publicKeyPairPrintable" in rsaProfile)){
         alert('Please log in.');
         return false;   
     }
@@ -77,33 +71,38 @@ var do_encode = function() {
     payLoad.ts = Math.floor((new Date()).getTime() / 1000);
 
     var keys = {};
-    keys[rsa_hash] = rsaProfile.n;
 
-    for (var c in contacts) {
-        if(prev_to == 'direct' && c == prev_cont){
-            keys[c] = contacts[c].key;
-            continue;
-        }
-        
-        if('hide' in contacts[c] && contacts[c].hide == 1){
-            continue;
-        }
+    if(prev_to == 'broadcast'){
+        keys[broad_hashB64] = broadProfile;
+    }else{
+        for (var c in contacts) {
+            if(c == rsa_hashB64) continue;
 
-        if(to_group !== null && contacts[c].groups && $.isArray(contacts[c].groups) && contacts[c].groups.indexOf(to_group) != -1){
-            keys[c] = contacts[c].key;
-        }
+            if(prev_to == 'direct' && c == prev_cont){
+                keys[c] = contacts[c];
+                continue;
+            }
+            
+            if('hide' in contacts[c] && contacts[c].hide == 1){
+                continue;
+            }
 
-        if(prev_to == 'direct' || to_group !== null){
-            continue;
-        }
+            if(to_group !== null && contacts[c].groups && $.isArray(contacts[c].groups) && contacts[c].groups.indexOf(to_group) != -1){
+                keys[c] = contacts[c];
+            }
 
-        keys[c] = contacts[c].key;
+            if(prev_to == 'direct' || to_group !== null){
+                continue;
+            }
+
+            keys[c] = contacts[c];
+        }
     }
 
     var p = encodeMessage(payLoad,keys, 0);
-    var testEncode = decodeMessage(p);
+    var testEncode = decodeMessage([0,p]);
 
-    if(!testEncode || testEncode.status != "OK"){
+    if(!testEncode){
         alert('Error in crypt module!');
         return false;
     }
@@ -122,18 +121,22 @@ var do_encode = function() {
 
 var do_decode = function(message, msgPrepend, thumb, fdate, post_id) {
     "use strict";
-
+    var msg = JSON.parse(message.text);
     var out_msg = {
         post_id: post_id,
-        id: message.id,
+        id: message.msgHash,
         txt: {
-            ts: message.ts,
-            msg: message.message.text
+            ts: message.timestamp,
+            msg: msg.text
         },
-        keyid: message.keyhash,
-        pubkey: message.key,
-        status: message.status,
-        to: message.keys,
+        keyid: message.sender || '',
+        pubkey: message.sender || '',
+        status: 'OK',
+        to: message.msgContacts.sort(),
+        contactsHidden: message.contactsHidden,
+        contactsNum: message.contactsNum,
+        senderHidden: message.senderHidden,
+        isBroad: message.isBroad
     };
 
     push_msg(out_msg, msgPrepend, thumb);

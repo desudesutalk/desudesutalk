@@ -1,10 +1,10 @@
 # Desu Desu Talk!
-Добавляем немного стеганографии и криптографии в обычный картинкопостинг на имджбордах десу. 1024 битный RSA и 256 битный AES для защищённого *псевдонимного* общения.
+Добавляем немного стеганографии и криптографии в обычный картинкопостинг на имджбордах десу. 256 битный ECC и 256 битный AES для защищённого *псевдонимного* общения.
 
 # 8chan? 4chan? Refer to **[english guide](https://github.com/desudesutalk/desudesutalk/wiki/How-to-use-this-script)**!
 
 ### Как установить
-Потербуется Google Chrome с [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo), Firefox с [Greasemonkey](https://addons.mozilla.org/firefox/addon/greasemonkey/) либо винтажная Opera c [Violentmonkey](https://addons.opera.com/ru/extensions/details/violent-monkey/)
+Потербуется Google Chrome с [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) или Firefox с [Greasemonkey](https://addons.mozilla.org/firefox/addon/greasemonkey/) 
 
 Так же потребуется [Куклоскрипт](https://github.com/SthephanShinkufag/Dollchan-Extension-Tools) (для 4chan-а он не нужен)
 
@@ -16,10 +16,8 @@
 [8chan.co/ddt](https://8chan.co/ddt/)
 
 ### Используемые библиотеки
-1. [RSA and jsbn](http://www-cs-students.stanford.edu/~tjw/jsbn/)
+1. [ECC](https://github.com/indutny/elliptic)
 2. [sjcl](http://bitwiseshiftleft.github.io/sjcl/)
-3. [rsa-sign](http://kjur.github.io/jsrsasign/)
-4. [SHA256](https://github.com/oftn/common)
 5. [pako](https://github.com/nodeca/pako)
 6. [Zepto](http://zeptojs.com/)
 7. [Identicon5](https://github.com/FrancisShanahan/Identicon5)
