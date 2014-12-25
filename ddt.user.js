@@ -24,6 +24,7 @@
 // @include      https://2ch.yt/*/*
 // @include      https://2-ch.so/*/*
 // @exclude      *#dev
+// @exclude      https://8chan.co/ddt/res/1907.html
 // @copyright    2014+, Boku 
 // @icon         https://github.com/desudesutalk/desudesutalk/raw/master/icon.jpg
 // @updateURL    https://github.com/desudesutalk/desudesutalk/raw/master/ddt.meta.js
