@@ -184,7 +184,7 @@ var render_contact = function() {
     var code = '<br><a href="data:text/plain;base64,' + strToDataUri(encodeURIComponent(JSON.stringify(contacts))) + 
                '" download="[DDT] Contacts - ' + document.location.host + ' - ' + dateToStr(new Date(), true) + 
                '.txt">Download contacts as file</a> or import from file: <input type="file" id="cont_import_file" name="cont_import_file"><br/>' +
-               '<p><label>Addres: <input name="contact_address" type="text" length=90 id="contact_address" style="width: 400px;"/></label><input type="button" value="Add" id="add_contact_key"/></p>', cnt = 1;
+               '<p><label>Address: <input name="contact_address" type="text" length=90 id="contact_address" style="width: 400px;"/></label><input type="button" value="Add" id="add_contact_key"/></p>', cnt = 1;
 
     for (var c in contacts) {
         var ren_action = ('hide' in contacts[c] && contacts[c].hide == 1) ? 'enable' : 'disable';
