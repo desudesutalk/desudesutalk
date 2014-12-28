@@ -1410,16 +1410,33 @@ var getURLasAB = function(rawURL, cb) {
     }
 
     /*jshint newcap: false  */
-    if (typeof GM_xmlhttpRequest === "function") {
-        GM_xmlhttpRequest({
-            method: "GET",
-            url: url.href,
-            overrideMimeType: "text/plain; charset=x-user-defined",
-            onload: function(oEvent) {
-                var ff_buffer = stringToByteArray(oEvent.responseText || oEvent.response);
-                cb(ff_buffer.buffer, new Date(0));
-            }
-        });
+    if (typeof GM_xmlhttpRequest === "function") {        
+        if(navigator.userAgent.match(/Chrome\/([\d.]+)/)){
+            GM_xmlhttpRequest({
+                method: "GET",
+                url: url.href,                
+                responseType: "arraybuffer",
+                onload: function(oEvent) {
+                    cb(oEvent.response, new Date(0));
+                },
+                onerror: function(oEvent) {                    
+                    cb(null, new Date());
+                }
+            });
+        }else{
+            GM_xmlhttpRequest({
+                method: "GET",
+                url: url.href,
+                overrideMimeType: "text/plain; charset=x-user-defined",
+                onload: function(oEvent) {
+                    var ff_buffer = stringToByteArray(oEvent.responseText || oEvent.response);
+                    cb(ff_buffer.buffer, new Date());
+                },
+                onerror: function(oEvent) {                    
+                    cb(null, new Date());
+                }
+            });
+        }
     }else{
         var oReq = new XMLHttpRequest();
 
@@ -1427,6 +1444,9 @@ var getURLasAB = function(rawURL, cb) {
         oReq.responseType = "arraybuffer";
         oReq.onload = function(oEvent) {
             cb(oReq.response, new Date(oEvent.target.getResponseHeader('Last-Modified')));
+        };
+        oReq.onerror = function(oEvent) {
+            cb(null, new Date());
         };
         oReq.send(null);        
     }
@@ -2961,6 +2981,86 @@ var jpegExtract = function(inArBuf) {
     return data;
 };
 
+var processedJpegs = {}, process_images = [], isJpegLoading = false;
+
+var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
+    "use strict";
+
+    if(processedJpegs[jpgURL]){
+        
+        if(processedJpegs[jpgURL].id != 'none'){
+            $("#msg_" + processedJpegs[jpgURL].id).addClass('hidbord_msg_new');
+        }
+        
+        console.log('from cache');
+
+        if (typeof(cb) == "function") {
+            cb();
+        }
+        return;
+    }
+        
+    getURLasAB(jpgURL, function(arrayBuffer, date) {
+        processedJpegs[jpgURL] = {'id': 'none'};
+        var arc = jpegExtract(arrayBuffer);
+        if(arc){
+            var p = decodeMessage(arc);
+            if(p){
+                processedJpegs[jpgURL] = {id: do_decode(p, null, thumbURL, date, post_id).id};
+            }
+        }
+
+        if (typeof(cb) == "function") {
+            cb();
+        }
+
+    });
+};
+
+var process_olds = function() {
+    "use strict";
+
+    var jpgURL;
+
+    if (process_images.length > 0) {
+        jpgURL = process_images.pop();
+
+        if (process_images.length !== 0) {
+            $('#hidbord_btn_getold').val('Stop fetch! ['+process_images.length+']');            
+            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], function(){setTimeout(process_olds, 0);});
+        }else{
+            $('#hidbord_btn_getold').val('Get old messages');
+            isJpegLoading = false;
+            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2]);
+        }
+    }
+};
+
+
+function readJpeg(url, thumb, post_id){
+    "use strict";
+
+    process_images.push([url, thumb, post_id]);
+
+    if(!isJpegLoading){
+        isJpegLoading = true;
+        setTimeout(process_olds, 0);
+    }
+}
+
+function stopReadJpeg(){
+    "use strict";
+
+    process_images = [];
+    isJpegLoading = false;
+    $('#hidbord_btn_getold').val('Get old messages');
+}
+
+function isJpegReading(){
+    "use strict";
+
+    return isJpegLoading;
+}
 var upload_handler = (new Date()).getTime() * 10000;
 
 var TinyBoardFields = ["name","email","subject","post","spoiler","body","file","file_url","password","thread","board", "recaptcha_challenge_field", "recaptcha_response_field", "user_flag"];
@@ -3301,43 +3401,6 @@ var do_decode = function(message, msgPrepend, thumb, fdate, post_id) {
 
     push_msg(out_msg, msgPrepend, thumb);
     return out_msg;
-};
-
-
-var processedJpegs = {};
-
-var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
-    "use strict";
-
-    if(processedJpegs[jpgURL]){
-        
-        if(processedJpegs[jpgURL].id != 'none'){
-            $("#msg_" + processedJpegs[jpgURL].id).addClass('hidbord_msg_new');
-        }
-        
-        console.log('from cache');
-
-        if (typeof(cb) == "function") {
-            cb();
-        }
-        return;
-    }
-        
-    getURLasAB(jpgURL, function(arrayBuffer, date) {
-        processedJpegs[jpgURL] = {'id': 'none'};
-        var arc = jpegExtract(arrayBuffer);
-        if(arc){
-            var p = decodeMessage(arc);
-            if(p){
-                processedJpegs[jpgURL] = {id: do_decode(p, null, thumbURL, date, post_id).id};
-            }
-        }
-
-        if (typeof(cb) == "function") {
-            cb();
-        }
-
-    });
 };
 
 var contacts = {}, cont_groups = [];
@@ -4267,16 +4330,14 @@ var push_msg = function(msg, msgPrepend, thumb) {
 
 };
 
-var process_images = [];
-
 var read_old_messages = function() {
 	"use strict";
 
-    if (process_images.length !== 0) {
-        process_images = [];
-        $('#hidbord_btn_getold').val('Get old messages');
+    if (isJpegReading()) {
+        stopReadJpeg();
         return true;
     }
+
     $('a[href*=jpg] img, a[href*=jpeg] img').each(function(i, e) {
         var url = $(e).closest('a').attr('href');
         var post_el = $(e).closest('.reply');
@@ -4289,31 +4350,12 @@ var read_old_messages = function() {
             }
         }
 
-        if (url.indexOf('?') == -1 && url.match(/\.jpe?g$/)) process_images.push([url, $(e).attr('src'), post_id]);
+        if (url.indexOf('?') == -1 && url.match(/\.jpe?g$/)) readJpeg(url, $(e).attr('src'), post_id);
     });
 
-//    console.log(process_images);
+/*//    console.log(process_images);
     $('#hidbord_btn_getold').val('Stop fetch! ['+process_images.length+']');
-    setTimeout(process_olds, 0);//500 + Math.round(500 * Math.random()));
-};
-
-var process_olds = function() {
-	"use strict";
-
-    var jpgURL;
-
-    if (process_images.length > 0) {
-        jpgURL = process_images.pop();
-
-        if (process_images.length !== 0) {
-            $('#hidbord_btn_getold').val('Stop fetch! ['+process_images.length+']');
-            //setTimeout(process_olds, 0); //500 + Math.round(500 * Math.random()));
-            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], function(){setTimeout(process_olds, 0);});
-        }else{
-            $('#hidbord_btn_getold').val('Get old messages');
-            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2]);
-        }
-    }
+    setTimeout(process_olds, 0);//500 + Math.round(500 * Math.random()));*/
 };
 
 var replyForm = null,
@@ -5106,11 +5148,23 @@ var jpegInserted = function(event) {
             }
         }
 
-        processJpgUrl(jpgURL, thumbURL, post_id);
+        readJpeg(jpgURL, thumbURL, post_id);
     }
 };
 
 var ArrayPrototypeEvery = Array.prototype.every;
+
+function startAnimeWatch(){
+    "use strict";
+
+    if(document.hidden || window.document.readyState != 'complete'){
+        setTimeout(startAnimeWatch, 1000);
+    }else{
+        setTimeout(function(){
+            $(document).bind('animationstart', jpegInserted).bind('MSAnimationStart', jpegInserted).bind('webkitAnimationStart', jpegInserted);
+        }, 0);
+    }
+}
 
 $(function($) {
     "use strict";
@@ -5126,9 +5180,7 @@ $(function($) {
         insertAnimation + '@-ms-keyframes ' + insertAnimation + '@-o-keyframes ' + insertAnimation +
         'a[href*=jpg] img, a[href*=jpeg] img ' + animationTrigger + '</style>').appendTo('head');
 
-    setTimeout(function() {
-        $(document).bind('animationstart', jpegInserted).bind('MSAnimationStart', jpegInserted).bind('webkitAnimationStart', jpegInserted);
-    }, 10000);
+    setTimeout(startAnimeWatch, 1000);
 
     inject_ui();
 

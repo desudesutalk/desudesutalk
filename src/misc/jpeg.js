@@ -99,3 +99,84 @@ var jpegExtract = function(inArBuf) {
 
     return data;
 };
+
+var processedJpegs = {}, process_images = [], isJpegLoading = false;
+
+var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
+    "use strict";
+
+    if(processedJpegs[jpgURL]){
+        
+        if(processedJpegs[jpgURL].id != 'none'){
+            $("#msg_" + processedJpegs[jpgURL].id).addClass('hidbord_msg_new');
+        }
+        
+        console.log('from cache');
+
+        if (typeof(cb) == "function") {
+            cb();
+        }
+        return;
+    }
+        
+    getURLasAB(jpgURL, function(arrayBuffer, date) {
+        processedJpegs[jpgURL] = {'id': 'none'};
+        var arc = jpegExtract(arrayBuffer);
+        if(arc){
+            var p = decodeMessage(arc);
+            if(p){
+                processedJpegs[jpgURL] = {id: do_decode(p, null, thumbURL, date, post_id).id};
+            }
+        }
+
+        if (typeof(cb) == "function") {
+            cb();
+        }
+
+    });
+};
+
+var process_olds = function() {
+    "use strict";
+
+    var jpgURL;
+
+    if (process_images.length > 0) {
+        jpgURL = process_images.pop();
+
+        if (process_images.length !== 0) {
+            $('#hidbord_btn_getold').val('Stop fetch! ['+process_images.length+']');            
+            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], function(){setTimeout(process_olds, 0);});
+        }else{
+            $('#hidbord_btn_getold').val('Get old messages');
+            isJpegLoading = false;
+            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2]);
+        }
+    }
+};
+
+
+function readJpeg(url, thumb, post_id){
+    "use strict";
+
+    process_images.push([url, thumb, post_id]);
+
+    if(!isJpegLoading){
+        isJpegLoading = true;
+        setTimeout(process_olds, 0);
+    }
+}
+
+function stopReadJpeg(){
+    "use strict";
+
+    process_images = [];
+    isJpegLoading = false;
+    $('#hidbord_btn_getold').val('Get old messages');
+}
+
+function isJpegReading(){
+    "use strict";
+
+    return isJpegLoading;
+}

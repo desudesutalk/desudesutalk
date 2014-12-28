@@ -40,11 +40,23 @@ var jpegInserted = function(event) {
             }
         }
 
-        processJpgUrl(jpgURL, thumbURL, post_id);
+        readJpeg(jpgURL, thumbURL, post_id);
     }
 };
 
 var ArrayPrototypeEvery = Array.prototype.every;
+
+function startAnimeWatch(){
+    "use strict";
+
+    if(document.hidden || window.document.readyState != 'complete'){
+        setTimeout(startAnimeWatch, 1000);
+    }else{
+        setTimeout(function(){
+            $(document).bind('animationstart', jpegInserted).bind('MSAnimationStart', jpegInserted).bind('webkitAnimationStart', jpegInserted);
+        }, 0);
+    }
+}
 
 $(function($) {
     "use strict";
@@ -60,9 +72,7 @@ $(function($) {
         insertAnimation + '@-ms-keyframes ' + insertAnimation + '@-o-keyframes ' + insertAnimation +
         'a[href*=jpg] img, a[href*=jpeg] img ' + animationTrigger + '</style>').appendTo('head');
 
-    setTimeout(function() {
-        $(document).bind('animationstart', jpegInserted).bind('MSAnimationStart', jpegInserted).bind('webkitAnimationStart', jpegInserted);
-    }, 10000);
+    setTimeout(startAnimeWatch, 1000);
 
     inject_ui();
 

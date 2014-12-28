@@ -587,16 +587,14 @@ var push_msg = function(msg, msgPrepend, thumb) {
 
 };
 
-var process_images = [];
-
 var read_old_messages = function() {
 	"use strict";
 
-    if (process_images.length !== 0) {
-        process_images = [];
-        $('#hidbord_btn_getold').val('Get old messages');
+    if (isJpegReading()) {
+        stopReadJpeg();
         return true;
     }
+
     $('a[href*=jpg] img, a[href*=jpeg] img').each(function(i, e) {
         var url = $(e).closest('a').attr('href');
         var post_el = $(e).closest('.reply');
@@ -609,31 +607,9 @@ var read_old_messages = function() {
             }
         }
 
-        if (url.indexOf('?') == -1 && url.match(/\.jpe?g$/)) process_images.push([url, $(e).attr('src'), post_id]);
+        if (url.indexOf('?') == -1 && url.match(/\.jpe?g$/)) readJpeg(url, $(e).attr('src'), post_id);
     });
 
-//    console.log(process_images);
-    $('#hidbord_btn_getold').val('Stop fetch! ['+process_images.length+']');
-    setTimeout(process_olds, 0);//500 + Math.round(500 * Math.random()));
-};
-
-var process_olds = function() {
-	"use strict";
-
-    var jpgURL;
-
-    if (process_images.length > 0) {
-        jpgURL = process_images.pop();
-
-        if (process_images.length !== 0) {
-            $('#hidbord_btn_getold').val('Stop fetch! ['+process_images.length+']');
-            //setTimeout(process_olds, 0); //500 + Math.round(500 * Math.random()));
-            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], function(){setTimeout(process_olds, 0);});
-        }else{
-            $('#hidbord_btn_getold').val('Get old messages');
-            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2]);
-        }
-    }
 };
 
 var replyForm = null,

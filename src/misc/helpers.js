@@ -203,16 +203,33 @@ var getURLasAB = function(rawURL, cb) {
     }
 
     /*jshint newcap: false  */
-    if (typeof GM_xmlhttpRequest === "function") {
-        GM_xmlhttpRequest({
-            method: "GET",
-            url: url.href,
-            overrideMimeType: "text/plain; charset=x-user-defined",
-            onload: function(oEvent) {
-                var ff_buffer = stringToByteArray(oEvent.responseText || oEvent.response);
-                cb(ff_buffer.buffer, new Date(0));
-            }
-        });
+    if (typeof GM_xmlhttpRequest === "function") {        
+        if(navigator.userAgent.match(/Chrome\/([\d.]+)/)){
+            GM_xmlhttpRequest({
+                method: "GET",
+                url: url.href,                
+                responseType: "arraybuffer",
+                onload: function(oEvent) {
+                    cb(oEvent.response, new Date(0));
+                },
+                onerror: function(oEvent) {                    
+                    cb(null, new Date());
+                }
+            });
+        }else{
+            GM_xmlhttpRequest({
+                method: "GET",
+                url: url.href,
+                overrideMimeType: "text/plain; charset=x-user-defined",
+                onload: function(oEvent) {
+                    var ff_buffer = stringToByteArray(oEvent.responseText || oEvent.response);
+                    cb(ff_buffer.buffer, new Date());
+                },
+                onerror: function(oEvent) {                    
+                    cb(null, new Date());
+                }
+            });
+        }
     }else{
         var oReq = new XMLHttpRequest();
 
@@ -220,6 +237,9 @@ var getURLasAB = function(rawURL, cb) {
         oReq.responseType = "arraybuffer";
         oReq.onload = function(oEvent) {
             cb(oReq.response, new Date(oEvent.target.getResponseHeader('Last-Modified')));
+        };
+        oReq.onerror = function(oEvent) {
+            cb(null, new Date());
         };
         oReq.send(null);        
     }
