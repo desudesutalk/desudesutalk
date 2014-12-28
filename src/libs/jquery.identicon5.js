@@ -446,7 +446,9 @@ Usage with options: $('li').identicon5({rotate:true, size:100});
         // return the object back to the chained call flow
         return this.each(function () {
 		
-			var hash = $(this).html().replace(/[^a-f0-9]/i, '');						
+			var key = $(this).html().replace(/[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g, '');						
+            var hash = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(sjcl.codec.bytes.toBits(bs58.dec(key))));
+                       //sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(sjcl.codec.bytes.toBits(publicKeyPair)))
 			var canvas = document.createElement('canvas');			
 									
             if (canvas.getContext) {
@@ -467,7 +469,7 @@ Usage with options: $('li').identicon5({rotate:true, size:100});
                     draw(ctx, hash, settings.size, settings.rotate);
                 }		
 				$(this).html('');				
-				$(this).append($('<img src="'+canvas.toDataURL()+'" title="'+hash+'" alt="'+hash+'" style="vertical-align: bottom;"/>'));				
+				$(this).append($('<img src="'+canvas.toDataURL()+'" title="'+key+'" alt="'+key+'" style="vertical-align: bottom;"/>'));				
             }			
         });
     };

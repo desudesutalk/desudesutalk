@@ -40,11 +40,23 @@ var jpegInserted = function(event) {
             }
         }
 
-        processJpgUrl(jpgURL, thumbURL, post_id);
+        readJpeg(jpgURL, thumbURL, post_id);
     }
 };
 
 var ArrayPrototypeEvery = Array.prototype.every;
+
+function startAnimeWatch(){
+    "use strict";
+
+    if(document.hidden || window.document.readyState != 'complete'){
+        setTimeout(startAnimeWatch, 1000);
+    }else{
+        setTimeout(function(){
+            $(document).bind('animationstart', jpegInserted).bind('MSAnimationStart', jpegInserted).bind('webkitAnimationStart', jpegInserted);
+        }, 0);
+    }
+}
 
 $(function($) {
     "use strict";
@@ -60,18 +72,12 @@ $(function($) {
         insertAnimation + '@-ms-keyframes ' + insertAnimation + '@-o-keyframes ' + insertAnimation +
         'a[href*=jpg] img, a[href*=jpeg] img ' + animationTrigger + '</style>').appendTo('head');
 
-    setTimeout(function() {
-        $(document).bind('animationstart', jpegInserted).bind('MSAnimationStart', jpegInserted).bind('webkitAnimationStart', jpegInserted);
-    }, 10000);
-
-    if (ssGet(boardHostName + 'magic_desu_numbers')) {
-        rsaProfile = ssGet(boardHostName + 'magic_desu_numbers');
-        rsa.setPrivateEx(rsaProfile.n, '10001', rsaProfile.d, rsaProfile.p, rsaProfile.q, rsaProfile.dmp1, rsaProfile.dmq1, rsaProfile.coeff);
-        rsa_hash = hex_sha1(rsaProfile.n);
-        rsa_hashB64 = hex2b64(rsa_hash);
-    }
+    setTimeout(startAnimeWatch, 1000);
 
     inject_ui();
+
+    do_login(false, true);
+    do_loginBroadcast(false, true);
 
     if (ssGet(boardHostName + 'magic_desu_pwd')) {
         $('#steg_pwd').val(ssGet(boardHostName + 'magic_desu_pwd'));
