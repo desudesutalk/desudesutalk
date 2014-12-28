@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.12
+// @version      0.4.13
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -24,7 +24,6 @@
 // @include      https://2ch.yt/*/*
 // @include      https://2-ch.so/*/*
 // @exclude      *#dev
-// @exclude      https://8chan.co/ddt/res/1907.html
 // @copyright    2014+, Boku 
 // @icon         https://github.com/desudesutalk/desudesutalk/raw/master/icon.jpg
 // @updateURL    https://github.com/desudesutalk/desudesutalk/raw/master/ddt.meta.js
