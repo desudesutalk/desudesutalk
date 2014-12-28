@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTest
 // @namespace    udp://desushelter/*
-// @version      0.4.10
+// @version      0.4.11
 // @description  Write something useful!
 // @include      https://8chan.co/ddt/res/1907.html
 // @exclude      *#dev
@@ -3001,7 +3001,13 @@ var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
     }
         
     getURLasAB(jpgURL, function(arrayBuffer, date) {
-        processedJpegs[jpgURL] = {'id': 'none'};
+        if(arrayBuffer !== null){
+            processedJpegs[jpgURL] = {'id': 'none'};
+        }else{
+            cb();
+            return;
+        }
+
         var arc = jpegExtract(arrayBuffer);
         if(arc){
             var p = decodeMessage(arc);
@@ -4353,9 +4359,6 @@ var read_old_messages = function() {
         if (url.indexOf('?') == -1 && url.match(/\.jpe?g$/)) readJpeg(url, $(e).attr('src'), post_id);
     });
 
-/*//    console.log(process_images);
-    $('#hidbord_btn_getold').val('Stop fetch! ['+process_images.length+']');
-    setTimeout(process_olds, 0);//500 + Math.round(500 * Math.random()));*/
 };
 
 var replyForm = null,
