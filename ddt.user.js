@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.16
+// @version      0.4.17
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -4044,7 +4044,7 @@ var do_popup = function(e) {
                    ' <i style="color: #999;">(' + msgTimeTxt + ') <span href="javascript:;" class="hidbord_mnu_reply hidbord_clickable">#'+msg.id.substr(0, 8)+'</span></i>'+
                    '    </div>'+
                    '    <hr style="clear:both;">'+
-                   '    <div style="overflow: hidden;"><img src="'+msg.thumb+'" class="hidbord_post_img hidbord_clickable" style="max-width: 150px; max-height:150px; float: left; padding: 5px 15px 5px 5px;"/>' + txt + '</div>'+
+                   '    <div style="overflow: hidden;"><img src="'+msg.thumb+'" class="hidbord_post_img hidbord_clickable" style="max-width: 100px; max-height:100px; float: left; padding: 5px 15px 5px 5px;"/>' + txt + '</div>'+
                    '<span class="msgrefs" style="font-size: 11px;font-style: italic;"></span>'+
                    '</div>';
 
