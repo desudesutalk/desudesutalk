@@ -725,7 +725,7 @@ var do_preview_popup = function(e) {
     if (container_image){
         img_thumb = '<img src="'+container_image+'" class="hidbord_post_img hidbord_clickable" style="max-width: 100px; max-height:100px; float: left; padding: 5px 15px 5px 5px;"/>';
     }else{
-        img_thumb = '<div style="width: 148px; height:148px; float: left; margin: 5px 15px 5px 5px; border: 2px dashed #999;"/>';
+        img_thumb = '<div style="width: 98; height:98px; float: left; margin: 5px 15px 5px 5px; border: 2px dashed #999;"/>';
     }
 
     $('#prev_popup').remove();
