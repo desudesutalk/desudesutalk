@@ -48,7 +48,7 @@ var cryptCore = (function(){
 	        "publicKeyPairPrintableHash": publicKeyPairPrintableHash
 	    };
 
-	    ssSet(boardHostName + profileStoreName, keyPair);
+	    ssSet(boardHostName + profileStoreName, {"privateKeyPair": bs58.enc(privateKey)});
 
 	    return {
 	        "publicEnc": hexToBytes(pubEncKey),
@@ -96,7 +96,7 @@ var cryptCore = (function(){
 	        "publicKeyPairPrintableHash": publicKeyPairPrintableHash
 	    };
 
-	    ssSet(boardHostName + profileStoreName + '2', keyPairBroadcast);
+	    ssSet(boardHostName + profileStoreName + '2', {"privateKeyPair": bs58.enc(privateKey)});
 
 	    return {
 	        "publicEnc": hexToBytes(pubEncKey),

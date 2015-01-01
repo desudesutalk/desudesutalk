@@ -5,6 +5,9 @@ var autoscanNewJpegs = true;
 var contactsInLocalStorage = false;
 var useGlobalContacts = false;
 
+var uiFontSize = ssGet('magic_desu_fontsize');
+if(!uiFontSize) uiFontSize = 13;
+
 contactsInLocalStorage = ssGet('magic_desu_contactsInLocalStorage');
 useGlobalContacts = ssGet('magic_desu_useGlobalContacts');
 

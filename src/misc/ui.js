@@ -33,6 +33,11 @@ var inject_ui = function() {
             '    <div class="hidbord_msg"><p id="identi" style="text-align: center;"></p>'+
 
             '            <p  style="text-align: center;">'+
+            '                    <label>Font size: <input type="number" step="any" value="14" style="width: 30px;" id="hidboard_option_fontsize"/>px</label>'+
+            '            </p>'+
+
+
+            '            <p  style="text-align: center;">'+
             '                    <label>Use global contacts: <input type="checkbox" id="hidboard_option_globalcontacts" style="vertical-align:middle;" checked></label>'+
             '            </p>'+
 
@@ -199,6 +204,17 @@ var inject_ui = function() {
             render_contact();
         }
     });
+
+    $('#hidboard_option_fontsize').val(uiFontSize);
+    $('.hidbord_maincontent').css('font-size', uiFontSize + 'px !important');
+
+   $('#hidboard_option_fontsize').on('change', function() {
+        ssSet('magic_desu_fontsize', $('#hidboard_option_fontsize').val());
+        $('.hidbord_maincontent').css('font-size', $('#hidboard_option_fontsize').val() + 'px !important');
+    });
+
+
+    
 
     $('#hidboard_option_autoscanison').on('change', function() {
         ssSet(boardHostName + 'autoscanDefault', !!$('#hidboard_option_autoscanison').attr('checked'));

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.19
+// @version      0.4.20
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -859,7 +859,7 @@ var cryptCore = (function(){
 	        "publicKeyPairPrintableHash": publicKeyPairPrintableHash
 	    };
 
-	    ssSet(boardHostName + profileStoreName, keyPair);
+	    ssSet(boardHostName + profileStoreName, {"privateKeyPair": bs58.enc(privateKey)});
 
 	    return {
 	        "publicEnc": hexToBytes(pubEncKey),
@@ -907,7 +907,7 @@ var cryptCore = (function(){
 	        "publicKeyPairPrintableHash": publicKeyPairPrintableHash
 	    };
 
-	    ssSet(boardHostName + profileStoreName + '2', keyPairBroadcast);
+	    ssSet(boardHostName + profileStoreName + '2', {"privateKeyPair": bs58.enc(privateKey)});
 
 	    return {
 	        "publicEnc": hexToBytes(pubEncKey),
@@ -3801,6 +3801,11 @@ var inject_ui = function() {
             '    <div class="hidbord_msg"><p id="identi" style="text-align: center;"></p>'+
 
             '            <p  style="text-align: center;">'+
+            '                    <label>Font size: <input type="number" step="any" value="14" style="width: 30px;" id="hidboard_option_fontsize"/>px</label>'+
+            '            </p>'+
+
+
+            '            <p  style="text-align: center;">'+
             '                    <label>Use global contacts: <input type="checkbox" id="hidboard_option_globalcontacts" style="vertical-align:middle;" checked></label>'+
             '            </p>'+
 
@@ -3967,6 +3972,17 @@ var inject_ui = function() {
             render_contact();
         }
     });
+
+    $('#hidboard_option_fontsize').val(uiFontSize);
+    $('.hidbord_maincontent').css('font-size', uiFontSize + 'px !important');
+
+   $('#hidboard_option_fontsize').on('change', function() {
+        ssSet('magic_desu_fontsize', $('#hidboard_option_fontsize').val());
+        $('.hidbord_maincontent').css('font-size', $('#hidboard_option_fontsize').val() + 'px !important');
+    });
+
+
+    
 
     $('#hidboard_option_autoscanison').on('change', function() {
         ssSet(boardHostName + 'autoscanDefault', !!$('#hidboard_option_autoscanison').attr('checked'));
@@ -5134,6 +5150,9 @@ var is4chan = !!document.URL.match(/\/boards\.4chan\.org\//);
 var autoscanNewJpegs = true;
 var contactsInLocalStorage = false;
 var useGlobalContacts = false;
+
+var uiFontSize = ssGet('magic_desu_fontsize');
+if(!uiFontSize) uiFontSize = 13;
 
 contactsInLocalStorage = ssGet('magic_desu_contactsInLocalStorage');
 useGlobalContacts = ssGet('magic_desu_useGlobalContacts');
