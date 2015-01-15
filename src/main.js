@@ -19,7 +19,6 @@ if(autoscanNewJpegs !== false && autoscanNewJpegs !== true){
     autoscanNewJpegs = true;
     ssSet(boardHostName + 'autoscanDefault', true);
 }
-console.log(contactsInLocalStorage, autoscanNewJpegs);
 
 var jpegInserted = function(event) {
     "use strict";

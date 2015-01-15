@@ -79,6 +79,7 @@ var add_contact_string = function(e) {
     }
 
     var name = prompt("Name this contact:", temp_name);
+    if(!name) return false;
 
     if (ssGet((useGlobalContacts?'':boardHostName) + contactStoreName, contactsInLocalStorage)) {
         contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + contactStoreName, contactsInLocalStorage));
@@ -106,6 +107,7 @@ var add_contact = function(e) {
     }
 
     var name = prompt("Name this contact:", temp_name);
+    if(!name) return false;
 
     if (ssGet((useGlobalContacts?'':boardHostName) + contactStoreName, contactsInLocalStorage)) {
         contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + contactStoreName, contactsInLocalStorage));

@@ -1,5 +1,4 @@
-var scriptStore = window.opera && window.opera.scriptStorage || localStorage,
-    isGM = typeof GM_setValue === 'function';
+var isGM = typeof GM_setValue === 'function';
 
 var ssGet = function(name, inLocal)    {
 	"use strict";
@@ -12,7 +11,7 @@ var ssGet = function(name, inLocal)    {
 		return JSON.parse(GM_getValue(name));
 	}
 
-	return JSON.parse(scriptStore.getItem(name));
+	return JSON.parse(localStorage.getItem(name));
 };
 
 var ssSet = function(name, val, inLocal)    {
@@ -25,5 +24,5 @@ var ssSet = function(name, val, inLocal)    {
 		return GM_setValue(name, JSON.stringify(val));
 	}
 
-	return scriptStore.setItem(name, JSON.stringify(val));
+	return localStorage.setItem(name, JSON.stringify(val));
 };

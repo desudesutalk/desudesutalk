@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.22
+// @version      0.4.23
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -1195,8 +1195,7 @@ var cryptCore = (function(){
 	return cryptCore;
 })();
 
-var scriptStore = window.opera && window.opera.scriptStorage || localStorage,
-    isGM = typeof GM_setValue === 'function';
+var isGM = typeof GM_setValue === 'function';
 
 var ssGet = function(name, inLocal)    {
 	"use strict";
@@ -1209,7 +1208,7 @@ var ssGet = function(name, inLocal)    {
 		return JSON.parse(GM_getValue(name));
 	}
 
-	return JSON.parse(scriptStore.getItem(name));
+	return JSON.parse(localStorage.getItem(name));
 };
 
 var ssSet = function(name, val, inLocal)    {
@@ -1222,7 +1221,7 @@ var ssSet = function(name, val, inLocal)    {
 		return GM_setValue(name, JSON.stringify(val));
 	}
 
-	return scriptStore.setItem(name, JSON.stringify(val));
+	return localStorage.setItem(name, JSON.stringify(val));
 };
 
 function repeat(pattern, count) {
@@ -3510,6 +3509,7 @@ var add_contact_string = function(e) {
     }
 
     var name = prompt("Name this contact:", temp_name);
+    if(!name) return false;
 
     if (ssGet((useGlobalContacts?'':boardHostName) + contactStoreName, contactsInLocalStorage)) {
         contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + contactStoreName, contactsInLocalStorage));
@@ -3537,6 +3537,7 @@ var add_contact = function(e) {
     }
 
     var name = prompt("Name this contact:", temp_name);
+    if(!name) return false;
 
     if (ssGet((useGlobalContacts?'':boardHostName) + contactStoreName, contactsInLocalStorage)) {
         contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + contactStoreName, contactsInLocalStorage));
@@ -3897,7 +3898,7 @@ var inject_ui = function() {
     //Highlight.js
     injectCSS('.hljs { display: block; padding: 0.5em; background: #002b36; color: #839496; } .hljs-comment, .hljs-template_comment, .diff .hljs-header, .hljs-doctype, .hljs-pi, .lisp .hljs-string, .hljs-javadoc { color: #586e75; }  .hljs-keyword, .hljs-winutils, .method, .hljs-addition, .css .hljs-tag, .hljs-request, .hljs-status, .nginx .hljs-title { color: #859900; }  .hljs-number, .hljs-command, .hljs-string, .hljs-tag .hljs-value, .hljs-rules .hljs-value, .hljs-phpdoc, .tex .hljs-formula, .hljs-regexp, .hljs-hexcolor, .hljs-link_url { color: #2aa198; }  .hljs-title, .hljs-localvars, .hljs-chunk, .hljs-decorator, .hljs-built_in, .hljs-identifier, .vhdl .hljs-literal, .hljs-id, .css .hljs-function { color: #268bd2; }  .hljs-attribute, .hljs-variable, .lisp .hljs-body, .smalltalk .hljs-number, .hljs-constant, .hljs-class .hljs-title, .hljs-parent, .haskell .hljs-type, .hljs-link_reference { color: #b58900; }  .hljs-preprocessor, .hljs-preprocessor .hljs-keyword, .hljs-pragma, .hljs-shebang, .hljs-symbol, .hljs-symbol .hljs-string, .diff .hljs-change, .hljs-special, .hljs-attr_selector, .hljs-subst, .hljs-cdata, .clojure .hljs-title, .css .hljs-pseudo, .hljs-header { color: #cb4b16; }  .hljs-deletion, .hljs-important { color: #dc322f; }  .hljs-link_label { color: #6c71c4; } .tex .hljs-formula { background: #073642; } ');
     
-    $('body').append(ui);
+    $('body').prepend(ui);
 
     $('.hidbord_notifer .hidbord_clickable').on('click', function() {
         $('.hidbord_notifer').hide();
@@ -5166,7 +5167,6 @@ if(autoscanNewJpegs !== false && autoscanNewJpegs !== true){
     autoscanNewJpegs = true;
     ssSet(boardHostName + 'autoscanDefault', true);
 }
-console.log(contactsInLocalStorage, autoscanNewJpegs);
 
 var jpegInserted = function(event) {
     "use strict";
