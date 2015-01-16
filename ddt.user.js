@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.24
+// @version      0.4.25
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -1520,6 +1520,19 @@ var xorBytes = function (a, b) {
 
     return a;
 };
+
+// Thanks, Y0ba!
+// Read more: https://github.com/greasemonkey/greasemonkey/issues/2034#issuecomment-70285613
+function getUint8Array(data, i, len) {
+    "use strict";
+    var rv;
+    if(typeof i === 'undefined') {
+        rv = new Uint8Array(data);
+        return rv instanceof Uint8Array ? rv : new unsafeWindow.Uint8Array(data);
+    }
+    rv = new Uint8Array(data, i, len);
+    return rv instanceof Uint8Array ? rv : new unsafeWindow.Uint8Array(data, i, len);
+}
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding#Appendix.3A_Decode_a_Base64_string_to_Uint8Array_or_ArrayBuffer
 /* UTF-8 array to DOMString and vice versa */
@@ -4415,6 +4428,7 @@ function handleFileSelect(evt) {
 
         reader.onload = (function(theFile) {
             return function(e) {
+                  var inAB = getUint8Array(e.target.result);
 
                 if(theFile.type != "image/jpeg" || isDobro){
                     var img = new Image();
@@ -4443,9 +4457,9 @@ function handleFileSelect(evt) {
                         container_data = jpegClean(dataURLtoUint8Array(buffer.toDataURL("image/jpeg", q)));
                         container_image= "data:image/Jpeg;base64," + arrayBufferDataUri(container_data);
                     };
-                    img.src = "data:image/Jpeg;base64," +arrayBufferDataUri(e.target.result);
+                    img.src = "data:image/Jpeg;base64," +arrayBufferDataUri(inAB);
                 }else{
-                    container_data = jpegClean(e.target.result);
+                    container_data = jpegClean(inAB);
                     container_image= "data:"+theFile.type+";base64," + arrayBufferDataUri(container_data);
                 }
             };

@@ -645,6 +645,7 @@ function handleFileSelect(evt) {
 
         reader.onload = (function(theFile) {
             return function(e) {
+                  var inAB = getUint8Array(e.target.result);
 
                 if(theFile.type != "image/jpeg" || isDobro){
                     var img = new Image();
@@ -673,9 +674,9 @@ function handleFileSelect(evt) {
                         container_data = jpegClean(dataURLtoUint8Array(buffer.toDataURL("image/jpeg", q)));
                         container_image= "data:image/Jpeg;base64," + arrayBufferDataUri(container_data);
                     };
-                    img.src = "data:image/Jpeg;base64," +arrayBufferDataUri(e.target.result);
+                    img.src = "data:image/Jpeg;base64," +arrayBufferDataUri(inAB);
                 }else{
-                    container_data = jpegClean(e.target.result);
+                    container_data = jpegClean(inAB);
                     container_image= "data:"+theFile.type+";base64," + arrayBufferDataUri(container_data);
                 }
             };

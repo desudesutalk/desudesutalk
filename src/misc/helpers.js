@@ -294,3 +294,16 @@ var xorBytes = function (a, b) {
 
     return a;
 };
+
+// Thanks, Y0ba!
+// Read more: https://github.com/greasemonkey/greasemonkey/issues/2034#issuecomment-70285613
+function getUint8Array(data, i, len) {
+    "use strict";
+    var rv;
+    if(typeof i === 'undefined') {
+        rv = new Uint8Array(data);
+        return rv instanceof Uint8Array ? rv : new unsafeWindow.Uint8Array(data);
+    }
+    rv = new Uint8Array(data, i, len);
+    return rv instanceof Uint8Array ? rv : new unsafeWindow.Uint8Array(data, i, len);
+}
