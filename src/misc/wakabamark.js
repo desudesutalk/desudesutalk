@@ -245,7 +245,7 @@ var restoreURLs = function(str) {
         if (txt.length > 63) {
             txt = txt.substring(0, 30) + '...' + txt.substring(txt.length - 30);
         }
-        return '<a href="' + url + '" target="_blank">' + safe_tags(txt) + '</a> ' + b;
+        return '<a href="' + url + '" target="_blank" rel="noreferrer">' + safe_tags(txt) + '</a> ' + b;
     });
 };
 
