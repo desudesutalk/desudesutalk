@@ -869,14 +869,14 @@ var showReplyform = function(msg_id, textInsert) {
 
         $('#hidboard_hide_sender').on('change', function() {
             hidboard_hide_sender = !!$('#hidboard_hide_sender').attr('checked');
+            ssSet(boardHostNameSection + '_hidboard_hide_sender', hidboard_hide_sender);
+
         });
 
         $('#hidboard_hide_contacts').on('change', function() {
             hidboard_hide_contacts = !!$('#hidboard_hide_contacts').attr('checked');
-            console.log(hidboard_hide_contacts);
+            ssSet(boardHostNameSection + '_hidboard_hide_contacts', hidboard_hide_contacts);
         });
-
-
 
         $('#hidbord_cont_type').on('change',function(){
             $('#hidbord_replyform').css('border-left', 'none');

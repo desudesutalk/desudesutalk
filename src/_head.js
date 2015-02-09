@@ -3,6 +3,11 @@
 	var _spoilerTag = '%' + '%';
 
 	var boardHostName = location.hostname.toLowerCase();
+	var boardHostNameSection = boardHostName;
+	var board_section = location.pathname.match(/\/([^\/]+)\//);
+	if (board_section[1]){
+		boardHostNameSection += '_' + board_section[1];
+	}
 
 	function math_ceil(a){
 		return Math.ceil(a);

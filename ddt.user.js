@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.25
+// @version      0.4.26
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -41,6 +41,11 @@
 	var _spoilerTag = '%' + '%';
 
 	var boardHostName = location.hostname.toLowerCase();
+	var boardHostNameSection = boardHostName;
+	var board_section = location.pathname.match(/\/([^\/]+)\//);
+	if (board_section[1]){
+		boardHostNameSection += '_' + board_section[1];
+	}
 
 	function math_ceil(a){
 		return Math.ceil(a);
@@ -3347,6 +3352,9 @@ var do_encode = function() {
     prev_to = $('#hidbord_cont_type').val();
     prev_cont = $('#hidbord_cont_direct').val();
 
+    ssSet(boardHostNameSection + '_prev_to', prev_to);
+    ssSet(boardHostNameSection + '_prev_cont', prev_cont);
+
     var to_group = null;
 
     if(prev_to.indexOf('group_') === 0){
@@ -4652,14 +4660,14 @@ var showReplyform = function(msg_id, textInsert) {
 
         $('#hidboard_hide_sender').on('change', function() {
             hidboard_hide_sender = !!$('#hidboard_hide_sender').attr('checked');
+            ssSet(boardHostNameSection + '_hidboard_hide_sender', hidboard_hide_sender);
+
         });
 
         $('#hidboard_hide_contacts').on('change', function() {
             hidboard_hide_contacts = !!$('#hidboard_hide_contacts').attr('checked');
-            console.log(hidboard_hide_contacts);
+            ssSet(boardHostNameSection + '_hidboard_hide_contacts', hidboard_hide_contacts);
         });
-
-
 
         $('#hidbord_cont_type').on('change',function(){
             $('#hidbord_replyform').css('border-left', 'none');
@@ -5033,7 +5041,7 @@ var restoreURLs = function(str) {
         if (txt.length > 63) {
             txt = txt.substring(0, 30) + '...' + txt.substring(txt.length - 30);
         }
-        return '<a href="' + url + '" target="_blank">' + safe_tags(txt) + '</a> ' + b;
+        return '<a href="' + url + '" target="_blank" rel="noreferrer">' + safe_tags(txt) + '</a> ' + b;
     });
 };
 
@@ -5185,6 +5193,12 @@ if(autoscanNewJpegs !== false && autoscanNewJpegs !== true){
     autoscanNewJpegs = true;
     ssSet(boardHostName + 'autoscanDefault', true);
 }
+
+// Dirty hack (i really start to forget how this script works)
+prev_to = ssGet(boardHostNameSection + '_prev_to');
+prev_cont = ssGet(boardHostNameSection + '_prev_cont');
+hidboard_hide_sender = ssGet(boardHostNameSection + '_hidboard_hide_sender');
+hidboard_hide_contacts = ssGet(boardHostNameSection + '_hidboard_hide_contacts');
 
 var jpegInserted = function(event) {
     "use strict";

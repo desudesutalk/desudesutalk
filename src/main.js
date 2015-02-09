@@ -20,6 +20,12 @@ if(autoscanNewJpegs !== false && autoscanNewJpegs !== true){
     ssSet(boardHostName + 'autoscanDefault', true);
 }
 
+// Dirty hack (i really start to forget how this script works)
+prev_to = ssGet(boardHostNameSection + '_prev_to');
+prev_cont = ssGet(boardHostNameSection + '_prev_cont');
+hidboard_hide_sender = ssGet(boardHostNameSection + '_hidboard_hide_sender');
+hidboard_hide_contacts = ssGet(boardHostNameSection + '_hidboard_hide_contacts');
+
 var jpegInserted = function(event) {
     "use strict";
 

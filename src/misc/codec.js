@@ -53,6 +53,9 @@ var do_encode = function() {
     prev_to = $('#hidbord_cont_type').val();
     prev_cont = $('#hidbord_cont_direct').val();
 
+    ssSet(boardHostNameSection + '_prev_to', prev_to);
+    ssSet(boardHostNameSection + '_prev_cont', prev_cont);
+
     var to_group = null;
 
     if(prev_to.indexOf('group_') === 0){
