@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.26
+// @version      0.4.27
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -936,6 +936,8 @@ var cryptCore = (function(){
 	        msgHash = new sjcl.hash.sha256(),
 	        ephemeral_byte = hexToBytes(ephemeral.getPublic(true, "hex"));
 
+	    if(hideSender && numContacts < 3) hideRecievers = true;
+	    
 	    ephemeral_byte[0] ^= (Math.random() * 0x100 | 0) & 0xfe;
 
 	    sessionKey[31] = 0xAA;

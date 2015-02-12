@@ -119,6 +119,8 @@ var cryptCore = (function(){
 	        msgHash = new sjcl.hash.sha256(),
 	        ephemeral_byte = hexToBytes(ephemeral.getPublic(true, "hex"));
 
+	    if(hideSender && numContacts < 3) hideRecievers = true;
+	    
 	    ephemeral_byte[0] ^= (Math.random() * 0x100 | 0) & 0xfe;
 
 	    sessionKey[31] = 0xAA;
