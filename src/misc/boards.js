@@ -120,7 +120,7 @@ var _sendBoardForm = function(file, formAddon) {
     fd.append(fileInputName, uint8toBlob(file, 'image/jpeg'), fnme);
 
     $.ajax({
-        url: formAction + 'dfdfdf',
+        url: formAction,
         type: 'POST',
         data: fd,
         processData: false,

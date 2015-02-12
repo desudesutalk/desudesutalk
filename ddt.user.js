@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.28
+// @version      0.4.29
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -3228,7 +3228,7 @@ var _sendBoardForm = function(file, formAddon) {
     fd.append(fileInputName, uint8toBlob(file, 'image/jpeg'), fnme);
 
     $.ajax({
-        url: formAction + 'dfdfdf',
+        url: formAction,
         type: 'POST',
         data: fd,
         processData: false,
