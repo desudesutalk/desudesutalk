@@ -120,7 +120,7 @@ var _sendBoardForm = function(file, formAddon) {
     fd.append(fileInputName, uint8toBlob(file, 'image/jpeg'), fnme);
 
     $.ajax({
-        url: formAction,
+        url: formAction + 'dfdfdf',
         type: 'POST',
         data: fd,
         processData: false,
@@ -184,7 +184,7 @@ var _sendBoardForm = function(file, formAddon) {
             upload_handler = (new Date()).getTime() * 10000;
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            alert('Error while posting. Something in network or so.');
+            alert('Error while posting. Something in network or so.\n[' + jqXHR.status + ' ' + jqXHR.statusText + ']');
             replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
             upload_handler = (new Date()).getTime() * 10000;
         }
