@@ -417,6 +417,10 @@ var jsf5steg = (function(){
 	            		componentId = data[offset];
 	            		var h = data[offset + 1] >> 4;
 	            		var v = data[offset + 1] & 15;
+                        if(componentsCount == 1){
+                            v = 1;
+                            h = 1;
+                        }
                         if (maxH < h) maxH = h;
                         if (maxV < v) maxV = v;
 	            		var qId = data[offset + 2];
