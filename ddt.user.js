@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.33
+// @version      0.4.34
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -4815,7 +4815,8 @@ var imoticons = {
     "tea":  '<img class="hidbord_imtc_tea"  style="vertical-align:bottom;" alt="A cup of Tea" title="A cup of Tea" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAM1BMVEX4WBgAAQBDRUL/GgBUVVN2eHX/ZDSHiYb/mAD/mTSpq6i5u7j/zAbKzMnc3tvt7+v+//ytxHIVAAAAAXRSTlMAQObYZgAAAPpJREFUOMvtktluxDAIRU1qjx3wwv9/bS/eklTpQ997pZESnSMGCM7958+hld+orrw4ndaV7jy5aillC3juZbZFhi9jvGisVWgJgpyfldNeVSJCU2DgrytQWA/nZAlF653DUJWb4Cij813jc6LnBO42p5qydT5TmFM6qM4C2IGPtcAoGc1lAU3xqJtra81juJyS/SQnZo5e4uY2uh/j23zSufdcKs0Cl7F5YPCqNP+hmSHTuHi7BIR9EBM4BnDDbQisQymF/Qhw55i3N8FFV5V7bB1z0ZH7kp4UOO6vDYVvi7TjQKf3myFC24+En1eH6wlxJbwfLtHbWX8D14kVhZIALoUAAAAASUVORK5CYII="/>',
  "sarcasm": '<img class="hidbord_imtc_sarcasm" style="vertical-align:bottom;" alt="SARCASM!" title="SARCASM!" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAuBAMAAACoiUZDAAAALVBMVEUAAAAQEBD/AACDWgCUWhAAqQB7e3vmpFLetFL/1Ur23ove3t7/5qT/7r3///8MKkFGAAAAAXRSTlMAQObYZgAAAbpJREFUKM9t071q40AQB/BdzrjWkIOVD/wKByaF7wIJDhEYN3mEAz3CgmBwKdwsBhciAjOQxqQxgXR5iQM1xk0QbBO4KuBnuP3QSrr4pvzt/PdjkBjrV8qGEftcKUvPEYbAzpGfNzKeDtN/IDHFI+jlB7NkSbRN+sYW5WNVEVHSj9Kiqqrfprc7aEAleSTZhWlBPk5FiyP6as9xFXXpm9PcHm6WAnIq3r+/EmUns5S1W3q8//PrleQsbFncfNxNHG5vyxYfYPw2yk4f89uyOV9QUdS6XokkyYpwKYHy+qif1rmJlLT1m3KcaK3Vpl6h7F56oS3qN4Giw2/a1Q7lyGDz/LHHHITpxAbjF2smjfNli3xjcW8RMSADo/scfTU4WIJSufiERADBMApjMhUM2snb2rostJOnnnq75A1Si18ux0C91swOievrA/VbAWZssrnSPwPKKaLAjMWxevGn04TGR4uScaXWR2cP+kIfLEYW1c59HoUZygEz96RYqedpg/UKpu5JNi/QYW1Swt8+Vusnd229N7OSfh6mdefRNEL4wEDlAHOUJp33fh+zPAD4odT5bxSr//xvPNhf1sQYU21hKHsAAAAASUVORK5CYII="/>',
     "slow": '<img class="hidbord_imtc_slow" style="vertical-align:bottom;" alt="Slow Poke" title="Slow Poke" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADcAAAAgCAMAAACB1hBXAAAAM1BMVEWUcoIAAAAQEBB7ITH/AACtQlKMWhlrY2MAqQDeY3v/hJTepWP/paXvxYzWzs7/5rX///8p8wWNAAAAAXRSTlMAQObYZgAAAbNJREFUOMudlYGSgyAMRCU02MBJ8/9fe5sgSq0619tpRws8NgnRTpOLmeP0vThD1O5l15+wnKNTuPlpyiJ8z0kDBeGGDWso33KwkbY+gwyBhVcQvy+5gIDiHl0Q9+5gvgFpjw4Oa7or1hK/MOzVyGum+FDuugo1aJU8SCIh5Z0DGM7OhVXfuOinF4cR9ngOaNDHo58EjgLEkcNwSySPJNfOiapWC1H8u1Eiezw8cGVZSsGCqgbCjojkXfwBlrK8TKXA7vlU5eb2oW7fwJWClnLH8Qpa5sDShgFMPU5b9cltApiKre9kSlRZzjWMs3GL6dV8UR5KN1xn0UCUTIZ6bQBecFH6yXqgUbQuSzI/uJV0yYU3DkWiYrEmp8j9cHx8xm2DwbicLLyCmpBfqXX0geTAcd9jsi6U5IDWhuWxvzbRXLOM6fkClMZNC1E+5YDVuttN3Zu8rlT1vZ03zQoubxjOwW/R0ZWwJy6nxfSZlVuffm99exIqWZvpESHTrJ0bXho2YcTs9CEvf43P3rgAP/4OsOU8zTN2iHE0arPNDnO37+8YB6TtCgz7fi1S+gdlWRwGfgHYqi1M874NxAAAAABJRU5ErkJggg=="/>',
-   "elita": '<span class="hidbord_imtc_elita" style="font-family: comic sans ms; font-style: italic;"><font style="font-size:32px" color="#ff0000">YA</font><font style="font-size:33px"> </font><font style="font-size:33px" color="#ff2b00">e</font><font style="font-size:26px" color="#ff5500">l</font><font style="font-size:40px" color="#ff8000">i</font><font style="font-size:20px" color="#ffaa00">t</font><font style="font-size:33px" color="#ffd500">a</font><font style="font-size:31px" color="#ffff00">,</font><font style="font-size:45px"> </font><font style="font-size:41px" color="#d4ff00">a</font><font style="font-size:25px"> </font><font style="font-size:28px" color="#aaff00">t</font><font style="font-size:33px" color="#7fff00">i</font><font style="font-size:50px"> </font><font style="font-size:21px" color="#55ff00">h</font><font style="font-size:24px" color="#2aff00">u</font><font style="font-size:47px" color="#00ff00">i</font><font style="font-size:39px" color="#00ff2b">!</font><font style="font-size:33px"> </font><font style="font-size:22px" color="#00ff55">S</font><font style="font-size:46px" color="#00ff80">a</font><font style="font-size:27px" color="#00ffaa">s</font><font style="font-size:41px" color="#00ffd5">a</font><font style="font-size:48px" color="#00ffff">i</font><font style="font-size:27px"> </font><font style="font-size:44px" color="#00d4ff">r</font><font style="font-size:38px" color="#00aaff">a</font><font style="font-size:47px" color="#007fff">i</font><font style="font-size:24px" color="#0055ff">n</font><font style="font-size:27px" color="#002aff">b</font><font style="font-size:39px" color="#0000ff">ow</font><font style="font-size:37px" color="#2400ff">,</font><font style="font-size:40px"> </font><font style="font-size:21px" color="#4900ff">l</font><font style="font-size:44px" color="#6d00ff">a</font><font style="font-size:29px" color="#9200ff">l</font><font style="font-size:21px" color="#b600ff">k</font><font style="font-size:26px" color="#db00ff">a</font><font style="font-size:41px" color="#ff00ff">!</font></span>'
+   "elita": '<span class="hidbord_imtc_elita" style="font-family: comic sans ms; font-style: italic;"><font style="font-size:32px" color="#ff0000">YA</font><font style="font-size:33px"> </font><font style="font-size:33px" color="#ff2b00">e</font><font style="font-size:26px" color="#ff5500">l</font><font style="font-size:40px" color="#ff8000">i</font><font style="font-size:20px" color="#ffaa00">t</font><font style="font-size:33px" color="#ffd500">a</font><font style="font-size:31px" color="#ffff00">,</font><font style="font-size:45px"> </font><font style="font-size:41px" color="#d4ff00">a</font><font style="font-size:25px"> </font><font style="font-size:28px" color="#aaff00">t</font><font style="font-size:33px" color="#7fff00">i</font><font style="font-size:50px"> </font><font style="font-size:21px" color="#55ff00">h</font><font style="font-size:24px" color="#2aff00">u</font><font style="font-size:47px" color="#00ff00">i</font><font style="font-size:39px" color="#00ff2b">!</font><font style="font-size:33px"> </font><font style="font-size:22px" color="#00ff55">S</font><font style="font-size:46px" color="#00ff80">a</font><font style="font-size:27px" color="#00ffaa">s</font><font style="font-size:41px" color="#00ffd5">a</font><font style="font-size:48px" color="#00ffff">i</font><font style="font-size:27px"> </font><font style="font-size:44px" color="#00d4ff">r</font><font style="font-size:38px" color="#00aaff">a</font><font style="font-size:47px" color="#007fff">i</font><font style="font-size:24px" color="#0055ff">n</font><font style="font-size:27px" color="#002aff">b</font><font style="font-size:39px" color="#0000ff">ow</font><font style="font-size:37px" color="#2400ff">,</font><font style="font-size:40px"> </font><font style="font-size:21px" color="#4900ff">l</font><font style="font-size:44px" color="#6d00ff">a</font><font style="font-size:29px" color="#9200ff">l</font><font style="font-size:21px" color="#b600ff">k</font><font style="font-size:26px" color="#db00ff">a</font><font style="font-size:41px" color="#ff00ff">!</font></span>',
+   "not4u": '<p class="hidbord_imtc_not4u" ><strong style="color: #f00; font-size: x-large;">NOT FOR YOU! CAN\'T BE DECODED!</strong></p>'
 };
 
 var wkbmrk = function(in_text) {
@@ -5089,7 +5090,7 @@ var parseOneLineTags = function(match, tag, str) {
 
     if (tag === null) {
         //imoticons
-        res = res.replace(/\[(gin|kana|desu|boku|dawa|hina|kira|bara|meat|cake|tea|sarcasm|elita|slow)\]/ig, function(match, a, b) {
+        res = res.replace(/\[(gin|kana|desu|boku|dawa|hina|kira|bara|meat|cake|tea|sarcasm|elita|slow|not4u)\]/ig, function(match, a, b) {
             return imoticons[a.toLowerCase()];
         });
 
@@ -5136,6 +5137,9 @@ function unHtml(el){
         if(el.className == 'hidbord_imtc_elita') return "[elita]";
     }
 
+    if(el.nodeName == 'P' && el.className == 'hidbord_imtc_not4u'){
+        return "[not4u]";
+    }
     
     if(el.nodeName == 'IMG'){
         if(el.className.match(/hidbord\_imtc\_/i)){
@@ -5144,16 +5148,12 @@ function unHtml(el){
         return '';
     }
 
-
-
-
     if(el.nodeName == 'A'){
         if(el.className == 'hidbord_msglink') 
             return '>>' + $(el).attr('alt');
 
         return el.href;
     }
-
 
     for (i = 0; i < el.childNodes.length; i++) {
         text += unHtml(el.childNodes[i]);       
