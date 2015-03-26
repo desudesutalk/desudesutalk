@@ -87,6 +87,7 @@ var jpegExtract = function(inArBuf) {
     try{
         stegger.parse(inArBuf);
     } catch(e){
+        console.log('JPEG decode fail: ' + e);
         return false;
     }
 
@@ -94,6 +95,7 @@ var jpegExtract = function(inArBuf) {
     try{
         data = stegger.f5extract(steg_iv);
     } catch(e){
+        console.log('Steg extraction fail: ' + e);
         return false;
     }
 

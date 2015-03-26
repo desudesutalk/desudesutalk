@@ -1012,7 +1012,7 @@ var jsf5steg = (function(){
                 data_idx = 0,
                 available_bits_to_embed = 0;
 
-            console.log('Embedding of '+byte_to_embed+'+4 bytes');
+            console.log('Embedding of '+byte_to_embed+' bytes');
 
             if(byte_to_embed > 0x007fffff) byte_to_embed = 0x007ffff;
 

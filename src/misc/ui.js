@@ -33,6 +33,10 @@ var inject_ui = function() {
             '    <div class="hidbord_msg"><p id="identi" style="text-align: center;"></p>'+
 
             '            <p  style="text-align: center;">'+
+            '                    <a href="https://github.com/desudesutalk/desudesutalk/raw/master/ddt.user.js" target="_blank">Reinstall/update Script</a>'+
+            '            </p>'+
+
+            '            <p  style="text-align: center;">'+
             '                    <label>Font size: <input type="number" step="any" value="14" style="width: 30px;" id="hidboard_option_fontsize"/>px</label>'+
             '            </p>'+
 

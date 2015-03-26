@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.34
+// @version      0.4.35
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -2642,7 +2642,7 @@ var jsf5steg = (function(){
                 data_idx = 0,
                 available_bits_to_embed = 0;
 
-            console.log('Embedding of '+byte_to_embed+'+4 bytes');
+            console.log('Embedding of '+byte_to_embed+' bytes');
 
             if(byte_to_embed > 0x007fffff) byte_to_embed = 0x007ffff;
 
@@ -3012,6 +3012,7 @@ var jpegExtract = function(inArBuf) {
     try{
         stegger.parse(inArBuf);
     } catch(e){
+        console.log('JPEG decode fail: ' + e);
         return false;
     }
 
@@ -3019,6 +3020,7 @@ var jpegExtract = function(inArBuf) {
     try{
         data = stegger.f5extract(steg_iv);
     } catch(e){
+        console.log('Steg extraction fail: ' + e);
         return false;
     }
 
@@ -3829,6 +3831,10 @@ var inject_ui = function() {
             '        </form></div>'+
 
             '    <div class="hidbord_msg"><p id="identi" style="text-align: center;"></p>'+
+
+            '            <p  style="text-align: center;">'+
+            '                    <a href="https://github.com/desudesutalk/desudesutalk/raw/master/ddt.user.js" target="_blank">Reinstall/update Script</a>'+
+            '            </p>'+
 
             '            <p  style="text-align: center;">'+
             '                    <label>Font size: <input type="number" step="any" value="14" style="width: 30px;" id="hidboard_option_fontsize"/>px</label>'+
