@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.35
+// @version      0.4.36
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -5004,6 +5004,10 @@ var safeB642Str = function(str){
 var saveURLs = function(str) {
     "use strict";
 
+    str = str.replace(/(\[[^\]]+\]\([a-z]{3,6}\:[^\s\"><\`]+\))/ig, function(match, a) {
+        return '`URL2:' + safeStr2B64(a) + '`';
+    });
+
     return str.replace(/([a-z]{3,6}\:\/\/[^\s\"><\`]+)($|\s)/ig, function(match, a, b) {
         return '`URL:' + safeStr2B64(a+b) + '`';
     });
@@ -5011,9 +5015,14 @@ var saveURLs = function(str) {
 
 var restoreURLs = function(str) {
     "use strict";
+    var txt, url, b = '';
+    
+    str = str.replace(/`URL2:([a-zA-Z0-9\/\#\=]+)`/ig, function(match, a) {
+        url = safeB642Str(a).match(/\[([^\]]+)\]\(([a-z]{3,6}\:[^\s\"><\`]+)\)/);
+        return '<a href="' + url[2] + '" target="_blank" rel="noreferrer">' + safe_tags(url[1]) + '</a>';
+    });
 
-    return str.replace(/`URL:([a-zA-Z0-9\/\#\=]+)`/ig, function(match, a) {
-        var txt, url, b = '';
+    return str.replace(/`URL:([a-zA-Z0-9\/\#\=]+)`/ig, function(match, a) {        
         url = safeB642Str(a);
 
         if(url[url.length-1] == ' '){
