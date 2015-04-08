@@ -13,7 +13,7 @@
 О том, как пользоваться скриптом, можно [почитать в wiki](https://github.com/desudesutalk/desudesutalk/wiki/%D0%9A%D0%B0%D0%BA-%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D1%8C%D1%81%D1%8F).
 
 ## Доска для тестирования
-[8ch.net/ddt](https://8ch.net/ddt/)
+[lainchan.org/layer](https://lainchan.org/layer/)
 
 ### Используемые библиотеки
 1. [ECC](https://github.com/indutny/elliptic)
