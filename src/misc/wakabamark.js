@@ -15,15 +15,50 @@ var imoticons = {
     "tea":  '<img class="hidbord_imtc_tea"  style="vertical-align:bottom;" alt="A cup of Tea" title="A cup of Tea" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAM1BMVEX4WBgAAQBDRUL/GgBUVVN2eHX/ZDSHiYb/mAD/mTSpq6i5u7j/zAbKzMnc3tvt7+v+//ytxHIVAAAAAXRSTlMAQObYZgAAAPpJREFUOMvtktluxDAIRU1qjx3wwv9/bS/eklTpQ997pZESnSMGCM7958+hld+orrw4ndaV7jy5aillC3juZbZFhi9jvGisVWgJgpyfldNeVSJCU2DgrytQWA/nZAlF653DUJWb4Cij813jc6LnBO42p5qydT5TmFM6qM4C2IGPtcAoGc1lAU3xqJtra81juJyS/SQnZo5e4uY2uh/j23zSufdcKs0Cl7F5YPCqNP+hmSHTuHi7BIR9EBM4BnDDbQisQymF/Qhw55i3N8FFV5V7bB1z0ZH7kp4UOO6vDYVvi7TjQKf3myFC24+En1eH6wlxJbwfLtHbWX8D14kVhZIALoUAAAAASUVORK5CYII="/>',
  "sarcasm": '<img class="hidbord_imtc_sarcasm" style="vertical-align:bottom;" alt="SARCASM!" title="SARCASM!" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAuBAMAAACoiUZDAAAALVBMVEUAAAAQEBD/AACDWgCUWhAAqQB7e3vmpFLetFL/1Ur23ove3t7/5qT/7r3///8MKkFGAAAAAXRSTlMAQObYZgAAAbpJREFUKM9t071q40AQB/BdzrjWkIOVD/wKByaF7wIJDhEYN3mEAz3CgmBwKdwsBhciAjOQxqQxgXR5iQM1xk0QbBO4KuBnuP3QSrr4pvzt/PdjkBjrV8qGEftcKUvPEYbAzpGfNzKeDtN/IDHFI+jlB7NkSbRN+sYW5WNVEVHSj9Kiqqrfprc7aEAleSTZhWlBPk5FiyP6as9xFXXpm9PcHm6WAnIq3r+/EmUns5S1W3q8//PrleQsbFncfNxNHG5vyxYfYPw2yk4f89uyOV9QUdS6XokkyYpwKYHy+qif1rmJlLT1m3KcaK3Vpl6h7F56oS3qN4Giw2/a1Q7lyGDz/LHHHITpxAbjF2smjfNli3xjcW8RMSADo/scfTU4WIJSufiERADBMApjMhUM2snb2rostJOnnnq75A1Si18ux0C91swOievrA/VbAWZssrnSPwPKKaLAjMWxevGn04TGR4uScaXWR2cP+kIfLEYW1c59HoUZygEz96RYqedpg/UKpu5JNi/QYW1Swt8+Vusnd229N7OSfh6mdefRNEL4wEDlAHOUJp33fh+zPAD4odT5bxSr//xvPNhf1sQYU21hKHsAAAAASUVORK5CYII="/>',
     "slow": '<img class="hidbord_imtc_slow" style="vertical-align:bottom;" alt="Slow Poke" title="Slow Poke" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADcAAAAgCAMAAACB1hBXAAAAM1BMVEWUcoIAAAAQEBB7ITH/AACtQlKMWhlrY2MAqQDeY3v/hJTepWP/paXvxYzWzs7/5rX///8p8wWNAAAAAXRSTlMAQObYZgAAAbNJREFUOMudlYGSgyAMRCU02MBJ8/9fe5sgSq0619tpRws8NgnRTpOLmeP0vThD1O5l15+wnKNTuPlpyiJ8z0kDBeGGDWso33KwkbY+gwyBhVcQvy+5gIDiHl0Q9+5gvgFpjw4Oa7or1hK/MOzVyGum+FDuugo1aJU8SCIh5Z0DGM7OhVXfuOinF4cR9ngOaNDHo58EjgLEkcNwSySPJNfOiapWC1H8u1Eiezw8cGVZSsGCqgbCjojkXfwBlrK8TKXA7vlU5eb2oW7fwJWClnLH8Qpa5sDShgFMPU5b9cltApiKre9kSlRZzjWMs3GL6dV8UR5KN1xn0UCUTIZ6bQBecFH6yXqgUbQuSzI/uJV0yYU3DkWiYrEmp8j9cHx8xm2DwbicLLyCmpBfqXX0geTAcd9jsi6U5IDWhuWxvzbRXLOM6fkClMZNC1E+5YDVuttN3Zu8rlT1vZ03zQoubxjOwW/R0ZWwJy6nxfSZlVuffm99exIqWZvpESHTrJ0bXho2YcTs9CEvf43P3rgAP/4OsOU8zTN2iHE0arPNDnO37+8YB6TtCgz7fi1S+gdlWRwGfgHYqi1M874NxAAAAABJRU5ErkJggg=="/>',
-    "shit":  '<img class="hidbord_imtc_shit"  style="vertical-align:bottom;" alt="Shit"   title="Shit"   src="data:image/gif;base64,R0lGODlhEAAQAKIFAAAAAHspCJxCGL1jOf///////wAAAP///yH/C05FVFNDQVBFMi4wAwEAAAAh+QQJCgAFACwAAAAAEAAQAAADRli63ArPLTgHpLKAES742CSAQ1mGmqAKXMCiWiDLgIqCeG1PgbmuHR6rNaM9ZMMcLjYyOUs2gOv5FHSkvyzwU+x2PUplIQEAIfkECQoABQAsAAAAABAAEAAAA0hYutwNDsYhHQMjQMB5FN0gipUCCKiQBWppBjB8gsvW3WkFBCM6C5oaSxQrSnZDyu1W2KFGUJHPGY0COaxcaqtBFr8x23IMSQAAIfkECQoABQAsAAAAABAAEAAAA0dYutwNCjoGhpyrBgh6d4DgDSR5RUIqDEGwnlErh+Lj3eoFBKWqbpLdiiWbxUKm260gHJpKg1THBa1GgS6fNoUteoscpfiTAAAh+QQJCgAFACwAAAAAEAAQAAADR1hasP6rOQnBoDCO0ID3zCR8Q1lijKAKW8CiTCDLgIp+eG1HgbmOAg6P1ZrRFAAZMYeLqUzQki1JjPo4VN3vhzV6vR2muJAAACH5BAkKAAUALAAAAAAQABAAAANHWLrcDQw+BYZ0cQQIeneA4A0keVFCKmjBykVBHIfi493qBQSlqm6L3Yolm1Fiw5uyIKyUnoNUpwWFCjZCn9SHLXq9HKX4kwAAIfkEBQoABQAsAAAAABAAEAAAA0hYutwNwEkwYmRX0WAhdIDgDSSZWUIqDEGwZgvQzqH4eLh6BqWqcjEXaUa8yIQVHK4gS5WepBQESYEOBJymb5vKEr/fjnIcSQAAOw=="/>',
+    "shit": '<img class="hidbord_imtc_shit"  style="vertical-align:bottom;" alt="Shit"   title="Shit"   src="data:image/gif;base64,R0lGODlhEAAQAKIFAAAAAHspCJxCGL1jOf///////wAAAP///yH/C05FVFNDQVBFMi4wAwEAAAAh+QQJCgAFACwAAAAAEAAQAAADRli63ArPLTgHpLKAES742CSAQ1mGmqAKXMCiWiDLgIqCeG1PgbmuHR6rNaM9ZMMcLjYyOUs2gOv5FHSkvyzwU+x2PUplIQEAIfkECQoABQAsAAAAABAAEAAAA0hYutwNDsYhHQMjQMB5FN0gipUCCKiQBWppBjB8gsvW3WkFBCM6C5oaSxQrSnZDyu1W2KFGUJHPGY0COaxcaqtBFr8x23IMSQAAIfkECQoABQAsAAAAABAAEAAAA0dYutwNCjoGhpyrBgh6d4DgDSR5RUIqDEGwnlErh+Lj3eoFBKWqbpLdiiWbxUKm260gHJpKg1THBa1GgS6fNoUteoscpfiTAAAh+QQJCgAFACwAAAAAEAAQAAADR1hasP6rOQnBoDCO0ID3zCR8Q1lijKAKW8CiTCDLgIp+eG1HgbmOAg6P1ZrRFAAZMYeLqUzQki1JjPo4VN3vhzV6vR2muJAAACH5BAkKAAUALAAAAAAQABAAAANHWLrcDQw+BYZ0cQQIeneA4A0keVFCKmjBykVBHIfi493qBQSlqm6L3Yolm1Fiw5uyIKyUnoNUpwWFCjZCn9SHLXq9HKX4kwAAIfkEBQoABQAsAAAAABAAEAAAA0hYutwNwEkwYmRX0WAhdIDgDSSZWUIqDEGwZgvQzqH4eLh6BqWqcjEXaUa8yIQVHK4gS5WepBQESYEOBJymb5vKEr/fjnIcSQAAOw=="/>',
+    "flagofsouthkoreaalsoknownasthetaegukgi": '<img class="hidbord_imtc_flagofsouthkoreaalsoknownasthetaegukgi"  style="vertical-align:bottom;" alt="Flag of South Korea, also known as the Taegukgi"   title="Flag of South Korea, also known as the Taegukgi"   src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAALCAIAAAD5gJpuAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAHCSURBVChTTVFLS+tAFM401bSJbdOHkSRX8FENik/qwrWiLf4A8e7uD/De61ZEC+5duLB/QsVVF4L4XBV8oOKii4io1D4STK9KrZmb8SRR8WPOzBnm++acj4OqtRfqGyzLcnY3+4hPYAgPPAd9LKzCze3V2XkDQUEfx7NsiOPCXMBP05fHJ3eq2hwKCXwEBF7340qlks1mjUcjJgid7e1EVQnGJB4vFEubmxt8OByNRH60tmK3AiHEMAzTNIdHEp2SSFZWyNwc+TNLlhbahObJqSlN0x6KRaBBBQQeAowfZOVymQ0E0M6+b22VmOYz9tTrb/yvmX8zP6sVTZIlhNBN4d7rugR1LBaDZFsLJjBtevzLw38LdWbh7nSQYThZAgKFELQEApsN0HW9iWNflP7fyjzd2HDLCMZrXU1MKrUnTa+KoohAY3uwLGDn8/lMJgO+U0P+rtH4PR2haq/jfY0TY/Lu7l46nc7lcq4Hr90QRbEsC/eDw6Oe3p7F6e6LEQb/J/1tzPV1fn1jKxqN8jwPBLclu4Isy8lkslQqCYII+oEOWw9oaZFSqRQIFEVx5kqhB13/Psivg8JO4gyawhg7bIh3hTEZN0YoEVIAAAAASUVORK5CYII="/>',
 
    // Text
    "elita": '<span class="hidbord_imtc_elita" style="font-family: comic sans ms; font-style: italic;"><font style="font-size:32px" color="#ff0000">YA</font><font style="font-size:33px"> </font><font style="font-size:33px" color="#ff2b00">e</font><font style="font-size:26px" color="#ff5500">l</font><font style="font-size:40px" color="#ff8000">i</font><font style="font-size:20px" color="#ffaa00">t</font><font style="font-size:33px" color="#ffd500">a</font><font style="font-size:31px" color="#ffff00">,</font><font style="font-size:45px"> </font><font style="font-size:41px" color="#d4ff00">a</font><font style="font-size:25px"> </font><font style="font-size:28px" color="#aaff00">t</font><font style="font-size:33px" color="#7fff00">i</font><font style="font-size:50px"> </font><font style="font-size:21px" color="#55ff00">h</font><font style="font-size:24px" color="#2aff00">u</font><font style="font-size:47px" color="#00ff00">i</font><font style="font-size:39px" color="#00ff2b">!</font><font style="font-size:33px"> </font><font style="font-size:22px" color="#00ff55">S</font><font style="font-size:46px" color="#00ff80">a</font><font style="font-size:27px" color="#00ffaa">s</font><font style="font-size:41px" color="#00ffd5">a</font><font style="font-size:48px" color="#00ffff">i</font><font style="font-size:27px"> </font><font style="font-size:44px" color="#00d4ff">r</font><font style="font-size:38px" color="#00aaff">a</font><font style="font-size:47px" color="#007fff">i</font><font style="font-size:24px" color="#0055ff">n</font><font style="font-size:27px" color="#002aff">b</font><font style="font-size:39px" color="#0000ff">ow</font><font style="font-size:37px" color="#2400ff">,</font><font style="font-size:40px"> </font><font style="font-size:21px" color="#4900ff">l</font><font style="font-size:44px" color="#6d00ff">a</font><font style="font-size:29px" color="#9200ff">l</font><font style="font-size:21px" color="#b600ff">k</font><font style="font-size:26px" color="#db00ff">a</font><font style="font-size:41px" color="#ff00ff">!</font></span>',
    "not4u": '<p class="hidbord_imtc_not4u" ><strong style="color: #f00; font-size: x-large;">NOT FOR YOU! CAN\'T BE DECODED!</strong></p>'
 };
 
-var wkbmrk = function(in_text) {
+var the8ball = [
+    '<span class="hidbord_imtc_8ball" alt="It is certain" title="It is certain">Бесспорно. </span>',
+    '<span class="hidbord_imtc_8ball" alt="It is decidedly so" title="It is decidedly so">Предрешено. </span>',
+    '<span class="hidbord_imtc_8ball" alt="Without a doubt" title="Without a doubt">Никаких сомнений. </span>',
+    '<span class="hidbord_imtc_8ball" alt="Yes - definitely" title="Yes - definitely">Определённо да. </span>',
+    '<span class="hidbord_imtc_8ball" alt="You may rely on it" title="You may rely on it">Можешь быть уверен в этом. </span>',
+    '<span class="hidbord_imtc_8ball" alt="As I see it, yes" title="As I see it, yes">Мне кажется - &quot;да&quot;. </span>',
+    '<span class="hidbord_imtc_8ball" alt="Most likely" title="Most likely">Вероятнее всего. </span>',
+    '<span class="hidbord_imtc_8ball" alt="Outlook good" title="Outlook good">Хорошие перспективы. </span>',
+    '<span class="hidbord_imtc_8ball" alt="Signs point to yes" title="Signs point to yes">Знаки говорят - &quot;да&quot;. </span>',
+    '<span class="hidbord_imtc_8ball" alt="Yes" title="Yes">Да. </span>',
+    '<span class="hidbord_imtc_8ball" alt="Reply hazy, try again" title="Reply hazy, try again">Пока не ясно, попробуй снова. </span>',
+    '<span class="hidbord_imtc_8ball" alt="Ask again later" title="Ask again later">Спроси позже. </span>',
+    '<span class="hidbord_imtc_8ball" alt="Better not tell you now" title="Better not tell you now">Лучше не рассказывать. </span>',
+    '<span class="hidbord_imtc_8ball" alt="Cannot predict now" title="Cannot predict now">Сейчас нельзя предсказать. </span>',
+    '<span class="hidbord_imtc_8ball" alt="Concentrate and ask again" title="Concentrate and ask again">Сконцентрируйся и спроси опять. </span>',
+    '<span class="hidbord_imtc_8ball" alt="Don’t count on it" title="Don’t count on it">Даже не думай. </span>',
+    '<span class="hidbord_imtc_8ball" alt="My reply is no " title="My reply is no ">Мой ответ - &quot;нет&quot;. </span>',
+    '<span class="hidbord_imtc_8ball" alt="My sources say no " title="My sources say no ">По моим данным - &quot;нет&quot;. </span>',
+    '<span class="hidbord_imtc_8ball" alt="Outlook not so good" title="Outlook not so good">Перспективы не очень хорошие. </span>',
+    '<span class="hidbord_imtc_8ball" alt="Very doubtful" title="Very doubtful">Весьма сомнительно. </span>'
+];
+
+var imRegEx = new RegExp('\\[(' + Object.keys(imoticons).join('|') + ')\\]', 'gi'),
+    fix_rand;
+
+function get8ball(){
     "use strict";
+    fix_rand = sjcl.codec.bytes.fromBits(sjcl.hash.sha256.hash(sjcl.codec.bytes.toBits(fix_rand)));
+    return the8ball[fix_rand[0] % 20];
+}
+
+var wkbmrk = function(in_text, for_id) {
+    "use strict";
+
+    fix_rand = sjcl.codec.bytes.fromBits(sjcl.hash.sha256.hash(sjcl.codec.hex.toBits(for_id)));
 
     var lines = in_text.split(/\n|\r|\n\r|\r\n/),
         i;
@@ -302,8 +337,13 @@ var parseOneLineTags = function(match, tag, str) {
 
     if (tag === null) {
         //imoticons
-        res = res.replace((new RegExp('\\[(' + Object.keys(imoticons).join('|') + ')\\]', 'gi')), function(match, a, b) {
+        res = res.replace(imRegEx, function(match, a, b) {
             return imoticons[a.toLowerCase()];
+        });
+
+        // Magic 8 ball
+        res = res.replace(/\[8ball\]/gi, function(match, a, b) {
+            return get8ball();
         });
 
         //reflinks
@@ -347,6 +387,7 @@ function unHtml(el){
         if(el.className == 'hidbord_spoiler') tag = _spoilerTag; 
         if(el.className == 'hidbord_irony') tag = "++";
         if(el.className == 'hidbord_imtc_elita') return "[elita]";
+        if(el.className == 'hidbord_imtc_8ball') return "[8ball]";
     }
 
     if(el.nodeName == 'P' && el.className == 'hidbord_imtc_not4u'){

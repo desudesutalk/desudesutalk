@@ -281,7 +281,7 @@ var do_popup = function(e) {
         msgDate.setTime(parseInt(msg.txt.ts) * 1000);
     
         if (msg.status == 'OK') {
-            txt = wkbmrk(msg.txt.msg);        
+            txt = wkbmrk(msg.txt.msg, msgid);        
         } else {
             txt = '<p><strong style="color: #f00; font-size: x-large;">NOT FOR YOU! CAN\'T BE DECODED!</strong></p>';
         }
@@ -544,7 +544,7 @@ var push_msg = function(msg, msgPrepend, thumb) {
     msgDate.setTime(parseInt(msg.txt.ts) * 1000);
     
     if (msg.status == 'OK') {
-        txt = wkbmrk(msg.txt.msg);        
+        txt = wkbmrk(msg.txt.msg, msg.id);        
     } else {
         txt = '<p><strong style="color: #f00; font-size: x-large;">NOT FOR YOU! CAN\'T BE DECODED!</strong></p>';
     }
@@ -754,7 +754,7 @@ var do_preview_popup = function(e) {
     }
 
     $('#prev_popup').remove();
-    var txt = '<div class="hidbord_msg" style="box-shadow: 0 0 10px #555;overflow-y: scroll;" alt="msg_preview">' + img_thumb + wkbmrk($('#hidbord_reply_text').val()) + '</div>';
+    var txt = '<div class="hidbord_msg" style="box-shadow: 0 0 10px #555;overflow-y: scroll;" alt="msg_preview">' + img_thumb + wkbmrk($('#hidbord_reply_text').val(), "00") + '</div>';
 
 //    console.log(txt);
 
