@@ -70,6 +70,10 @@ var _sendBoardForm = function(file, formAddon) {
         formData = $('form[name=post]').first().serializeArray();
         fileInputName = $("form[name=post] input[type=file]")[0].name;
         formAction = $("form[name=post]")[0].action; 
+    }else if(($('form#postform').length !== 0)){
+        formData = $('form#postform').first().serializeArray();
+        fileInputName = $("form#postform input[type=file]")[0].name;
+        formAction = $("form#postform")[0].action; 
     }
 
     if(is4chan){
@@ -163,6 +167,9 @@ var _sendBoardForm = function(file, formAddon) {
                 $('#recaptcha_challenge_image').click();
                 $('input[name=recaptcha_response_field]').val('');
                 $('.recaptcha_image').click();
+                $('#ABU-getnewposts a').first().click();
+                $('.captcha-reload-button').click();
+                $('#qr-shampoo, #shampoo').val('');
                 if(is4chan){
                     setTimeout(function() {$('a[data-cmd=update]').first().click(); $('.thread-refresh-shortcut.fa.fa-refresh').first().click();}, 2500);                    
                     $('#qrCapField').val('');
