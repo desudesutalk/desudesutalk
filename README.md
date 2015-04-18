@@ -6,9 +6,9 @@
 ### Как установить
 Потербуется Google Chrome с [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) или Firefox с [Greasemonkey](https://addons.mozilla.org/firefox/addon/greasemonkey/) 
 
-На 8ch.net, 4chan.org, lainchan.org и 2ch.hk скрипт работает самостоятельно. Для других борд потребуется [Куклоскрипт](https://github.com/SthephanShinkufag/Dollchan-Extension-Tools).
+Ставим расширение для юзер-скриптов, ставим скрипт [по ссылке](https://github.com/desudesutalk/desudesutalk/raw/master/ddt.user.js) и наслаждаемся.
 
-После чего ставим скрипт [по ссылке](https://github.com/desudesutalk/desudesutalk/raw/master/ddt.user.js) и наслаждаемся.
+На 8ch.net, 4chan.org, lainchan.org и 2ch.hk скрипт работает самостоятельно. Для других борд потребуется [Куклоскрипт](https://github.com/SthephanShinkufag/Dollchan-Extension-Tools).
 
 О том, как пользоваться скриптом, можно [почитать в wiki](https://github.com/desudesutalk/desudesutalk/wiki/%D0%9A%D0%B0%D0%BA-%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D1%8C%D1%81%D1%8F).
 
