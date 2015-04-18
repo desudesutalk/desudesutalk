@@ -992,17 +992,23 @@ var showReplyform = function(msg_id, textInsert) {
 };
 
 var insertInto = function(textarea, text) {
-	"use strict";
+      "use strict";
+      quotedText = quoteSelection(window.getSelection().getRangeAt(0).cloneContents());
 
-    if (textarea.createTextRange && textarea.caretPos) {
-        var caretPos = textarea.caretPos;
-        caretPos.text = caretPos.text.charAt(caretPos.text.length - 1) == " " ? text + " " : text;
-    } else if (textarea.setSelectionRange) {
-        var start = textarea.selectionStart;
-        var end = textarea.selectionEnd;
-        textarea.value = textarea.value.substr(0, start) + text + textarea.value.substr(end);
-        textarea.setSelectionRange(start + text.length, start + text.length);
-    } else {
-        textarea.value += text + " ";
-    }
+      if (quotedText.length > 0){
+            text += quotedText;
+      }
+      if (textarea.createTextRange && textarea.caretPos) {
+            var caretPos = textarea.caretPos;
+            caretPos.text = caretPos.text.charAt(caretPos.text.length - 1) == " " ? text + " " : text;
+      } else if (textarea.setSelectionRange) {
+            var start = textarea.selectionStart;
+            var end = textarea.selectionEnd;
+            textarea.value = textarea.value.substr(0, start) + text + textarea.value.substr(end);
+            textarea.setSelectionRange(start + text.length, start + text.length);
+      } else {
+            textarea.value += text + " ";
+      }
+
+      $(textarea).focus();
 };
