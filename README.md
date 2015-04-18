@@ -6,7 +6,7 @@
 ### Как установить
 Потербуется Google Chrome с [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) или Firefox с [Greasemonkey](https://addons.mozilla.org/firefox/addon/greasemonkey/) 
 
-Так же потребуется [Куклоскрипт](https://github.com/SthephanShinkufag/Dollchan-Extension-Tools) (для 8chan-а, 4chan-а и 2ch.hk он не нужен)
+На 8ch.net, 4chan.org, lainchan.org и 2ch.hk скрипт работает самостоятельно. Для других борд потребуется [Куклоскрипт](https://github.com/SthephanShinkufag/Dollchan-Extension-Tools).
 
 После чего ставим скрипт [по ссылке](https://github.com/desudesutalk/desudesutalk/raw/master/ddt.user.js) и наслаждаемся.
 
