@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.39
+// @version      0.4.40
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -3187,7 +3187,7 @@ var _sendBoardForm = function(file, formAddon) {
         formAction = $("form[name=post]")[0].action; 
     }else if(($('form#postform').length !== 0)){
         formData = $('form#postform').first().serializeArray();
-        fileInputName = $("form#postform input[type=file]")[0].name;
+        fileInputName = 'image1';
         formAction = $("form#postform")[0].action; 
     }
 
@@ -3229,7 +3229,7 @@ var _sendBoardForm = function(file, formAddon) {
     }
 
     for (var i = 0; i < formData.length; i++) {
-        if (formData[i].name != fileInputName) {
+        if (formData[i].name && formData[i].name != fileInputName && formData[i].name !== "") {
             fd.append(formData[i].name, formData[i].value);
         }
     }
