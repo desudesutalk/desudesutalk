@@ -993,7 +993,12 @@ var showReplyform = function(msg_id, textInsert) {
 
 var insertInto = function(textarea, text) {
       "use strict";
-      quotedText = quoteSelection(window.getSelection().getRangeAt(0).cloneContents());
+
+      if(!window.getSelection().type || window.getSelection().type == "Range"){
+            quotedText = quoteSelection(window.getSelection().getRangeAt(0).cloneContents());
+      }else{
+            quotedText = '';
+      }
 
       if (quotedText.length > 0){
             text += quotedText;

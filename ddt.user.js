@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.40
+// @version      0.4.41
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -4800,7 +4800,12 @@ var showReplyform = function(msg_id, textInsert) {
 
 var insertInto = function(textarea, text) {
       "use strict";
-      quotedText = quoteSelection(window.getSelection().getRangeAt(0).cloneContents());
+
+      if(!window.getSelection().type || window.getSelection().type == "Range"){
+            quotedText = quoteSelection(window.getSelection().getRangeAt(0).cloneContents());
+      }else{
+            quotedText = '';
+      }
 
       if (quotedText.length > 0){
             text += quotedText;
