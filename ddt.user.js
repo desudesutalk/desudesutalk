@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.41
+// @version      0.4.42
 // @description  Write something useful!
 // @include      http://dobrochan.com/*/*
 // @include      http://dobrochan.ru/*/*
@@ -4788,28 +4788,31 @@ var showReplyform = function(msg_id, textInsert) {
             ta.focus();
         });
     }
-    $(msg_id).after($('#hidbord_replyform'));
-    $('#hidbord_replyform').show();
 
     $('.hidbord_thread')[0].scrollTop += $('#hidbord_replyform').offset().top - window.scrollY - $(window).height() + $('#hidbord_replyform').height() + 50;
 
     if (textInsert) {
         insertInto(document.getElementById('hidbord_reply_text'), textInsert + "\n");
     }
+    
+    $(msg_id).after($('#hidbord_replyform'));
+    $('#hidbord_replyform').show();
+    $('#hidbord_reply_text').focus();
 };
 
 var insertInto = function(textarea, text) {
       "use strict";
 
-      if(!window.getSelection().type || window.getSelection().type == "Range"){
+      if(window.getSelection().focusNode !== null){
             quotedText = quoteSelection(window.getSelection().getRangeAt(0).cloneContents());
       }else{
             quotedText = '';
       }
 
-      if (quotedText.length > 0){
+      if (quotedText.length > 0 && quotedText != '> \n'){
             text += quotedText;
       }
+
       if (textarea.createTextRange && textarea.caretPos) {
             var caretPos = textarea.caretPos;
             caretPos.text = caretPos.text.charAt(caretPos.text.length - 1) == " " ? text + " " : text;
@@ -4822,7 +4825,6 @@ var insertInto = function(textarea, text) {
             textarea.value += text + " ";
       }
 
-      $(textarea).focus();
 };
 
 var imoticons = {                                                                        
