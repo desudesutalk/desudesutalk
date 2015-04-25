@@ -1,4 +1,4 @@
-(function(){
+function ddtMainFunction(){
 	//fix for % escaping.
 	var _spoilerTag = '%' + '%';
 
@@ -7,6 +7,19 @@
 	var board_section = location.pathname.match(/\/([^\/]+)\//);
 	if (board_section[1]){
 		boardHostNameSection += '_' + board_section[1];
+		board_section = board_section[1];
+	}else{
+		board_section = "unknown";
+	}
+
+	var threadId = location.pathname.match(/(\d+)[^\/]*$/);
+
+	var isSavedThread = window.location.protocol == 'file:' && ddtThread;
+
+	if (threadId[1]){
+		threadId = threadId[1];
+	}else{
+		threadId = "0";
 	}
 
 	function math_ceil(a){

@@ -82,6 +82,8 @@ $(function($) {
 
     setTimeout(startAnimeWatch, 1000);
 
+    $('.hidbord_main').remove();
+
     inject_ui();
 
     do_login(false, true);
@@ -92,5 +94,11 @@ $(function($) {
     }
 
     render_contact();
+
+    if(isSavedThread){
+        for(var m in ddtThread){
+            push_msg(ddtThread[m], null, ddtThread[m].thumb);
+        }
+    }
 
 });

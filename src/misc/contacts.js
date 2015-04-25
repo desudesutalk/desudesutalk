@@ -133,6 +133,10 @@ function safe_tags(str) {
 var getContactHTML = function(hash, key) {
     "use strict";
 
+    if(isSavedThread){
+        return '<strong class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">' + safe_tags(hash.substring(0,3) + "-" + hash.substring(3,6) + "-" + hash.substring(6,9)) + '</strong>';
+    }
+
     if (hash == rsa_hashB64) {
         return '<strong style="color: #090; font-style: italic" class="hidbord_clickable hidbord_usr_reply" alt="'+hash+'">Me</strong>';
     }

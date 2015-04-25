@@ -9,7 +9,9 @@ module.exports = function(grunt) {
                     "dist/crypto.js": ["src/crypto/elliptic.min.js","src/crypto/sjcl.js","src/crypto/sjcl.ccm_hack.js"],
                     "dist/libs.js": ["src/libs/zepto.min.js","src/libs/jquery.identicon5.js","src/libs/base58.js",
                                      "src/libs/pako.min.js",
-                                     "src/libs/highlight.pack.js"],
+                                     "src/libs/jszip.min.js",
+                                     "src/libs/highlight.pack.js",
+                                     "src/libs/FileSaver.min.js"],
 
                     "ddt.user.js": ["src/metablock.js", 'src/_head.js', "dist/crypto.js","dist/libs.js",
                                     "src/misc/cryptcore.js",
@@ -25,6 +27,7 @@ module.exports = function(grunt) {
                                     "src/misc/jpeg.js",
                                     "src/misc/ui.js",
                                     "src/misc/wakabamark.js",
+                                    "src/misc/threadsaver.js",
                                     "src/main.js","src/_tail.js"],
                     "ddt.meta.js": ["src/metablock.js"]
                 }

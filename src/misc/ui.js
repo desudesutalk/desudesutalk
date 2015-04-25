@@ -90,6 +90,8 @@ var inject_ui = function() {
                 '<input type="button" value="Write reply" style="font-weight: bold;float: left;font-size: 12px;" id="hidbord_btn_reply">'+
                 '<input type="button" value="Get old messages" style="font-size: 12px;" id="hidbord_btn_getold">&nbsp;<label><input type="checkbox" id="hidboard_option_autofetch" style="vertical-align:middle;" checked>autoscan</label>'+
                 '<a href="javascript:;" style="float: right;line-height: 27px;" id="hidbord_btn_checknew">check for new</a>'+
+                '<a href="javascript:;" style="float: right;line-height: 27px; padding-right: 15px;" id="hidbord_btn_save_thread" title="Save DDT thread as a file">save</a> '+
+                '<span style="float: right;line-height: 27px; padding-right: 15px; display:none" id="hidbord_btn_save_thread_info">Saving..</span> '+
                 '</div>'+
             '</div>'+
             '<div class="hidbord_notifer">'+
@@ -216,12 +218,17 @@ var inject_ui = function() {
     $('#hidboard_option_fontsize').val(uiFontSize);
     $('.hidbord_maincontent').css('font-size', uiFontSize + 'px !important');
 
-   $('#hidboard_option_fontsize').on('change', function() {
+    $('#hidboard_option_fontsize').on('change', function() {
         ssSet('magic_desu_fontsize', $('#hidboard_option_fontsize').val());
         $('.hidbord_maincontent').css('font-size', $('#hidboard_option_fontsize').val() + 'px !important');
     });
 
 
+    $('#hidbord_btn_save_thread').on('click', function() {
+        $('#hidbord_btn_save_thread').hide();
+        $('#hidbord_btn_save_thread_info').show();        
+        ddtSaveThread();
+    });
     
 
     $('#hidboard_option_autoscanison').on('change', function() {
