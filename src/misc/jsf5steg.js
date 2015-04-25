@@ -709,29 +709,29 @@ var jsf5steg = (function(){
 	}
 
 	function writeDHT(self){
-		writeWord(0xFFC4); // marker
-		if(self.frames[0].components.length != 1){
-            writeWord(0x01A2); // length
-        }else{
-            writeWord(0x0D2); // length
+        writeWord(0xFFC4); // marker
+        writeWord(31); // length
+        writeByte(0); // HTYDCinfo
+        for (var i=0; i<16; i++) {
+            writeByte(std_dc_luminance_nrcodes[i+1]);
+        }
+        for (var j=0; j<=11; j++) {
+            writeByte(std_dc_luminance_values[j]);
         }
 
-		writeByte(0); // HTYDCinfo
-		for (var i=0; i<16; i++) {
-			writeByte(std_dc_luminance_nrcodes[i+1]);
-		}
-		for (var j=0; j<=11; j++) {
-			writeByte(std_dc_luminance_values[j]);
-		}
+        writeWord(0xFFC4); // marker
+        writeWord(181); // length
+        writeByte(0x10); // HTYACinfo
+        for (var k=0; k<16; k++) {
+            writeByte(std_ac_luminance_nrcodes[k+1]);
+        }
+        for (var l=0; l<=161; l++) {
+            writeByte(std_ac_luminance_values[l]);
+        }
 
-		writeByte(0x10); // HTYACinfo
-		for (var k=0; k<16; k++) {
-			writeByte(std_ac_luminance_nrcodes[k+1]);
-		}
-		for (var l=0; l<=161; l++) {
-			writeByte(std_ac_luminance_values[l]);
-		}
         if(self.frames[0].components.length != 1){
+            writeWord(0xFFC4); // marker
+            writeWord(31); // length
     		writeByte(1); // HTUDCinfo
     		for (var m=0; m<16; m++) {
     			writeByte(std_dc_chrominance_nrcodes[m+1]);
@@ -740,6 +740,8 @@ var jsf5steg = (function(){
     			writeByte(std_dc_chrominance_values[n]);
     		}
 
+            writeWord(0xFFC4); // marker
+            writeWord(181); // length
     		writeByte(0x11); // HTUACinfo
     		for (var o=0; o<16; o++) {
     			writeByte(std_ac_chrominance_nrcodes[o+1]);
