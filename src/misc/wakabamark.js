@@ -346,14 +346,6 @@ var parseOneLineTags = function(match, tag, str) {
             return get8ball();
         });
 
-        // Browser Info
-        res = res.replace(/\[info\]/gi, function(match, a, b) {
-            return '<pre>---- info ----------------\n' +
-                    navigator.userAgent + '\n' + /*jshint newcap: false  */
-                    'v' + (typeof GM_info !== 'undefined' ? GM_info.script.version : GM_getMetadata("version"))+
-                   '</pre>';
-        });
-
         //reflinks
         res = res.replace(/(\&gt\;\&gt\;)([0-9a-f]{64})/ig, function(match, a, b) {
             return '<a href="javascript:;" alt="' + b + '" class="hidbord_msglink">&gt;&gt;' + b.substr(0, 8) + '</a>';
