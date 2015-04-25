@@ -5,7 +5,7 @@ function ddtMainFunction(){
 	var boardHostName = location.hostname.toLowerCase();
 	var boardHostNameSection = boardHostName;
 	var board_section = location.pathname.match(/\/([^\/]+)\//);
-	if (board_section[1]){
+	if (board_section && board_section[1]){
 		boardHostNameSection += '_' + board_section[1];
 		board_section = board_section[1];
 	}else{
@@ -16,7 +16,7 @@ function ddtMainFunction(){
 
 	var isSavedThread = window.location.protocol == 'file:' && ddtThread;
 
-	if (threadId[1]){
+	if (threadId && threadId[1]){
 		threadId = threadId[1];
 	}else{
 		threadId = "0";
