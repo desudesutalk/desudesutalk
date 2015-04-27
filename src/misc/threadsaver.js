@@ -9,12 +9,13 @@ function ddtSaveThread(){
 	
 	zip.file(fname + ".html", '<html><head><title>' + fname + '</title>\n'+
 		'	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n'+
-        	'   <link rel="stylesheet" type="text/css" id="stylesheet" href="data/style.css">\n' +
-		'	<script language="JavaScript" type="text/javascript" src="data/ddt_thread.js"></script>\n'+
-		'	<script language="JavaScript" type="text/javascript" src="data/ddt.js"></script>\n'+
+		'   <style>\n' +
+        	'      body {\n\tbackground: ' + Zepto('body').css("background-color") + ';\t\n}\n' +
+        	'   </style>\n' +             
+		'<script language="JavaScript" type="text/javascript" src="data/ddt_thread.js"></script>\n'+
+		'<script language="JavaScript" type="text/javascript" src="data/ddt.js"></script>\n'+
 		'</head><body></body></html>'); /*jshint newcap: false  */
 	data.file("ddt.js", 'function GM_getMetadata(){ return "'+(typeof GM_info !== 'undefined' ? GM_info.script.version : GM_getMetadata("version"))+'"}\n' + ddtMainFunction.toString() + '\nddtMainFunction();');
-	data.file("style.css", 'body {\n\tbackground: ' + Zepto.map(Zepto('body').css(["background-color","background-image","background-repeat","background-position","background-attachment"]), function(v){return v}).join(' ') + ';\n}\n')
 
 	for(m in msgs){
 		if(msgs[m].contactsNum < 3){
