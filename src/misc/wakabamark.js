@@ -55,6 +55,11 @@ function get8ball(){
     return the8ball[fix_rand[0] % 20];
 }
 
+function cleanUrl(url){
+    "use strict";
+    return url.replace(/\"/g, '%22').replace(/</g, '%3C').replace(/\>/g, '%3E').replace(/\'/g, '%27');
+}
+
 var wkbmrk = function(in_text, for_id) {
     "use strict";
 
@@ -111,7 +116,7 @@ var wkbmrk = function(in_text, for_id) {
         }
 
         if (is_pre) {
-            res += lines[i].replace(/\&/g, '&amp;').replace(/</g, '&lt;').replace(/\>/g, '&gt;') + "\n";
+            res += safe_tags(lines[i]) + "\n";
             continue;
         }
 
@@ -218,7 +223,6 @@ var wkbmrk = function(in_text, for_id) {
         res += '</div>';
     }
 
-
     //console.log(res);
     return res;
 };
@@ -236,7 +240,7 @@ var safeB642Str = function(str){
 var saveURLs = function(str) {
     "use strict";
 
-    str = str.replace(/(\[[^\]]+\]\([a-z]{3,6}\:[^\s\"><\`]+\))/ig, function(match, a) {
+    str = str.replace(/(\[[^\]]+\]\([a-z]{3,6}\:[^\s\"><\`\]\)\(\[]+\))/ig, function(match, a) {
         return '`URL2:' + safeStr2B64(a) + '`';
     });
 
@@ -250,8 +254,8 @@ var restoreURLs = function(str) {
     var txt, url, b = '';
     
     str = str.replace(/`URL2:([a-zA-Z0-9\/\#\=]+)`/ig, function(match, a) {
-        url = safeB642Str(a).match(/\[([^\]]+)\]\(([a-z]{3,6}\:[^\s\"><\`]+)\)/);
-        return '<a href="' + url[2] + '" target="_blank" rel="noreferrer">' + safe_tags(url[1]) + '</a>';
+        url = safeB642Str(a).match(/\[([^\]]+)\]\(([a-z]{3,6}\:[^\s\"><\`\]\)\(\[]+)\)/);
+        return '<a href="' + cleanUrl(url[2]) + '" target="_blank" rel="noreferrer">' + safe_tags(url[1]) + '</a>';
     });
 
     return str.replace(/`URL:([a-zA-Z0-9\/\#\=]+)`/ig, function(match, a) {        
@@ -296,7 +300,7 @@ var restoreURLs = function(str) {
         if (txt.length > 63) {
             txt = txt.substring(0, 30) + '...' + txt.substring(txt.length - 30);
         }
-        return '<a href="' + url + '" target="_blank" rel="noreferrer">' + safe_tags(txt) + '</a> ' + b;
+        return '<a href="' + cleanUrl(url) + '" target="_blank" rel="noreferrer">' + safe_tags(txt) + '</a> ' + b;
     });
 };
 
@@ -312,7 +316,7 @@ var restoreCode = function(str) {
     "use strict";
 
     return str.replace(/`COD:([a-zA-Z0-9\/\#\=]+)`/ig, function(match, a) {
-        return '<code>' + safeB642Str(a).replace(/\&/g, '&amp;').replace(/</g, '&lt;').replace(/\>/g, '&gt;') + '</code>';
+        return '<code>' + safe_tags(safeB642Str(a)) + '</code>';
     });
 };
 
@@ -357,7 +361,7 @@ var parseOneLineTags = function(match, tag, str) {
         });
     }
 
-    res = tag === null ? restoreCode(restoreURLs(res)) : res;
+    res = tag === null ? restoreURLs(restoreCode(res)) : res;
 
     if (tag !== null) {
         return tags[tag][0] + res + tags[tag][1];

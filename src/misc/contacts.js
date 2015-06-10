@@ -124,7 +124,13 @@ function safe_tags(str) {
     "use strict";
 
     if(str && typeof str === 'string'){
-        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return str.replace(/&/g,'&amp;')
+          .replace(/</g,'&lt;')
+          .replace(/>/g,'&gt;')
+          .replace(/"/g,'&quot;')
+          .replace(/'/g,'&#x27;')
+          .replace(/`/g,'&grave;')
+          .replace(/\//g,'&#x2F;');
     }
 
     return "";

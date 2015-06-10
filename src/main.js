@@ -99,7 +99,7 @@ $(function($) {
         for(var m in ddtThread){
             push_msg(ddtThread[m], null, ddtThread[m].thumb);
         }
-        
+
         $('.hidbord_notifer .hidbord_clickable').click();
     }
 
