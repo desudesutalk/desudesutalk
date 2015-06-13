@@ -68,7 +68,7 @@ var _sendBoardForm = function(file, formAddon) {
         formAction = '/' + Hanabira.URL.board + '/post/new.xhtml' + "?X-Progress-ID=" + upload_handler;   
     }else if(($('form[name=post]').length !== 0)){
         formData = $('form[name=post]').first().serializeArray();
-        fileInputName = $("form[name=post] input[type=file]")[0].name;
+        fileInputName = $("form[name=post] input[type=file]").length ? $("form[name=post] input[type=file]")[0].name : 'file';
         formAction = $("form[name=post]")[0].action; 
     }else if(($('form#postform').length !== 0)){
         formData = $('form#postform').first().serializeArray();
