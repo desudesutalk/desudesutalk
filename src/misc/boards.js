@@ -153,7 +153,7 @@ var _sendBoardForm = function(file, formAddon) {
                 p = 1;
             }
 
-            if (p !== 0) {
+            if (p !== 0 || (data.Status && data.Status == "OK")) {
                 $('#de-pform textarea').val('');
                 $('form#yukipostform textarea').val('');
                 $('form[name=post] textarea').val('');
