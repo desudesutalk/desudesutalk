@@ -170,6 +170,8 @@ var _sendBoardForm = function(file, formAddon) {
                 $('#ABU-getnewposts a').first().click();
                 $('.captcha-reload-button').click();
                 $('#qr-shampoo, #shampoo').val('');
+                $('#imgcaptcha').click();
+                $('#captchainput').val('');
                 if(is4chan){
                     setTimeout(function() {$('a[data-cmd=update]').first().click(); $('.thread-refresh-shortcut.fa.fa-refresh').first().click();}, 2500);                    
                     $('#qrCapField').val('');
