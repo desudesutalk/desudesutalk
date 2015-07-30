@@ -3,6 +3,11 @@ function ddtMainFunction(){
 	var _spoilerTag = '%' + '%';
 
 	var boardHostName = location.hostname.toLowerCase();
+
+	if(["2ch.hk", "2ch.pm", "2ch.re", "2ch.tf", "2ch.wf", "2ch.yt", "2-ch.so"].indexOf(boardHostName) != -1){
+        boardHostName = "2ch.hk";
+    }
+
 	var boardHostNameSection = boardHostName;
 	var board_section = location.pathname.match(/\/([^\/]+)\//);
 	if (board_section && board_section[1]){
