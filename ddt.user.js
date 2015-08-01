@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.51
+// @version      0.4.52
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -3537,7 +3537,7 @@ var add_contact_key = function(contactStr) {
         key: contactStr,
         name: name,
         hide: 0,
-        groups: [],
+        groups: [boardHostName, boardHostName+'/'+board_section],
         "publicEnc": pubEncKey,
         "publicKeyPair": words,
         "publicKeyPairPrintable": contactStr,
@@ -3562,6 +3562,7 @@ var add_contact = function(e) {
     }
 
     var name = prompt("Name this contact:", temp_name);
+    if(!name) return false;
 
     if (ssGet((useGlobalContacts?'':boardHostName) + contactStoreName, contactsInLocalStorage)) {
         contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + contactStoreName, contactsInLocalStorage));
@@ -3578,34 +3579,6 @@ var add_contact_string = function(e) {
     "use strict";
 
     var key = $('#contact_address').val();
-    var rsa_hash = key;
-    var temp_name = rsa_hash.substring(0,3) + "-" + rsa_hash.substring(3,6) + "-" + rsa_hash.substring(6,9);
-
-    if(!add_contact_key(key)){
-        alert('Invalid key!');
-        return false;
-    }
-
-    var name = prompt("Name this contact:", temp_name);
-    if(!name) return false;
-
-    if (ssGet((useGlobalContacts?'':boardHostName) + contactStoreName, contactsInLocalStorage)) {
-        contacts = JSON.parse(ssGet((useGlobalContacts?'':boardHostName) + contactStoreName, contactsInLocalStorage));
-    }
-
-    contacts[rsa_hash].name = '' + name;
-
-    ssSet((useGlobalContacts?'':boardHostName) + contactStoreName, JSON.stringify(contacts), contactsInLocalStorage);
-    render_contact();
-    $('em[alt="'+rsa_hash+'"]').text('' + name).css({"color": '', "font-weight": "bold", "font-style": 'normal'});
-};
-
-
-
-var add_contact = function(e) {
-    "use strict";
-
-    var key = $(e.target).attr('alt');
     var rsa_hash = key;
     var temp_name = rsa_hash.substring(0,3) + "-" + rsa_hash.substring(3,6) + "-" + rsa_hash.substring(6,9);
 
@@ -3720,12 +3693,13 @@ var render_contact = function() {
 
 
         code += '<div class="hidbord_msg">' +
+            '<div style="float: right; color: #ccc;"><sup>#'+(cnt++)+'</sup></div>' + groups_list +
             '<div class="cont_identi" style="float: left">' + c + '</div>' +
             '<div  style="float: left; padding: 5px;">' + getContactHTML(c) + '<br/><i style="color: #009">' + c + '</i><br/>' +
             '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">delete</a>]</sub> '+
             '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">' + ren_action + '</a>]</sub> '+
             '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">rename</a>]</sub> '+
-            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">groups</a>]</sub></div>'+groups_list+'<div style="float: right; color: #ccc;"><sup>#'+(cnt++)+'</sup></div><br style="clear: both;"/></div>';
+            '<sub>[<a href="javascript:;" alt="' + c + '" class="hidbord_cont_action">groups</a>]</sub></div><br style="clear: both;"/></div>';
     }
 
     var cont_list = $(code);
