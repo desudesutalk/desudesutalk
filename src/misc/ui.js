@@ -625,6 +625,7 @@ var read_old_messages = function() {
         stopReadJpeg();
         return true;
     }
+    var first = null;
 
     $('a[href*=jpg] img, a[href*=jpeg] img').each(function(i, e) {
         var url = $(e).closest('a').attr('href');
@@ -638,8 +639,18 @@ var read_old_messages = function() {
             }
         }
 
-        if (url.indexOf('?') == -1 && url.match(/\.jpe?g$/)) readJpeg(url, $(e).attr('src'), post_id);
+        if (url.indexOf('?') == -1 && url.match(/\.jpe?g$/)) {
+            if(!first){
+                first = [url+'', $(e).attr('src')+'', post_id+0];                
+            }else{
+                readJpeg(url, $(e).attr('src'), post_id);
+            }
+        }
     });
+
+    if(first){
+        readJpeg(first[0], first[1], first[2]);
+    }
 
 };
 
