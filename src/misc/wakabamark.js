@@ -409,7 +409,7 @@ function unHtml(el){
         if(el.className == 'hidbord_msglink') 
             return '>>' + $(el).attr('alt');
 
-        return el.href;
+        return '['+el.textContent+']('+el.href+')';
     }
 
     for (i = 0; i < el.childNodes.length; i++) {

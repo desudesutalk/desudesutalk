@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.53
+// @version      0.4.54
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -4645,12 +4645,24 @@ var do_preview_popup = function(e) {
 
 };
 
+var bytesMagnitude = function(bytes){
+    "use strict";
+    if(bytes < 1024){
+        return bytes + ' B';
+    }else if (bytes < 1024 * 1024){
+        return (bytes / 1024).toFixed(2) + ' KB';
+    }else{
+        return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+    }
+};
+
 var do_imgpreview_popup = function(e) {
 	"use strict";
 
     $('#file_selector').remove();
     if (!container_image) return;
-    var txt = '<div class="hidbord_msg" style="box-shadow: 0 0 10px #555;"><img style="max-width: 200px; max-height: 200px;" src="' + container_image + '"></div>';
+    var txt = '<div class="hidbord_msg" style="box-shadow: 0 0 10px #555;"><img style="max-width: 200px; max-height: 200px;" src="' + container_image + 
+              '"><p style="text-align: center; margin: 0; font-size: x-small;">' + bytesMagnitude(container_data.length) + '</p></div>';
     var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
         h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
@@ -5281,7 +5293,7 @@ function unHtml(el){
         if(el.className == 'hidbord_msglink') 
             return '>>' + $(el).attr('alt');
 
-        return el.href;
+        return '['+el.textContent+']('+el.href+')';
     }
 
     for (i = 0; i < el.childNodes.length; i++) {
