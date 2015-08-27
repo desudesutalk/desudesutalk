@@ -592,6 +592,8 @@ var push_msg = function(msg, msgPrepend, thumb) {
             '    <div style="overflow: hidden;"><img src="'+thumb+'" class="hidbord_post_img hidbord_clickable" style="max-width: 100px; max-height:100px; float: left; padding: 5px 15px 5px 5px;"/>' + txt + '</div>'+
             '<span class="msgrefs" style="font-size: 11px;font-style: italic;"></span>'+
             '</div>';
+    var endP = $('.hidbord_thread p').last()[0],
+        pbbox1 = endP.getBoundingClientRect(), pbbox2; 
 
     $(prependTo).after($(code));
 
@@ -612,6 +614,12 @@ var push_msg = function(msg, msgPrepend, thumb) {
     });
 
     renderRefs(msg.id);
+    
+    var mbbox = $('#msg_' + msg.id)[0].getBoundingClientRect();
+    if(mbbox.top < 0){
+        pbbox2 = endP.getBoundingClientRect(); 
+        $('.hidbord_thread')[0].scrollTop += Math.floor(pbbox2.top - pbbox1.top);
+    }  
 
     new_messages++;
     $('#hidbord_notify_counter').text(new_messages).show();
