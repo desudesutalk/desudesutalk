@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.56
+// @version      0.4.57
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -28,6 +28,12 @@
 // @include      *://2-ch.so/*/*
 // @include      *://dva-ch.net/*/*
 // @include      *://02ch.su/*/*
+// @include      *://dmirrgetyojz735v.onion/*/*
+// @include      *://2-chru.net/*/*
+// @include      *://mirror.2-chru.net/*/*
+// @include      *://bypass.2-chru.net/*/*
+// @include      *://2chru.cafe/*/*
+// @include      *://2-chru.cafe/*/*
 // @exclude      *#dev
 // @copyright    2014+, Boku 
 // @icon         https://github.com/desudesutalk/desudesutalk/raw/master/icon.jpg

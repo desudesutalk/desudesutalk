@@ -13,6 +13,15 @@ var sendBoardForm = function(file) {
     "use strict";
     replyForm.find("#do_encode").val('..Working...').attr("disabled", "disabled");
 
+    if(["dmirrgetyojz735v.onion", "2-chru.net", "mirror.2-chru.net", "bypass.2-chru.net", "2chru.cafe", "2-chru.cafe"].indexOf(document.location.host.toLowerCase()) != -1){
+        $('body').append('<iframe class="ninja" id="csstest" src="../csstest.foo"></iframe>');
+        $('iframe.ninja#csstest').on('load', function(e){
+            $(e.target).remove();
+            _sendBoardForm(file, []);
+        });
+        return;
+    }
+
     if ($('form[name*="postcontrols"]').length !==0) {
         $.ajax({
             url: location.href,
@@ -153,13 +162,15 @@ var _sendBoardForm = function(file, formAddon) {
                 p = 1;
             }
 
+            if(data.match(/<h1>Ошибка!<\/h1>/)) p = 0;
+
             if (p !== 0 || (data.Status && data.Status == "OK")) {
                 $('#de-pform textarea').val('');
                 $('form#yukipostform textarea').val('');
                 $('form[name=post] textarea').val('');
                 $('#de-pform img[src*=captcha]').click();
                 $('#hidbord_replyform #c_file').val('');
-                $('#de-updater-btn').click();
+                $('.de-thread-updater .de-abtn').click();
                 $('#de-thrupdbtn').click();
                 $('a#yukiForceUpdate').click();
                 $('a#update_thread').click();
