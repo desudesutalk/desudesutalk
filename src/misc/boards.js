@@ -66,6 +66,8 @@ var _sendBoardForm = function(file, formAddon) {
         $('form#yukipostform textarea').val('');
     }
 
+    $('form noscript').remove();
+
     if($('#de-pform form').length !== 0){
         formData = $('#de-pform form').serializeArray();
         fileInputName = $("#de-pform form input[type=file]")[0].name;
@@ -79,6 +81,10 @@ var _sendBoardForm = function(file, formAddon) {
         formData = $('form[name=post]').first().serializeArray();
         fileInputName = $("form[name=post] input[type=file]").length ? $("form[name=post] input[type=file]")[0].name : 'file';
         formAction = $("form[name=post]")[0].action; 
+    }else if(($('form#qr-postform').length !== 0)){
+        formData = $('form#qr-postform').first().serializeArray();
+        fileInputName = 'image1';
+        formAction = $("form#qr-postform")[0].action; 
     }else if(($('form#postform').length !== 0)){
         formData = $('form#postform').first().serializeArray();
         fileInputName = 'image1';
@@ -162,7 +168,7 @@ var _sendBoardForm = function(file, formAddon) {
                 p = 1;
             }
 
-            if(data.match(/<h1>Ошибка!<\/h1>/)) p = 0;
+            if(typeof data == "string" && data.match(/<h1>Ошибка!<\/h1>/)) p = 0;
 
             if (p !== 0 || (data.Status && data.Status == "OK")) {
                 $('#de-pform textarea').val('');
@@ -182,6 +188,7 @@ var _sendBoardForm = function(file, formAddon) {
                 $('.captcha-reload-button').click();
                 $('#qr-shampoo, #shampoo').val('');
                 $('#imgcaptcha').click();
+                $('#recaptcha_reload').click();                
                 $('#captchainput').val('');
                 if(is4chan){
                     setTimeout(function() {$('a[data-cmd=update]').first().click(); $('.thread-refresh-shortcut.fa.fa-refresh').first().click();}, 2500);                    

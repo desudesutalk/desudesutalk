@@ -3,13 +3,18 @@ var is4chan = !!document.URL.match(/\/boards\.4chan\.org\//);
 
 var autoscanNewJpegs = true;
 var contactsInLocalStorage = false;
-var useGlobalContacts = false;
+var useGlobalContacts = true;
 
 var uiFontSize = ssGet('magic_desu_fontsize');
 if(!uiFontSize) uiFontSize = 13;
 
 contactsInLocalStorage = ssGet('magic_desu_contactsInLocalStorage');
 useGlobalContacts = ssGet('magic_desu_useGlobalContacts');
+
+if(useGlobalContacts !== false && useGlobalContacts !== true){
+    useGlobalContacts = true;
+    ssSet('magic_desu_useGlobalContacts', true);
+}
 
 if(useGlobalContacts && contactsInLocalStorage) useGlobalContacts = false;
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.57
+// @version      0.4.58
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -3322,7 +3322,7 @@ var _sendBoardForm = function(file, formAddon) {
                 p = 1;
             }
 
-            if(data.match(/<h1>Ошибка!<\/h1>/)) p = 0;
+            if(typeof data == "string" && data.match(/<h1>Ошибка!<\/h1>/)) p = 0;
 
             if (p !== 0 || (data.Status && data.Status == "OK")) {
                 $('#de-pform textarea').val('');
@@ -3663,7 +3663,7 @@ var getContactHTML = function(hash, key) {
 
 var contactsSelector = function(){
     "use strict";
-    var code = '<div id="hidbord_contacts_select"><strong>to:</strong>&nbsp;<select id="hidbord_cont_type"><option selected="selected" value="all">All</option><option value="direct">Direct</option><option value="broadcast">Broadcast</option><option disabled="disabled">Groups:</option>';
+    var code = '<div id="hidbord_contacts_select"><strong>to:</strong>&nbsp;<select id="hidbord_cont_type"><option selected="selected" value="broadcast">Broadcast</option><option value="all">All contacts</option><option value="direct">Direct</option><option disabled="disabled">Groups:</option>';
 
     for (var i = 0; i < cont_groups.length; i++) {
         code += '<option value="group_'+safe_tags(cont_groups[i])+'">'+safe_tags(cont_groups[i])+'</option>';
@@ -5418,13 +5418,18 @@ var is4chan = !!document.URL.match(/\/boards\.4chan\.org\//);
 
 var autoscanNewJpegs = true;
 var contactsInLocalStorage = false;
-var useGlobalContacts = false;
+var useGlobalContacts = true;
 
 var uiFontSize = ssGet('magic_desu_fontsize');
 if(!uiFontSize) uiFontSize = 13;
 
 contactsInLocalStorage = ssGet('magic_desu_contactsInLocalStorage');
 useGlobalContacts = ssGet('magic_desu_useGlobalContacts');
+
+if(useGlobalContacts !== false && useGlobalContacts !== true){
+    useGlobalContacts = true;
+    ssSet('magic_desu_useGlobalContacts', true);
+}
 
 if(useGlobalContacts && contactsInLocalStorage) useGlobalContacts = false;
 

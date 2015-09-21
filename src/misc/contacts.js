@@ -138,7 +138,7 @@ var getContactHTML = function(hash, key) {
 
 var contactsSelector = function(){
     "use strict";
-    var code = '<div id="hidbord_contacts_select"><strong>to:</strong>&nbsp;<select id="hidbord_cont_type"><option selected="selected" value="all">All</option><option value="direct">Direct</option><option value="broadcast">Broadcast</option><option disabled="disabled">Groups:</option>';
+    var code = '<div id="hidbord_contacts_select"><strong>to:</strong>&nbsp;<select id="hidbord_cont_type"><option selected="selected" value="broadcast">Broadcast</option><option value="all">All contacts</option><option value="direct">Direct</option><option disabled="disabled">Groups:</option>';
 
     for (var i = 0; i < cont_groups.length; i++) {
         code += '<option value="group_'+safe_tags(cont_groups[i])+'">'+safe_tags(cont_groups[i])+'</option>';
