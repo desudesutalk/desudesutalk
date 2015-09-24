@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.58
+// @version      0.4.59
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -3226,6 +3226,8 @@ var _sendBoardForm = function(file, formAddon) {
         $('form#yukipostform textarea').val('');
     }
 
+    $('form noscript').remove();
+
     if($('#de-pform form').length !== 0){
         formData = $('#de-pform form').serializeArray();
         fileInputName = $("#de-pform form input[type=file]")[0].name;
@@ -3239,6 +3241,10 @@ var _sendBoardForm = function(file, formAddon) {
         formData = $('form[name=post]').first().serializeArray();
         fileInputName = $("form[name=post] input[type=file]").length ? $("form[name=post] input[type=file]")[0].name : 'file';
         formAction = $("form[name=post]")[0].action; 
+    }else if(($('form#qr-postform').length !== 0)){
+        formData = $('form#qr-postform').first().serializeArray();
+        fileInputName = 'image1';
+        formAction = $("form#qr-postform")[0].action; 
     }else if(($('form#postform').length !== 0)){
         formData = $('form#postform').first().serializeArray();
         fileInputName = 'image1';
@@ -3342,6 +3348,7 @@ var _sendBoardForm = function(file, formAddon) {
                 $('.captcha-reload-button').click();
                 $('#qr-shampoo, #shampoo').val('');
                 $('#imgcaptcha').click();
+                $('#recaptcha_reload').click();                
                 $('#captchainput').val('');
                 if(is4chan){
                     setTimeout(function() {$('a[data-cmd=update]').first().click(); $('.thread-refresh-shortcut.fa.fa-refresh').first().click();}, 2500);                    
@@ -3908,14 +3915,14 @@ var inject_ui = function() {
 
             '    <div class="hidbord_msg">'+
             '        <p style="text-align: center; background: #f00; color: #fff;"><b>DANGER ZONE!!!</b></p>'+
-            '        <p style="text-align: center;">Change this only when you know what you\'re doing!</p><hr/>'+
+            '        <p style="text-align: center; border-bottom: 1px solid #ddd;padding-bottom: 5px;">Change this only when you know what you\'re doing!</p>'+
             '        <h3 style="text-align: center;">Broadcast address:</h3><p id="identi_broad" style="text-align: center;"></p>'+
             '        <form name="broadcastform" style="margin: 0;">'+
             '                    <table style="margin-left:auto; margin-right:auto; text-align: right;"><tr><td>Password: </td><td><input name="passwd" type="text" value=""  style="width: 300px; color: rgb(221, 221, 221); max-width: none;"></td></tr><tr><td>Salt: </td>'+
             '                    <td><input name="magik_num" type="text" value="" style="width: 300px; color: rgb(221, 221, 221); max-width: none;"></td></tr>'+
             '                    <tr><td>&nbsp;</td><td style="text-align: left;"><input type="button" value="set" id="do_login_broadcast"></td></tr></table>'+
-            '            </p>'+
-            '            <hr/><p  style="text-align: center;">'+
+            '            <p style="border-bottom: 1px solid #ddd;padding-bottom: 5px;"></p>'+
+            '            <p  style="text-align: center;">'+
             '                    Steg Password: <input name="steg_pwd" type="text" value="desu" size=10 id="steg_pwd">'+
             '            </p>'+
             '        </form></div>'+
