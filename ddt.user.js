@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.59
+// @version      0.4.60
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -3099,6 +3099,10 @@ var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
             return;
         }
 
+        if (typeof(cb) == "function") {
+            cb();
+        }
+
         var arc = jpegExtract(arrayBuffer);
         if(arc){
             var p = decodeMessage(arc);
@@ -3106,11 +3110,6 @@ var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
                 processedJpegs[jpgURL] = {id: do_decode(p, null, thumbURL, date, post_id).id};
             }
         }
-
-        if (typeof(cb) == "function") {
-            cb();
-        }
-
     });
 };
 
