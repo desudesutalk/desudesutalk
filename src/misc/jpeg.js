@@ -63,7 +63,7 @@ var jpegEmbed = function(img_container, data_array){
     _initIv();
 
     try{
-        stegger.parse(img_container);
+        stegger.parse(img_container, true);
     } catch(e){
         alert('Unsupported container image. Choose another.\n' + e);
         return false;

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.60
+// @version      0.4.61
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -1728,7 +1728,7 @@ var jsf5steg = (function(){
    		return code[0].children;
   	}
 
-  	function decodeScan(data, offset, frame, components, resetInterval, spectralStart, spectralEnd, successivePrev, successive) {
+  	function decodeScan(data, offset, frame, components, resetInterval, spectralStart, spectralEnd, successivePrev, successive, forExtract) {
     	var precision = frame.precision;
     	var samplesPerLine = frame.samplesPerLine;
     	var scanLines = frame.scanLines;
@@ -1805,6 +1805,26 @@ var jsf5steg = (function(){
       		}
     	}
 
+        function decodeBaselineExt(component, zz, pos) {
+            var t = decodeHuffman(component.huffmanTableDC);
+            var diff = t === 0 ? 0 : receiveAndExtend(t);
+            zz[pos] = 0; //(component.pred += diff);
+            var k = 1;
+            while (k < 64) {
+                var rs = decodeHuffman(component.huffmanTableAC);
+                var s = rs & 15, r = rs >> 4;
+                if (s === 0) {
+                    if (r < 15) break;
+                    k += 16;
+                    continue;
+                }
+                k += r;
+                //var z = dctZigZag[k];
+                zz[pos + k] = receiveAndExtend(s);
+                k++;
+            }
+        }
+
     	function decodeDCFirst(component, zz, pos) {
       		var t = decodeHuffman(component.huffmanTableDC);
       		var diff = t === 0 ? 0 : (receiveAndExtend(t) << successive);
@@ -1814,6 +1834,17 @@ var jsf5steg = (function(){
     	function decodeDCSuccessive(component, zz, pos) {
       		zz[pos] |= readBit() << successive;
     	}
+
+        function decodeDCFirstExt(component, zz, pos) {
+            var t = decodeHuffman(component.huffmanTableDC);
+            var diff = t === 0 ? 0 : (receiveAndExtend(t) << successive);
+            zz[pos] = 0; //(component.pred += diff);
+        }
+
+        function decodeDCSuccessiveExt(component, zz, pos) {
+            readBit();
+            //zz[pos] |= readBit() << successive;
+        }
 
     	var eobrun = 0;
     
@@ -1923,11 +1954,14 @@ var jsf5steg = (function(){
     	var decodeFn;
     	if (progressive) {
       		if (spectralStart === 0)
-        		decodeFn = successivePrev === 0 ? decodeDCFirst : decodeDCSuccessive;
+                if(forExtract)
+        		    decodeFn = successivePrev === 0 ? decodeDCFirstExt : decodeDCSuccessiveExt;
+                else
+                    decodeFn = successivePrev === 0 ? decodeDCFirst : decodeDCSuccessive;
       		else
         		decodeFn = successivePrev === 0 ? decodeACFirst : decodeACSuccessive;
     	} else {
-      		decodeFn = decodeBaseline;
+      		decodeFn = forExtract? decodeBaselineExt : decodeBaseline;
     	}
 
     	var mcu = 0, marker;
@@ -1986,7 +2020,7 @@ var jsf5steg = (function(){
 	var constructor = function(){
 	};
 
-	constructor.prototype.parse = function(fileAB){
+	constructor.prototype.parse = function(fileAB, preserveDC){
 		var data = new Uint8Array(fileAB), offset = 0, length = data.length;
 		
 		function readUint16() {
@@ -2149,10 +2183,11 @@ var jsf5steg = (function(){
 	          		var spectralStart = data[offset++];
 	          		var spectralEnd = data[offset++];
 	          		var successiveApproximation = data[offset++];
-	          		var processed = decodeScan(data, offset,
+	          		
+                    var processed = decodeScan(data, offset,
 	          			frame, components, resetInterval,
 	          			spectralStart, spectralEnd,
-	          			successiveApproximation >> 4, successiveApproximation & 15);
+	          			successiveApproximation >> 4, successiveApproximation & 15, !preserveDC);
 	          		offset += processed;
 	          		break;
 	          	
@@ -2568,7 +2603,7 @@ var jsf5steg = (function(){
     function stegShuffle(key, data){
         var i = 0, j = 0, t = 0, k = 0,
             S = makeUin8(256),
-            max_random = data.length, random_index = 0,
+            max_random = data.length | 0, random_index = 0,
             gamma = makeUin8(math_ceil(data.length / 8));
         
         // init state from key
@@ -2585,6 +2620,7 @@ var jsf5steg = (function(){
 
         // shuffle data
         for(k = 0; k < data.length; ++k) {
+            
             i = (i + 1) & 255;
             j = (j + S[i]) & 255;
             t = S[i];
@@ -2837,131 +2873,175 @@ var jsf5steg = (function(){
         }
     };
 
+
+
     constructor.prototype.f5extract = function(iv){
-        var ret = [];
         var coeff = this.frames[0].components[0].blocks;
-        var coeff_count = coeff.length;
 
-        var pm = makeUin32(coeff_count);
-        for (i = 1; i < coeff_count; i++) pm[i] = i;
-        var gamma = stegShuffle(iv, pm), gammaI = 0;
-                
-        var extracted_byte = 0,
-            available_extracted_bits = 0,
-            n_bytes_extracted = 0,
-            extracted_bit = 0;
+        var gamma = stegShuffle(iv, coeff);
 
-        var extracted_file_length = math_floor(coeff_count / 8),
-            pos = -1, i = 0, cc = 0, shuffled_index = 0,
-            k = 1, n = 1;
+        var pos = 0,
+            extrBit = 0,
+            cCount = coeff.length;
 
-        var data = makeUin8(extracted_file_length),
-            data_idx = 0, keep_extracting = true;
+        var out = new Uint8Array((cCount / 8) | 0),
+            extrByte = 0, outPos = 0, bitsAvail = 0;
+
+        var out2 = new Uint8Array((cCount / 8 / 3 * 2) | 0),
+            extrByte2 = 0, outPos2 = 0, bitsAvail2 = 0, code2 = 1, hash2 = 0;
+
+        var out3 = new Uint8Array((cCount / 8 / 7 * 3) | 0),
+            extrByte3 = 0, outPos3 = 0, bitsAvail3 = 0, code3 = 1, hash3 = 0;
+
+        var out4 = new Uint8Array((cCount / 8 / 15 * 4) | 0),
+            extrByte4 = 0, outPos4 = 0, bitsAvail4 = 0, code4 = 1, hash4 = 0;
+
+        var out5 = new Uint8Array((cCount / 8 / 31 * 5) | 0),
+            extrByte5 = 0, outPos5 = 0, bitsAvail5 = 0, code5 = 1, hash5 = 0;
+
+        var out6 = new Uint8Array((cCount / 8 / 63 * 6) | 0),
+            extrByte6 = 0, outPos6 = 0, bitsAvail6 = 0, code6 = 1, hash6 = 0;
+
+        var out7 = new Uint8Array((cCount / 8 / 127 * 7) | 0),
+            extrByte7 = 0, outPos7 = 0, bitsAvail7 = 0, code7 = 1, hash7 = 0;
 
 
-        while(pos < coeff_count){
-            pos++;
+        for(pos = 0; pos < cCount; pos++){
+            if(coeff[pos] === 0){
+                continue;
+            }
 
-            if(pos >= coeff_count)
-                break;
+            extrBit = coeff[pos] & 1;
 
-            shuffled_index = pm[pos];
+            if(coeff[pos] < 0){
+                extrBit = 1 - extrBit;
+            }
+
+            // Default code
+            extrByte |= extrBit << bitsAvail;
+            bitsAvail++;
+
+            if(bitsAvail == 8){
+                out[outPos] = extrByte ^ gamma[outPos++];
+                extrByte = 0;
+                bitsAvail = 0;
+            }
+
+            // code 2 3
+            hash2 ^= extrBit * code2++;
+
+            if(code2 == 4){
+                extrByte2 |= hash2 << bitsAvail2;
+                bitsAvail2 += 2;
+                code2 = 1;
+                hash2 = 0;
+
+                if(bitsAvail2 >= 8){
+                    out2[outPos2] = (extrByte2 & 0xFF) ^ gamma[outPos2++];
+                    bitsAvail2 -= 8;
+                    extrByte2 = extrByte2 >> 8;
+                }
+            }
+
+            // code 3 7
+            hash3 ^= extrBit * code3++;
+
+            if(code3 == 8){
+                extrByte3 |= hash3 << bitsAvail3;
+                bitsAvail3 += 3;
+                code3 = 1;
+                hash3 = 0;
+
+                if(bitsAvail3 >= 8){
+                    out3[outPos3] = (extrByte3 & 0xFF) ^ gamma[outPos3++];
+                    bitsAvail3 -= 8;
+                    extrByte3 = extrByte3 >> 8;
+                }
+            }
+
+            // code 4 15
+            hash4 ^= extrBit * code4++;
+
+            if(code4 == 16){
+                extrByte4 |= hash4 << bitsAvail4;
+                bitsAvail4 += 4;
+                code4 = 1;
+                hash4 = 0;
+
+                if(bitsAvail4 >= 8){
+                    out4[outPos4] = (extrByte4 & 0xFF) ^ gamma[outPos4++];
+                    bitsAvail4 -= 8;
+                    extrByte4 = extrByte4 >> 8;
+                }
+            }
+
+            // code 5 31
+            hash5 ^= extrBit * code5++;
+
+            if(code5 == 32){
+                extrByte5 |= hash5 << bitsAvail5;
+                bitsAvail5 += 5;
+                code5 = 1;
+                hash5 = 0;
+
+                if(bitsAvail5 >= 8){
+                    out5[outPos5] = (extrByte5 & 0xFF) ^ gamma[outPos5++];
+                    bitsAvail5 -= 8;
+                    extrByte5 = extrByte5 >> 8;
+                }
+            }
+
+            // code 6 63
+            hash6 ^= extrBit * code6++;
+
+            if(code6 == 64){
+                extrByte6 |= hash6 << bitsAvail6;
+                bitsAvail6 += 6;
+                code6 = 1;
+                hash6 = 0;
+
+                if(bitsAvail6 >= 8){
+                    out6[outPos6] = (extrByte6 & 0xFF) ^ gamma[outPos6++];
+                    bitsAvail6 -= 8;
+                    extrByte6 = extrByte6 >> 8;
+                }
+            }
             
-            if(shuffled_index % 64 === 0) 
-                continue;
+            // code 7 127
+            hash7 ^= extrBit * code7++;
 
-            cc = coeff[shuffled_index];
+            if(code7 == 128){
+                extrByte7 |= hash7 << bitsAvail7;
+                bitsAvail7 += 7;
+                code7 = 1;
+                hash7 = 0;
 
-            if(cc === 0){
-                continue;
-            }else if(cc > 0){
-                extracted_bit = cc & 1;
-            }else{
-                extracted_bit = 1 - (cc & 1);
-            }
-
-            extracted_byte |= extracted_bit << available_extracted_bits;
-            available_extracted_bits++;
-
-            if(available_extracted_bits == 8){
-                data[data_idx++] = extracted_byte ^ gamma[gammaI++];
-                extracted_byte = 0;
-                available_extracted_bits = 0;
-                n_bytes_extracted++;
-
-                if(data_idx >= extracted_file_length){
-                    break;
+                if(bitsAvail7 >= 8){
+                    out7[outPos7] = (extrByte7 & 0xFF) ^ gamma[outPos7++];
+                    bitsAvail7 -= 8;
+                    extrByte7 = extrByte7 >> 8;
                 }
             }
+
         }
 
-        ret[1] = makeUin8(data.buffer, 0, data_idx);
+        if(bitsAvail > 0)  out[outPos]   = (extrByte  & 0xFF) ^ gamma[outPos];
+        if(bitsAvail2 > 0 || hash2 !== 0) {extrByte2 |= hash2 << bitsAvail2; out2[outPos2] = (extrByte2 & 0xFF) ^ gamma[outPos2++];}
+        if(bitsAvail3 > 0 || hash3 !== 0) {extrByte3 |= hash3 << bitsAvail3; out3[outPos3] = (extrByte3 & 0xFF) ^ gamma[outPos3++];}
+        if(bitsAvail4 > 0 || hash3 !== 0) {extrByte4 |= hash4 << bitsAvail4; out4[outPos4] = (extrByte4 & 0xFF) ^ gamma[outPos4++];}
+        if(bitsAvail5 > 0 || hash5 !== 0) {extrByte5 |= hash5 << bitsAvail5; out5[outPos5] = (extrByte5 & 0xFF) ^ gamma[outPos5++];}
+        if(bitsAvail6 > 0 || hash6 !== 0) {extrByte6 |= hash6 << bitsAvail6; out6[outPos6] = (extrByte6 & 0xFF) ^ gamma[outPos6++];}
+        if(bitsAvail7 > 0 || hash2 !== 0) {extrByte7 |= hash7 << bitsAvail7; out7[outPos7] = (extrByte7 & 0xFF) ^ gamma[outPos7++];}
 
-        for (k = 2; k < 8; k++) {
-            n = (1 << k) - 1;
-            extracted_file_length = math_floor(k * coeff_count / n / 8);
-            data = makeUin8(extracted_file_length);
-            data_idx = 0;
-            keep_extracting = true;
-            gammaI = 0;
-            pos = -1;
-            extracted_byte = 0;
-            available_extracted_bits = 0;
-            n_bytes_extracted = 0;
-            extracted_bit = 0;
-
-
-            var vhash = 0, code;
-
-            while(keep_extracting){
-                vhash = 0;
-                code = 1;
-                while(code <= n){
-                    pos++;
-                    if(pos >= coeff_count){
-                        keep_extracting = false;
-                        break;
-                    }
-
-                    shuffled_index = pm[pos];
-                    if(shuffled_index % 64 === 0) continue;
-
-                    cc = coeff[shuffled_index];
-
-                    if(cc === 0){
-                        continue;
-                    }else if(cc > 0){
-                        extracted_bit = cc & 1;
-                    }else{
-                        extracted_bit = 1 - (cc & 1);
-                    }
-
-                    if(extracted_bit == 1)
-                        vhash ^= code;
-                    code++;
-                }
-
-                for (i = 0; i < k; i++) {
-                    extracted_byte |= (vhash >> i & 1) << available_extracted_bits;
-                    available_extracted_bits++;
-                    if(available_extracted_bits == 8){
-                        data[data_idx++] = extracted_byte ^ gamma[gammaI++];
-                        extracted_byte = 0;
-                        available_extracted_bits = 0;
-                        n_bytes_extracted++;
-
-                        if(data_idx >= extracted_file_length){
-                            keep_extracting = false;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            ret[k] = makeUin8(data.buffer, 0, data_idx);
-        }
-
-        return ret;
+        return [null,
+            new Uint8Array(out.buffer, 0, outPos),
+            new Uint8Array(out2.buffer, 0, outPos2),
+            new Uint8Array(out3.buffer, 0, outPos3),
+            new Uint8Array(out4.buffer, 0, outPos4),
+            new Uint8Array(out5.buffer, 0, outPos5),
+            new Uint8Array(out6.buffer, 0, outPos6),
+            new Uint8Array(out7.buffer, 0, outPos7)
+        ];
     };
 
 	return constructor;
@@ -3033,7 +3113,7 @@ var jpegEmbed = function(img_container, data_array){
     _initIv();
 
     try{
-        stegger.parse(img_container);
+        stegger.parse(img_container, true);
     } catch(e){
         alert('Unsupported container image. Choose another.\n' + e);
         return false;
