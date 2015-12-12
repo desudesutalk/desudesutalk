@@ -111,7 +111,7 @@ var cryptCore = (function(){
 	        msgCompressed = pako.deflateRaw(msgRaw),
 	        codedAt = Math.floor((new Date()).getTime() / 15000) * 15,
 	        msgLength = 16 + msgCompressed.byteLength + 8,
-	        numContacts = Object.keys(contacts).length + 1, i,
+	        numContacts = Object.keys(contacts).length, i,
 	        ephemeral = ECcrypt.genKeyPair(),
 	        sessionKey = sjcl.codec.bytes.fromBits(sjcl.random.randomWords(8, 0)), sessionKeyBits, rp,
 	        iv = sjcl.random.randomWords(4, 0),
@@ -126,9 +126,7 @@ var cryptCore = (function(){
 	    sessionKey[31] = 0xAA;
 	    sessionKeyBits = sjcl.codec.bytes.toBits(sessionKey);
 
-	    var secret = getSharedSecret(ephemeral, keyPair.publicEnc);
-
-	    slots.push(xorBytes(secret, sessionKey));
+	    var secret;
 
 	    for (i in contacts) {
 	        secret = getSharedSecret(ephemeral, contacts[i].publicEnc);
