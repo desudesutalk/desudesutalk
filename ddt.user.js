@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.62
+// @version      0.4.64
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -3023,7 +3023,7 @@ var jsf5steg = (function(){
 
         }
 
-        if(bitsAvail > 0)  out[outPos]   = (extrByte  & 0xFF) ^ gamma[outPos];
+        if(bitsAvail > 0)  out[outPos]   = (extrByte  & 0xFF) ^ gamma[outPos++];
         if(bitsAvail2 > 0 || hash2 !== 0) {extrByte2 |= hash2 << bitsAvail2; out2[outPos2] = (extrByte2 & 0xFF) ^ gamma[outPos2++];}
         if(bitsAvail3 > 0 || hash3 !== 0) {extrByte3 |= hash3 << bitsAvail3; out3[outPos3] = (extrByte3 & 0xFF) ^ gamma[outPos3++];}
         if(bitsAvail4 > 0 || hash3 !== 0) {extrByte4 |= hash4 << bitsAvail4; out4[outPos4] = (extrByte4 & 0xFF) ^ gamma[outPos4++];}
@@ -3423,10 +3423,11 @@ var _sendBoardForm = function(file, formAddon) {
                 $('.recaptcha_image').click();
                 $('#ABU-getnewposts a').first().click();
                 $('.captcha-reload-button').click();
-                $('#qr-shampoo, #shampoo').val('');
+                $('#qr-shampoo, #shampoo, #qr-captcha-value').val('');
                 $('#imgcaptcha').click();
                 $('#recaptcha_reload').click();                
                 $('#captchainput').val('');
+                $('a#updateThread').click();
                 if(is4chan){
                     setTimeout(function() {$('a[data-cmd=update]').first().click(); $('.thread-refresh-shortcut.fa.fa-refresh').first().click();}, 2500);                    
                     $('#qrCapField').val('');
@@ -3538,6 +3539,9 @@ var do_encode = function() {
 
     if(prev_to == 'broadcast'){
         keys[broad_hashB64] = broadProfile;
+        if (!hidboard_hide_sender) {
+             keys[rsa_hashB64] = rsaProfile;
+        }
     }else{
         keys[rsa_hashB64] = rsaProfile;
 
@@ -3578,11 +3582,11 @@ var do_encode = function() {
     var final_container = jpegEmbed(container_data, p);
     if(!final_container) return false;
 
-    var out_file = appendBuffer(final_container, lastRand);
+    //var out_file = appendBuffer(final_container, lastRand);
     
-    var compressedB64 = arrayBufferDataUri(out_file);
+    //var compressedB64 = arrayBufferDataUri(out_file);
 
-    sendBoardForm(out_file);
+    sendBoardForm(final_container);
 };
 
 var do_decode = function(message, msgPrepend, thumb, fdate, post_id) {

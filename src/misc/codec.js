@@ -81,6 +81,9 @@ var do_encode = function() {
 
     if(prev_to == 'broadcast'){
         keys[broad_hashB64] = broadProfile;
+        if (!hidboard_hide_sender) {
+             keys[rsa_hashB64] = rsaProfile;
+        }
     }else{
         keys[rsa_hashB64] = rsaProfile;
 
@@ -121,11 +124,11 @@ var do_encode = function() {
     var final_container = jpegEmbed(container_data, p);
     if(!final_container) return false;
 
-    var out_file = appendBuffer(final_container, lastRand);
+    //var out_file = appendBuffer(final_container, lastRand);
     
-    var compressedB64 = arrayBufferDataUri(out_file);
+    //var compressedB64 = arrayBufferDataUri(out_file);
 
-    sendBoardForm(out_file);
+    sendBoardForm(final_container);
 };
 
 var do_decode = function(message, msgPrepend, thumb, fdate, post_id) {

@@ -186,10 +186,11 @@ var _sendBoardForm = function(file, formAddon) {
                 $('.recaptcha_image').click();
                 $('#ABU-getnewposts a').first().click();
                 $('.captcha-reload-button').click();
-                $('#qr-shampoo, #shampoo').val('');
+                $('#qr-shampoo, #shampoo, #qr-captcha-value').val('');
                 $('#imgcaptcha').click();
                 $('#recaptcha_reload').click();                
                 $('#captchainput').val('');
+                $('a#updateThread').click();
                 if(is4chan){
                     setTimeout(function() {$('a[data-cmd=update]').first().click(); $('.thread-refresh-shortcut.fa.fa-refresh').first().click();}, 2500);                    
                     $('#qrCapField').val('');

@@ -1352,7 +1352,7 @@ var jsf5steg = (function(){
 
         }
 
-        if(bitsAvail > 0)  out[outPos]   = (extrByte  & 0xFF) ^ gamma[outPos];
+        if(bitsAvail > 0)  out[outPos]   = (extrByte  & 0xFF) ^ gamma[outPos++];
         if(bitsAvail2 > 0 || hash2 !== 0) {extrByte2 |= hash2 << bitsAvail2; out2[outPos2] = (extrByte2 & 0xFF) ^ gamma[outPos2++];}
         if(bitsAvail3 > 0 || hash3 !== 0) {extrByte3 |= hash3 << bitsAvail3; out3[outPos3] = (extrByte3 & 0xFF) ^ gamma[outPos3++];}
         if(bitsAvail4 > 0 || hash3 !== 0) {extrByte4 |= hash4 << bitsAvail4; out4[outPos4] = (extrByte4 & 0xFF) ^ gamma[outPos4++];}
