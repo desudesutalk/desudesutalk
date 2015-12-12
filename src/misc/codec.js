@@ -82,6 +82,8 @@ var do_encode = function() {
     if(prev_to == 'broadcast'){
         keys[broad_hashB64] = broadProfile;
     }else{
+        keys[rsa_hashB64] = rsaProfile;
+
         for (var c in contacts) {
             if(c == rsa_hashB64) continue;
 

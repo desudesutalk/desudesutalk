@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.61
+// @version      0.4.62
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -972,7 +972,7 @@ var cryptCore = (function(){
 	        msgCompressed = pako.deflateRaw(msgRaw),
 	        codedAt = Math.floor((new Date()).getTime() / 15000) * 15,
 	        msgLength = 16 + msgCompressed.byteLength + 8,
-	        numContacts = Object.keys(contacts).length + 1, i,
+	        numContacts = Object.keys(contacts).length, i,
 	        ephemeral = ECcrypt.genKeyPair(),
 	        sessionKey = sjcl.codec.bytes.fromBits(sjcl.random.randomWords(8, 0)), sessionKeyBits, rp,
 	        iv = sjcl.random.randomWords(4, 0),
@@ -987,9 +987,7 @@ var cryptCore = (function(){
 	    sessionKey[31] = 0xAA;
 	    sessionKeyBits = sjcl.codec.bytes.toBits(sessionKey);
 
-	    var secret = getSharedSecret(ephemeral, keyPair.publicEnc);
-
-	    slots.push(xorBytes(secret, sessionKey));
+	    var secret;
 
 	    for (i in contacts) {
 	        secret = getSharedSecret(ephemeral, contacts[i].publicEnc);
@@ -3541,6 +3539,8 @@ var do_encode = function() {
     if(prev_to == 'broadcast'){
         keys[broad_hashB64] = broadProfile;
     }else{
+        keys[rsa_hashB64] = rsaProfile;
+
         for (var c in contacts) {
             if(c == rsa_hashB64) continue;
 
