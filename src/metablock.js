@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.64
+// @version      0.4.65
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*

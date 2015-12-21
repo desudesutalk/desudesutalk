@@ -1,6 +1,6 @@
 var upload_handler = (new Date()).getTime() * 10000;
 
-var TinyBoardFields = ["name","email","subject","post","spoiler","body","file","file_url","password","thread","board", "recaptcha_challenge_field", "recaptcha_response_field", "user_flag"];
+var TinyBoardFields = ["name","email","subject","post","spoiler","body","file","file_url","password","thread","board", "recaptcha_challenge_field", "recaptcha_response_field", "user_flag", "huehuehue", "derpibooruAPIKey", "embed"];
 
 ParseUrl = function(url){
     "use strict";
@@ -19,6 +19,11 @@ var sendBoardForm = function(file) {
             $(e.target).remove();
             _sendBoardForm(file, []);
         });
+        return;
+    }
+
+    if(["syn-ch.com", "syn-ch.org", "syn-ch.ru", "syn-ch.com.ua"].indexOf(document.location.host.toLowerCase()) != -1 && $('#de-pform form').length === 0){
+        _sendBoardSync(file);
         return;
     }
 
@@ -215,6 +220,57 @@ var _sendBoardForm = function(file, formAddon) {
             alert('Error while posting. Something in network or so.\n[' + jqXHR.status + ' ' + jqXHR.statusText + ']');
             replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
             upload_handler = (new Date()).getTime() * 10000;
+        }
+    });
+};
+
+
+var _sendBoardSync = function(file) {
+ "use strict";
+    
+    var formData, fileInputName, formAction,
+        fd = new FormData();
+
+    formData = $('form[name=post]').first().serializeArray();
+    formData.push({"name": "json_response", "value": 1});
+    formData.push({"name": "post", "value": $('form[name=post] input[type=submit]').val()});
+    fileInputName = 'file';
+    formAction = $("form[name=post]")[0].action; 
+
+    for (var i = 0; i < formData.length; i++) {
+        if (formData[i].name && formData[i].name != fileInputName && formData[i].name !== "") {
+            fd.append(formData[i].name, formData[i].value);
+        }
+    }
+
+    var fnme = Math.floor((new Date()).getTime() / 10 - Math.random() * 100000000) + '.jpg';
+
+    fd.append(fileInputName, uint8toBlob(file, 'image/jpeg'), fnme);
+
+    $.ajax({
+        url: formAction,
+        type: 'POST',
+        data: fd,
+        processData: false,
+        contentType: false,
+        success: function(data, textStatus, jqXHR) {
+            var resp = JSON.parse(data);
+            if (resp.redirect) {
+                $('a#updateThread').click();
+                $('form[name=post] textarea').val('');
+                $('form[name=post] input[name=embed]').val('');
+                replyForm.remove();
+                replyForm = null;
+                container_image = null;
+                container_data = null;
+            } else {
+                alert(resp.error);
+                replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            alert('Error while posting. Something in network or so.\n[' + jqXHR.status + ' ' + jqXHR.statusText + ']');
+            replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
         }
     });
 };
