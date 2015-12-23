@@ -64,6 +64,7 @@ var wkbmrk = function(in_text, for_id) {
     "use strict";
 
     savedURLs = [];
+    savedCode = [];
 
     fix_rand = sjcl.codec.bytes.fromBits(sjcl.hash.sha256.hash(sjcl.codec.hex.toBits(for_id)));
 
@@ -229,30 +230,20 @@ var wkbmrk = function(in_text, for_id) {
     return res;
 };
 
-var savedURLs = [];
-
-var safeStr2B64 = function(str){
-    "use strict";
-    savedURLs.push(str);
-    return savedURLs.length - 1;
-    //return arrayBufferDataUri(strToUTF8Arr(str)).replace(/\+/g, '#');
-};
-
-var safeB642Str = function(str){
-    "use strict";
-    return savedURLs[parseInt(str)];
-    //return utf8ArrToStr(dataURLtoUint8Array(',' + str.replace(/\#/g, '+')));
-};
+var savedURLs = [],
+    savedCode = [];
 
 var saveURLs = function(str) {
     "use strict";
 
     str = str.replace(/(\[[^\]]+\]\([a-z]{3,6}\:[^\s\"><\`\]\)\(\[]+\))/ig, function(match, a) {
-        return '`URL2:' + safeStr2B64(a) + '`';
+        savedURLs.push(a);
+        return '`URL2:' + (savedURLs.length - 1) + '`';
     });
 
     return str.replace(/([a-z]{3,6}\:\/\/[^\s\"><\`]+)($|\s)/ig, function(match, a, b) {
-        return '`URL:' + safeStr2B64(a+b) + '`';
+        savedURLs.push(a+b);
+        return '`URL:' + (savedURLs.length - 1) + '`';
     });
 };
 
@@ -261,12 +252,12 @@ var restoreURLs = function(str) {
     var txt, url, b = '';
     
     str = str.replace(/`URL2:(\d+)`/ig, function(match, a) {
-        url = safeB642Str(a).match(/\[([^\]]+)\]\(([a-z]{3,6}\:[^\s\"><\`\]\)\(\[]+)\)/);
+        url = savedURLs[parseInt(a)].match(/\[([^\]]+)\]\(([a-z]{3,6}\:[^\s\"><\`\]\)\(\[]+)\)/);
         return url ? '<a href="' + cleanUrl(url[2]) + '" target="_blank" rel="noreferrer">' + safe_tags(url[1]) + '</a>' : '';
     });
 
     return str.replace(/`URL:(\d+)`/ig, function(match, a) {        
-        url = safeB642Str(a);
+        url = savedURLs[parseInt(a)];
 
         if(url[url.length-1] == ' '){
             url = url.trim();
@@ -315,7 +306,8 @@ var saveCode = function(str) {
     "use strict";
 
     return str.replace(/(\`{1,2})([^\s]|[^\s].*?[^\s])\1(?=[^\`]|$)/ig, function(match, a, b) {
-        return '`COD:' + safeStr2B64(b) + '`';
+        savedCode.push(b);
+        return '`COD:' + (savedCode.length - 1) + '`';
     });
 };
 
@@ -323,7 +315,7 @@ var restoreCode = function(str) {
     "use strict";
 
     return str.replace(/`COD:(\d+)`/ig, function(match, a) {
-        return '<code>' + safe_tags(safeB642Str(a)) + '</code>';
+        return '<code>' + safe_tags(savedCode[parseInt(a)]) + '</code>';
     });
 };
 
