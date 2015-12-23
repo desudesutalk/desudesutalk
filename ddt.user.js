@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.65
+// @version      0.4.66
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -5118,6 +5118,8 @@ function cleanUrl(url){
 var wkbmrk = function(in_text, for_id) {
     "use strict";
 
+    savedURLs = [];
+
     fix_rand = sjcl.codec.bytes.fromBits(sjcl.hash.sha256.hash(sjcl.codec.hex.toBits(for_id)));
 
     var lines = in_text.split(/\n|\r|\n\r|\r\n/),
@@ -5282,14 +5284,19 @@ var wkbmrk = function(in_text, for_id) {
     return res;
 };
 
+var savedURLs = [];
+
 var safeStr2B64 = function(str){
     "use strict";
-    return arrayBufferDataUri(strToUTF8Arr(str)).replace(/\+/g, '#');
+    savedURLs.push(str);
+    return savedURLs.length - 1;
+    //return arrayBufferDataUri(strToUTF8Arr(str)).replace(/\+/g, '#');
 };
 
 var safeB642Str = function(str){
     "use strict";
-    return utf8ArrToStr(dataURLtoUint8Array(',' + str.replace(/\#/g, '+')));
+    return savedURLs[parseInt(str)];
+    //return utf8ArrToStr(dataURLtoUint8Array(',' + str.replace(/\#/g, '+')));
 };
 
 var saveURLs = function(str) {
@@ -5308,12 +5315,12 @@ var restoreURLs = function(str) {
     "use strict";
     var txt, url, b = '';
     
-    str = str.replace(/`URL2:([a-zA-Z0-9\/\#\=]+)`/ig, function(match, a) {
+    str = str.replace(/`URL2:(\d+)`/ig, function(match, a) {
         url = safeB642Str(a).match(/\[([^\]]+)\]\(([a-z]{3,6}\:[^\s\"><\`\]\)\(\[]+)\)/);
-        return '<a href="' + cleanUrl(url[2]) + '" target="_blank" rel="noreferrer">' + safe_tags(url[1]) + '</a>';
+        return url ? '<a href="' + cleanUrl(url[2]) + '" target="_blank" rel="noreferrer">' + safe_tags(url[1]) + '</a>' : '';
     });
 
-    return str.replace(/`URL:([a-zA-Z0-9\/\#\=]+)`/ig, function(match, a) {        
+    return str.replace(/`URL:(\d+)`/ig, function(match, a) {        
         url = safeB642Str(a);
 
         if(url[url.length-1] == ' '){
@@ -5370,7 +5377,7 @@ var saveCode = function(str) {
 var restoreCode = function(str) {
     "use strict";
 
-    return str.replace(/`COD:([a-zA-Z0-9\/\#\=]+)`/ig, function(match, a) {
+    return str.replace(/`COD:(\d+)`/ig, function(match, a) {
         return '<code>' + safe_tags(safeB642Str(a)) + '</code>';
     });
 };
