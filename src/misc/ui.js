@@ -701,12 +701,12 @@ function handleFileSelect(evt) {
                         ctxB.fill();
 
                         ctxB.drawImage(img, -o1, -o3);
-                        container_data = jpegClean(dataURLtoUint8Array(buffer.toDataURL("image/jpeg", q)));
+                        container_data = dataURLtoUint8Array(buffer.toDataURL("image/jpeg", q));
                         container_image= "data:image/Jpeg;base64," + arrayBufferDataUri(container_data);
                     };
                     img.src = "data:image/Jpeg;base64," +arrayBufferDataUri(inAB);
                 }else{
-                    container_data = jpegClean(inAB);
+                    container_data = inAB;
                     container_image= "data:"+theFile.type+";base64," + arrayBufferDataUri(container_data);
                 }
             };

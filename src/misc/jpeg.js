@@ -1,53 +1,5 @@
-var jpegClean = function(origAB) {
-    "use strict";
-    var i, l, posO = 2, posT = 2,
-        orig = new Uint8Array(origAB),
-        outData = new ArrayBuffer(orig.byteLength),
-        output = new Uint8Array(outData);
-    
-
-    output[0] = orig[0];
-    output[1] = orig[1];
-
-    while (!(orig[posO] === 0xFF && orig[posO + 1] === 0xD9) && posO <= orig.byteLength) {
-        if (orig[posO] === 0xFF && orig[posO + 1] === 0xFE) {
-            l = (2 + orig[posO + 2] * 256 + orig[posO + 3]);
-            for (i = 0; i < l; i++) {
-                output[posT++] = orig[posO++];
-            }
-        } else if (orig[posO] === 0xFF && (orig[posO + 1] >> 4) === 0xE) {
-            posO += 2 + orig[posO + 2] * 256 + orig[posO + 3];
-
-            while(orig[posO] !== 0xFF){
-                posO++;
-            }
-
-        } else if (orig[posO] === 0xFF && orig[posO + 1] === 0xDA) {
-            l = (2 + orig[posO + 2] * 256 + orig[posO + 3]);
-            for (i = 0; i < l; i++) {
-                output[posT++] = orig[posO++];
-            }
-            while (!(orig[posO] === 0xFF && orig[posO + 1] === 0xD9) && posO <= orig.byteLength) {
-                output[posT++] = orig[posO++];
-            }
-        } else {
-            l = (2 + orig[posO + 2] * 256 + orig[posO + 3]);
-            for (i = 0; i < l; i++) {
-                output[posT++] = orig[posO++];
-            }
-        }
-
-
-    }
-
-    output[posT] = orig[posO];
-    output[posT + 1] = orig[posO + 1];
-
-    return new Uint8Array(outData, 0, posT + 2);
-};
-
 var steg_iv = [];
-var stegger = new jsf5steg();
+var stegger = null;
 
 var _initIv = function(){
     "use strict";
@@ -57,47 +9,66 @@ var _initIv = function(){
     }  
 };
 
+var allocateStegger = function () {
+	if (stegger === null) {
+		stegger = new Eph5.Simple();
+	}
+};
+
+var freeStegger = function () {
+	if (stegger !== null) {
+		stegger = null;
+
+		console.log("Stegger freed");
+	}
+};
+
 var jpegEmbed = function(img_container, data_array){
     "use strict";
 
     _initIv();
+	allocateStegger();
 
-    try{
-        stegger.parse(img_container, true);
-    } catch(e){
-        alert('Unsupported container image. Choose another.\n' + e);
-        return false;
-    }
+	try {
+		var result = stegger.embed(data_array, img_container, steg_iv);
 
-    try{
-        stegger.f5embed(data_array, steg_iv);
-    } catch(e){
-        alert('Capacity exceeded. Select bigger/more complex image.');
-        return false;
-    }
+		console.log("Container properties:", result.containerProperties);
+		console.log("Used k:", result.k)
+		console.log("Embedded length:", result.embeddedLength)
 
-    return new Uint8Array(stegger.pack());
+		if (result.embeddedLength !== data_array.length) {
+			throw new Error("Capacity exceeded. Select bigger/more complex image");
+		}
+
+		return result.image;
+	} catch (exception) {
+		alert(exception.message);
+		return false;
+	}
 };
 
 var jpegExtract = function(inArBuf) {
     "use strict";
 
     _initIv();
+	allocateStegger();
 
-    try{
-        stegger.parse(inArBuf);
-    } catch(e){
-        console.log('JPEG decode fail: ' + e);
-        return false;
-    }
+	try {
+		var result = stegger.extract(new Uint8Array(inArBuf), steg_iv);
 
-    var data;
-    try{
-        data = stegger.f5extract(steg_iv);
-    } catch(e){
-        console.log('Steg extraction fail: ' + e);
-        return false;
-    }
+		return {
+			"1": result.get(1),
+			"2": result.get(2),
+			"3": result.get(3),
+			"4": result.get(4),
+			"5": result.get(5),
+			"6": result.get(6),
+			"7": result.get(7)
+		};
+	} catch (exception) {
+		alert(exception.message);
+		return false;
+	}
 
     return data;
 };
@@ -157,7 +128,7 @@ var process_olds = function() {
         }else{
             $('#hidbord_btn_getold').val('Get old messages');
             isJpegLoading = false;
-            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2]);
+            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], freeStegger);
         }
     }
 };
@@ -180,6 +151,7 @@ function stopReadJpeg(){
     process_images = [];
     isJpegLoading = false;
     $('#hidbord_btn_getold').val('Get old messages');
+	freeStegger();
 }
 
 function isJpegReading(){

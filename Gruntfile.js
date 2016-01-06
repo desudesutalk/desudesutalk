@@ -18,7 +18,6 @@ module.exports = function(grunt) {
                                     "src/misc/storage.js",
                                     "src/misc/helpers.js",
                                     "src/misc/utf8array.js",
-                                    "src/misc/jsf5steg.js",
                                     "src/misc/jpeg.js",
                                     "src/misc/boards.js",
                                     "src/misc/codec.js",
