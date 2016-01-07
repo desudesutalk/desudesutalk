@@ -122,6 +122,11 @@ var do_encode = function() {
     var lastRand = stringToByteArray(String(Math.round(Math.random() * 1e6)));
 
     var final_container = jpegEmbed(container_data, p);
+
+	if (process_images.length === 0) {
+		freeStegger();
+	}
+
     if(!final_container) return false;
 
     //var out_file = appendBuffer(final_container, lastRand);
