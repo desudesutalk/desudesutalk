@@ -6,7 +6,7 @@ module.exports = function(grunt) {
             basic: {
                 "options": { "separator": "\n" },
                 "files": {
-                    "dist/crypto.js": ["src/crypto/elliptic.min.js","src/crypto/sjcl.js","src/crypto/sjcl.ccm_hack.js"],
+                    "dist/crypto.js": ["src/crypto/elliptic.min.js","src/crypto/sjcl.js","src/crypto/sjcl.ccm_hack.js", "src/crypto/eph5.js"],
                     "dist/libs.js": ["src/libs/zepto.min.js","src/libs/jquery.identicon5.js","src/libs/base58.js",
                                      "src/libs/pako.min.js",
                                      "src/libs/jszip.min.js",

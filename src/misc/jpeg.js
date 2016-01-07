@@ -10,12 +10,14 @@ var _initIv = function(){
 };
 
 var allocateStegger = function () {
+    "use strict";
 	if (stegger === null) {
 		stegger = new Eph5.Simple();
 	}
 };
 
 var freeStegger = function () {
+    "use strict";
 	if (stegger !== null) {
 		stegger = null;
 
@@ -33,8 +35,8 @@ var jpegEmbed = function(img_container, data_array){
 		var result = stegger.embed(data_array, img_container, steg_iv);
 
 		console.log("Container properties:", result.containerProperties);
-		console.log("Used k:", result.k)
-		console.log("Embedded length:", result.embeddedLength)
+		console.log("Used k:", result.k);
+		console.log("Embedded length:", result.embeddedLength);
 
 		if (result.embeddedLength !== data_array.length) {
 			throw new Error("Capacity exceeded. Select bigger/more complex image");
