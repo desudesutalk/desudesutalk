@@ -108,4 +108,9 @@ $(function($) {
         $('.hidbord_notifer .hidbord_clickable').click();
     }
 
+    idxdbGetPosts(function(post){
+        processedJpegs[post.src] = {id: post.id};
+        push_msg(post, null, post.thumb, true);
+    });
+
 });

@@ -27,6 +27,7 @@ module.exports = function(grunt) {
                                     "src/misc/ui.js",
                                     "src/misc/wakabamark.js",
                                     "src/misc/threadsaver.js",
+                                    "src/misc/idxdbstore.js",
                                     "src/main.js","src/_tail.js"],
                     "ddt.meta.js": ["src/metablock.js"]
                 }

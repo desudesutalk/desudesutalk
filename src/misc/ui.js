@@ -88,7 +88,7 @@ var inject_ui = function() {
             '    </div>'+
                 '<div style="position: absolute;left: 0;right: 0;bottom: 0;background-color: rgb(217,225,229);border-top: 1px solid #fff;  box-shadow: 0 0 10px #000;height: 27px;text-align: center;padding: 0 5px;">'+
                 '<input type="button" value="Write reply" style="font-weight: bold;float: left;font-size: 12px;" id="hidbord_btn_reply">'+
-                '<input type="button" value="Get old messages" style="font-size: 12px;" id="hidbord_btn_getold">&nbsp;<label><input type="checkbox" id="hidboard_option_autofetch" style="vertical-align:middle;" checked>autoscan</label>'+
+                '<input type="button" value="Rescan thread" style="font-size: 12px;" id="hidbord_btn_getold">&nbsp;<label><input type="checkbox" id="hidboard_option_autofetch" style="vertical-align:middle;" checked>autoscan</label>'+
                 '<a href="javascript:;" style="float: right;line-height: 27px;" id="hidbord_btn_checknew">check for new</a>'+
                 '<a href="javascript:;" style="float: right;line-height: 27px; padding-right: 15px;" id="hidbord_btn_save_thread" title="Save DDT thread as a file">save</a> '+
                 '<span style="float: right;line-height: 27px; padding-right: 15px; display:none" id="hidbord_btn_save_thread_info">Saving..</span> '+
@@ -479,7 +479,7 @@ var renderRefs = function(msgId, elm){
 
 var messages_list = [], new_messages = 0, all_messages = {}, ref_map = {};
 
-var push_msg = function(msg, msgPrepend, thumb) {
+var push_msg = function(msg, msgPrepend, thumb, isOld) {
 	"use strict";
 /*var out_msg = {
     post_id: post_id,
@@ -576,7 +576,8 @@ var push_msg = function(msg, msgPrepend, thumb) {
     var isDirect = msg.contactsNum == 2;
     if(msg.isBroad) isDirect = false;
 
-    var code = '<div class="hidbord_msg hidbord_msg_new hidbord_msgfrom_' + msg.pubkey + '" id="msg_' + msg.id + '" ' + (isDirect? '  style="border-left: 8px solid #090;"' : '') + (msg.isBroad? '  style="border-left: 8px solid #900;"' : '') + '>'+
+    var code = '<div class="hidbord_msg'+(isOld? '' : ' hidbord_msg_new')+' hidbord_msgfrom_' + msg.pubkey +
+            '" id="msg_' + msg.id + '" ' + (isDirect? '  style="border-left: 8px solid #090;"' : '') + (msg.isBroad? '  style="border-left: 8px solid #900;"' : '') + '>'+
             '    <div class="hidbord_mnu"><a href="javascript:;" id="hidbord_mnu_info">info</a> <a href="javascript:;" class="hidbord_mnu_replydirect">' + (msg.isBroad? 'BROADCAST' : 'direct') + '</a>'+ ((isDirect || msg.isBroad)? '': '<a href="javascript:;" class="hidbord_mnu_reply">reply</a>')+'</div>'+
             '    <div class="hidbord_msg_header hidbord_hidden" >'+
             (msg.keyid !=='' ? '        <div style="float:left; width:40px; background: #fff;" class="idntcn">' + msg.keyid + '</div>' : '')+
@@ -593,8 +594,6 @@ var push_msg = function(msg, msgPrepend, thumb) {
             '    <div style="overflow: hidden;"><img src="'+thumb+'" class="hidbord_post_img hidbord_clickable" style="max-width: 100px; max-height:100px; float: left; padding: 5px 15px 5px 5px;"/>' + txt + '</div>'+
             '<span class="msgrefs" style="font-size: 11px;font-style: italic;"></span>'+
             '</div>';
-    var endP = $('.hidbord_thread p').last()[0],
-        pbbox1 = endP.getBoundingClientRect(), pbbox2;
 
     $(prependTo).after($(code));
 
@@ -616,15 +615,10 @@ var push_msg = function(msg, msgPrepend, thumb) {
 
     renderRefs(msg.id);
 
-    var mbbox = $('#msg_' + msg.id)[0].getBoundingClientRect();
-    if(mbbox.top < 0){
-        pbbox2 = endP.getBoundingClientRect();
-        $('.hidbord_thread')[0].scrollTop += Math.round(pbbox2.top - pbbox1.top);
+    if(!isOld){
+        new_messages++;
+        $('#hidbord_notify_counter').text(new_messages).show();
     }
-
-    new_messages++;
-    $('#hidbord_notify_counter').text(new_messages).show();
-
 };
 
 var read_old_messages = function() {
@@ -634,7 +628,6 @@ var read_old_messages = function() {
         stopReadJpeg();
         return true;
     }
-    var first = null;
 
     $('a[href*=jpg] img, a[href*=jpe] img, a[href^=blob] img').each(function(i, e) {
         var url = $(e).closest('a').attr('href');
@@ -648,12 +641,8 @@ var read_old_messages = function() {
             }
         }
 
-        if (url.match(/(^blob\:|\.jp(g|eg?)(\?.*)?$)/i)) {
-            if(!first){
-                first = [url+'', $(e).attr('src')+'', post_id+0];
-            }else{
-                readJpeg(url, $(e).attr('src'), post_id);
-            }
+        if (url.match(/(^blob\:|\.jpe?g(\?.*)?$)/i)) {
+            readJpeg(url, $(e).attr('src'), post_id, true);
         }
     });
 
@@ -675,7 +664,6 @@ var read_old_messages = function() {
     if(first){
         readJpeg(first[0], first[1], first[2]);
     }
-
 };
 
 var replyForm = null,

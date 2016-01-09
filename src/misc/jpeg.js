@@ -6,7 +6,7 @@ var _initIv = function(){
 
     if(steg_iv.length === 0){
         steg_iv = sjcl.codec.bytes.fromBits(sjcl.misc.pbkdf2($('#steg_pwd').val(), $('#steg_pwd').val(), 1000, 256 * 8));
-    }  
+    }
 };
 
 var allocateStegger = function () {
@@ -84,11 +84,11 @@ var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
     "use strict";
 
     if(processedJpegs[jpgURL]){
-        
+
         if(processedJpegs[jpgURL].id != 'none'){
             $("#msg_" + processedJpegs[jpgURL].id).addClass('hidbord_msg_new');
         }
-        
+
         console.log('from cache');
 
         if (typeof(cb) == "function") {
@@ -96,7 +96,7 @@ var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
         }
         return;
     }
-        
+
     getURLasAB(jpgURL, function(arrayBuffer, date) {
         if(arrayBuffer !== null){
             processedJpegs[jpgURL] = {'id': 'none'};
@@ -113,7 +113,7 @@ var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
         if(arc){
             var p = decodeMessage(arc);
             if(p){
-                processedJpegs[jpgURL] = {id: do_decode(p, null, thumbURL, date, post_id).id};
+                processedJpegs[jpgURL] = {id: do_decode(p, null, thumbURL, date, post_id, jpgURL).id};
             }
         }
     });
@@ -125,21 +125,23 @@ var process_olds = function() {
     var jpgURL;
 
     if (process_images.length > 0) {
-        jpgURL = process_images.pop();
-        
-        $('#hidbord_btn_getold').val('Stop fetch! ['+(totalJpegs2Process-process_images.length)+'/'+totalJpegs2Process+']');            
-        processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], function(){setTimeout(process_olds, 0);});        
+        jpgURL = process_images.shift();
+
+        $('#hidbord_btn_getold').val('Stop fetch! ['+(totalJpegs2Process-process_images.length)+'/'+totalJpegs2Process+']');
+        processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], function(){setTimeout(process_olds, 0);});
     } else {
 	   stopReadJpeg();
 	}
 };
 
 
-function readJpeg(url, thumb, post_id){
+function readJpeg(url, thumb, post_id, skiptReaded){
     "use strict";
 
-    process_images.push([url, thumb, post_id]);
     totalJpegs2Process++;
+
+    if(!skiptReaded || !processedJpegs[url])
+        process_images.push([url, thumb, post_id]);
 
     if(!isJpegLoading){
         isJpegLoading = true;
@@ -154,7 +156,7 @@ function stopReadJpeg(){
     process_images = [];
     isJpegLoading = false;
     totalJpegs2Process = 0;
-    $('#hidbord_btn_getold').val('Get old messages');
+    $('#hidbord_btn_getold').val('Get posts');
 }
 
 function isJpegReading(){
