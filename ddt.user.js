@@ -3283,7 +3283,7 @@ var push_msg = function(msg, msgPrepend, thumb, isOld) {
     var isDirect = msg.contactsNum == 2;
     if(msg.isBroad) isDirect = false;
 
-    var code = '<div class="hidbord_msg'+(isOld? '' : ' hidbord_msg_new')+' hidbord_msgfrom_' + msg.pubkey +
+    var code = '<div class="hidbord_msg hidbord_msgfrom_' + msg.pubkey + (isOld? '' : ' hidbord_msg_new') +
             '" id="msg_' + msg.id + '" ' + (isDirect? '  style="border-left: 8px solid #090;"' : '') + (msg.isBroad? '  style="border-left: 8px solid #900;"' : '') + '>'+
             '    <div class="hidbord_mnu"><a href="javascript:;" id="hidbord_mnu_info">info</a> <a href="javascript:;" class="hidbord_mnu_replydirect">' + (msg.isBroad? 'BROADCAST' : 'direct') + '</a>'+ ((isDirect || msg.isBroad)? '': '<a href="javascript:;" class="hidbord_mnu_reply">reply</a>')+'</div>'+
             '    <div class="hidbord_msg_header hidbord_hidden" >'+
