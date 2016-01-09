@@ -196,6 +196,16 @@ var getHost = function(url){
 var getURLasAB = function(rawURL, cb) {
     "use strict";
 
+    if (rawURL.match(/^blob\:/i)) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', rawURL, true);
+        xhr.responseType = 'arraybuffer';
+        xhr.onload = function(oEvent) {cb(xhr.response, new Date(oEvent.target.getResponseHeader('Last-Modified')));};
+        xhr.onerror = function(oEvent) {cb(null, new Date());};
+        xhr.send();
+        return true;
+    }
+
     var url = getHost(rawURL);
 
     if(["2ch.hk", "2ch.pm", "2ch.re", "2ch.tf", "2ch.wf", "2ch.yt", "2-ch.so"].indexOf(url.host.toLowerCase()) != -1){

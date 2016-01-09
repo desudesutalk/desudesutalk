@@ -68,6 +68,7 @@ var jpegExtract = function(inArBuf) {
 			"7": result.get(7)
 		};
 	} catch (exception) {
+        if(exception.message.match(/^Not a JPEG/i)) return false;
 		alert(exception.message);
 		return false;
 	}

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.70
+// @version      0.4.71
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -1490,6 +1490,16 @@ var getHost = function(url){
 var getURLasAB = function(rawURL, cb) {
     "use strict";
 
+    if (rawURL.match(/^blob\:/i)) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', rawURL, true);
+        xhr.responseType = 'arraybuffer';
+        xhr.onload = function(oEvent) {cb(xhr.response, new Date(oEvent.target.getResponseHeader('Last-Modified')));};
+        xhr.onerror = function(oEvent) {cb(null, new Date());};
+        xhr.send();
+        return true;
+    }
+
     var url = getHost(rawURL);
 
     if(["2ch.hk", "2ch.pm", "2ch.re", "2ch.tf", "2ch.wf", "2ch.yt", "2-ch.so"].indexOf(url.host.toLowerCase()) != -1){
@@ -1758,6 +1768,7 @@ var jpegExtract = function(inArBuf) {
 			"7": result.get(7)
 		};
 	} catch (exception) {
+        if(exception.message.match(/^Not a JPEG/i)) return false;
 		alert(exception.message);
 		return false;
 	}
@@ -3252,7 +3263,7 @@ var read_old_messages = function() {
     }
     var first = null;
 
-    $('a[href*=jpg] img, a[href*=jpeg] img').each(function(i, e) {
+    $('a[href*=jpg] img, a[href*=jpeg] img, a[href^=blob] img').each(function(i, e) {
         var url = $(e).closest('a').attr('href');
         var post_el = $(e).closest('.reply');
         var post_id = 0;
@@ -3264,7 +3275,7 @@ var read_old_messages = function() {
             }
         }
 
-        if (url.indexOf('?') == -1 && url.match(/\.jpe?g$/)) {
+        if (url.indexOf('?') == -1 && url.match(/(^blob\:|\.jpe?g$)/i)) {
             if(!first){
                 first = [url+'', $(e).attr('src')+'', post_id+0];                
             }else{

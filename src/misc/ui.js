@@ -635,7 +635,7 @@ var read_old_messages = function() {
     }
     var first = null;
 
-    $('a[href*=jpg] img, a[href*=jpeg] img').each(function(i, e) {
+    $('a[href*=jpg] img, a[href*=jpeg] img, a[href^=blob] img').each(function(i, e) {
         var url = $(e).closest('a').attr('href');
         var post_el = $(e).closest('.reply');
         var post_id = 0;
@@ -647,7 +647,7 @@ var read_old_messages = function() {
             }
         }
 
-        if (url.indexOf('?') == -1 && url.match(/\.jpe?g$/)) {
+        if (url.indexOf('?') == -1 && url.match(/(^blob\:|\.jpe?g$)/i)) {
             if(!first){
                 first = [url+'', $(e).attr('src')+'', post_id+0];                
             }else{
