@@ -110,7 +110,7 @@ var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
         if(arc){
             var p = decodeMessage(arc);
             if(p){
-                processedJpegs[jpgURL] = {id: do_decode(p, null, thumbURL, date, post_id).id};
+                processedJpegs[jpgURL] = {id: do_decode(p, null, thumbURL, date, post_id, jpgURL).id};
             }
         }
     });
@@ -122,7 +122,7 @@ var process_olds = function() {
     var jpgURL;
 
     if (process_images.length > 0) {
-        jpgURL = process_images.pop();
+        jpgURL = process_images.shift();
 
         if (process_images.length !== 0) {
             $('#hidbord_btn_getold').val('Stop fetch! ['+process_images.length+']');            
@@ -136,10 +136,11 @@ var process_olds = function() {
 };
 
 
-function readJpeg(url, thumb, post_id){
+function readJpeg(url, thumb, post_id, skiptReaded){
     "use strict";
 
-    process_images.push([url, thumb, post_id]);
+    if(!skiptReaded || !processedJpegs[url])
+        process_images.push([url, thumb, post_id]);
 
     if(!isJpegLoading){
         isJpegLoading = true;
