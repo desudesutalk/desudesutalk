@@ -618,7 +618,7 @@ var push_msg = function(msg, msgPrepend, thumb) {
     var mbbox = $('#msg_' + msg.id)[0].getBoundingClientRect();
     if(mbbox.top < 0){
         pbbox2 = endP.getBoundingClientRect(); 
-        $('.hidbord_thread')[0].scrollTop += Math.floor(pbbox2.top - pbbox1.top);
+        $('.hidbord_thread')[0].scrollTop += Math.round(pbbox2.top - pbbox1.top);
     }  
 
     new_messages++;

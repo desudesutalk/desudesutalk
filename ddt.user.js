@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.69
+// @version      0.4.70
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -3235,7 +3235,7 @@ var push_msg = function(msg, msgPrepend, thumb) {
     var mbbox = $('#msg_' + msg.id)[0].getBoundingClientRect();
     if(mbbox.top < 0){
         pbbox2 = endP.getBoundingClientRect(); 
-        $('.hidbord_thread')[0].scrollTop += Math.floor(pbbox2.top - pbbox1.top);
+        $('.hidbord_thread')[0].scrollTop += Math.round(pbbox2.top - pbbox1.top);
     }  
 
     new_messages++;
@@ -4126,7 +4126,7 @@ function ddtSaveThread(){
 		'   <style>\n' +
 			'      body {\n\tbackground: ' + $('body').css("background-color") + ';\t\n}\n' +
 			'   </style>\n' +
-		'<script language="JavaScript" type="text/javascript" src="data/ddt_thread.js"></script>\n'+
+		'<script language="JavaScript" type="text/javascript" src="data/'+fname+'.js"></script>\n'+
 		'<script language="JavaScript" type="text/javascript" src="data/ddt.js"></script>\n'+
 		'</head><body></body></html>'); /*jshint newcap: false  */
 	data.file("ddt.js", 'function GM_getMetadata(){ return "'+(typeof GM_info !== 'undefined' ? GM_info.script.version : GM_getMetadata("version"))+'"}\n' + ddtMainFunction.toString() + '\nddtMainFunction();');
@@ -4168,7 +4168,7 @@ function ddtSaveThread(){
 				processThumbUrl(thumbURL.thumb, thumbURL.id, function(){setTimeout(processThumbs, 0);});
 			}else{
 				processThumbUrl(thumbURL.thumb, thumbURL.id, function(){
-					data.file("ddt_thread.js", "var ddtThread = " + JSON.stringify(msgs, null, 2));
+					data.file(fname+".js", "var ddtThread = " + JSON.stringify(msgs, null, 2));
 					saveAs(zip.generate({type:"blob", compression: "DEFLATE"}), fname + ".zip");
 					$('#hidbord_btn_save_thread').show();
 					$('#hidbord_btn_save_thread_info').hide().text('Saving...');      

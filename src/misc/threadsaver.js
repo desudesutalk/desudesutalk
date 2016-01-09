@@ -12,7 +12,7 @@ function ddtSaveThread(){
 		'   <style>\n' +
 			'      body {\n\tbackground: ' + $('body').css("background-color") + ';\t\n}\n' +
 			'   </style>\n' +
-		'<script language="JavaScript" type="text/javascript" src="data/ddt_thread.js"></script>\n'+
+		'<script language="JavaScript" type="text/javascript" src="data/'+fname+'.js"></script>\n'+
 		'<script language="JavaScript" type="text/javascript" src="data/ddt.js"></script>\n'+
 		'</head><body></body></html>'); /*jshint newcap: false  */
 	data.file("ddt.js", 'function GM_getMetadata(){ return "'+(typeof GM_info !== 'undefined' ? GM_info.script.version : GM_getMetadata("version"))+'"}\n' + ddtMainFunction.toString() + '\nddtMainFunction();');
@@ -54,7 +54,7 @@ function ddtSaveThread(){
 				processThumbUrl(thumbURL.thumb, thumbURL.id, function(){setTimeout(processThumbs, 0);});
 			}else{
 				processThumbUrl(thumbURL.thumb, thumbURL.id, function(){
-					data.file("ddt_thread.js", "var ddtThread = " + JSON.stringify(msgs, null, 2));
+					data.file(fname+".js", "var ddtThread = " + JSON.stringify(msgs, null, 2));
 					saveAs(zip.generate({type:"blob", compression: "DEFLATE"}), fname + ".zip");
 					$('#hidbord_btn_save_thread').show();
 					$('#hidbord_btn_save_thread_info').hide().text('Saving...');      
