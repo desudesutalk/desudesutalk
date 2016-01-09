@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.71
+// @version      0.4.72
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -2442,13 +2442,13 @@ var getContactHTML = function(hash, key) {
 
 var contactsSelector = function(){
     "use strict";
-    var code = '<div id="hidbord_contacts_select"><strong>to:</strong>&nbsp;<select id="hidbord_cont_type"><option selected="selected" value="broadcast">Broadcast</option><option value="all">All contacts</option><option value="direct">Direct</option><option disabled="disabled">Groups:</option>';
+    var code = '<div id="hidbord_contacts_select"><strong>to:</strong>&nbsp;<select id="hidbord_cont_type" style="float: none !important;"><option selected="selected" value="broadcast">Broadcast</option><option value="all">All contacts</option><option value="direct">Direct</option><option disabled="disabled">Groups:</option>';
 
     for (var i = 0; i < cont_groups.length; i++) {
         code += '<option value="group_'+safe_tags(cont_groups[i])+'">'+safe_tags(cont_groups[i])+'</option>';
     }
     
-    code += '</select>&nbsp;<select id="hidbord_cont_direct" style="display: none;">';
+    code += '</select>&nbsp;<select id="hidbord_cont_direct" style="float: none !important; display: none;">';
     
     for (var c in contacts) {
         code += '<option value="'+c+'">'+safe_tags(contacts[c].name)+'</option>';
