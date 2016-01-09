@@ -136,7 +136,7 @@ var do_encode = function() {
     sendBoardForm(final_container);
 };
 
-var do_decode = function(message, msgPrepend, thumb, fdate, post_id) {
+var do_decode = function(message, msgPrepend, thumb, fdate, post_id, jpgURL) {
     "use strict";
     var msg = JSON.parse(message.text);
     var out_msg = {
@@ -153,9 +153,12 @@ var do_decode = function(message, msgPrepend, thumb, fdate, post_id) {
         contactsHidden: message.contactsHidden,
         contactsNum: message.contactsNum,
         senderHidden: message.senderHidden,
-        isBroad: message.isBroad
+        isBroad: message.isBroad,
+        src: jpgURL,
+        thumb: thumb
     };
 
+    idxdbPutPost(out_msg);
     push_msg(out_msg, msgPrepend, thumb);
     return out_msg;
 };
