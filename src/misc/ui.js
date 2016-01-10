@@ -88,7 +88,7 @@ var inject_ui = function() {
             '    </div>'+
                 '<div style="position: absolute;left: 0;right: 0;bottom: 0;background-color: rgb(217,225,229);border-top: 1px solid #fff;  box-shadow: 0 0 10px #000;height: 27px;text-align: center;padding: 0 5px;">'+
                 '<input type="button" value="Write reply" style="font-weight: bold;float: left;font-size: 12px;" id="hidbord_btn_reply">'+
-                '<input type="button" value="Rescan thread" style="font-size: 12px;" id="hidbord_btn_getold">&nbsp;<label><input type="checkbox" id="hidboard_option_autofetch" style="vertical-align:middle;" checked>autoscan</label>'+
+                '<input type="button" value="Get posts" style="font-size: 12px;" id="hidbord_btn_getold" title="shift+click - reverse scan&#13;ctrl+click - force images rescan">&nbsp;<label><input type="checkbox" id="hidboard_option_autofetch" style="vertical-align:middle;" checked>autoscan</label>'+
                 '<a href="javascript:;" style="float: right;line-height: 27px;" id="hidbord_btn_checknew">check for new</a>'+
                 '<a href="javascript:;" style="float: right;line-height: 27px; padding-right: 15px;" id="hidbord_btn_save_thread" title="Save DDT thread as a file">save</a> '+
                 '<span style="float: right;line-height: 27px; padding-right: 15px; display:none" id="hidbord_btn_save_thread_info">Saving..</span> '+
@@ -268,21 +268,35 @@ var inject_ui = function() {
 var popup_del_timer;
 
 var do_popup = function(e) {
-	"use strict";
+    "use strict";
 
     var msgid = $(e.target).attr('alt'),
-        fromId = $(e.target).closest('.hidbord_msg').first().attr('id').replace(/^msg_/, ''),
-        msgClone, oMsg, oMsgH;
+        fromId = $(e.target).closest('.hidbord_msg').first().attr('id').replace(/^msg_/, '');
+
+    if(all_messages[msgid]){
+        _do_popup(e, all_messages[msgid], msgid, fromId);
+    }else{
+        idxdbGetPostById(msgid, function(msg){
+            _do_popup(e, msg, msgid, fromId);
+        });
+    }
+};
+
+
+var _do_popup = function(e, msg, msgid, fromId) {
+	"use strict";
+
+    var msgClone, oMsg, oMsgH;
 
     $('#hidbord_popup_' + msgid).remove();
     $('body').append('<div class="hidbord_popup" id="hidbord_popup_' + msgid + '" style="position: fixed; top: 0; right: -1250px; width: 611px;"></div');
 
-    if(!all_messages[msgid]){
+    if(!msg){
         oMsg = msgClone = $('<div style="padding: 10px; background: #fee; border: 1px solid #f00; font-weight: bold; text-align:center;">NOT FOUND</div>');
         $('#hidbord_popup_' + msgid).append(msgClone);
         oMsgH = 50;
     } else{
-        var msg = all_messages[msgid], txt, person, msgTimeTxt,
+        var txt, person, msgTimeTxt,
             msgDate = new Date();
         
         msgDate.setTime(parseInt(msg.txt.ts) * 1000);
@@ -354,7 +368,6 @@ var do_popup = function(e) {
             $('#hidbord_popup_' + msgid).remove();
         }, 200);
     });
-
 };
 
 var msgPopupTimers = {};
@@ -628,13 +641,15 @@ var push_msg = function(msg, msgPrepend, thumb, isOld) {
     }
 };
 
-var read_old_messages = function() {
+var read_old_messages = function(e) {
 	"use strict";
 
     if (isJpegReading()) {
         stopReadJpeg();
         return true;
     }
+
+    var i, urls = [];
 
     $('a[href*=jpg] img, a[href*=jpeg] img, a[href^=blob] img').each(function(i, e) {
         var url = $(e).closest('a').attr('href');
@@ -649,9 +664,17 @@ var read_old_messages = function() {
         }
 
         if (url.indexOf('?') == -1 && url.match(/(^blob\:|\.jpe?g$)/i)) {
-            readJpeg(url, $(e).attr('src'), post_id, true);
+            urls.push({url:url, thumb:$(e).attr('src'), post_id: post_id});
         }
     });
+
+    if(e.shiftKey){
+       urls.reverse(); 
+    }
+
+    for (i = 0; i < urls.length; i++) {
+        readJpeg(urls[i].url, urls[i].thumb, urls[i].post_id, true, e.ctrlKey);
+    }    
 };
 
 var replyForm = null,

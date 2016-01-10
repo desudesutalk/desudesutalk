@@ -78,10 +78,10 @@ var jpegExtract = function(inArBuf) {
 
 var processedJpegs = {}, process_images = [], isJpegLoading = false;
 
-var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
+var processJpgUrl = function(jpgURL, thumbURL, post_id, reRead, cb){
     "use strict";
 
-    if(processedJpegs[jpgURL]){
+    if(processedJpegs[jpgURL] && !reRead){
         
         if(processedJpegs[jpgURL].id != 'none'){
             $("#msg_" + processedJpegs[jpgURL].id).addClass('hidbord_msg_new');
@@ -95,9 +95,10 @@ var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
         return;
     }
         
-    getURLasAB(jpgURL, function(arrayBuffer, date) {
+    getURLasAB(jpgURL +(reRead ? '?t='+Math.random():''), function(arrayBuffer, date) {
         if(arrayBuffer !== null){
-            processedJpegs[jpgURL] = {'id': 'none'};
+            processedJpegs[jpgURL] = {'id': 'none', 'src': jpgURL};
+            idxdbPutLink(processedJpegs[jpgURL]);
         }else{
             cb();
             return;
@@ -111,7 +112,8 @@ var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
         if(arc){
             var p = decodeMessage(arc);
             if(p){
-                processedJpegs[jpgURL] = {id: do_decode(p, null, thumbURL, date, post_id, jpgURL).id};
+                processedJpegs[jpgURL] = {id: do_decode(p, null, thumbURL, date, post_id, jpgURL).id, 'src': jpgURL};
+                idxdbPutLink(processedJpegs[jpgURL]);
             }
         }
     });
@@ -127,21 +129,21 @@ var process_olds = function() {
 
         if (process_images.length !== 0) {
             $('#hidbord_btn_getold').val('Stop fetch! ['+process_images.length+']');            
-            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], function(){setTimeout(process_olds, 0);});
+            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], jpgURL[3], function(){setTimeout(process_olds, 0);});
         }else{
             $('#hidbord_btn_getold').val('Get old messages');
             isJpegLoading = false;
-            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], freeStegger);
+            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], jpgURL[3], freeStegger);
         }
     }
 };
 
 
-function readJpeg(url, thumb, post_id, skiptReaded){
+function readJpeg(url, thumb, post_id, skipReaded, forceReread){
     "use strict";
 
-    if(!skiptReaded || !processedJpegs[url])
-        process_images.push([url, thumb, post_id]);
+    if(!skipReaded || !processedJpegs[url] || forceReread)
+        process_images.push([url, thumb, post_id, forceReread]);
 
     if(!isJpegLoading){
         isJpegLoading = true;
