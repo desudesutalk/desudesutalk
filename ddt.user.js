@@ -1782,11 +1782,10 @@ var jpegExtract = function(inArBuf) {
 
 var processedJpegs = {}, process_images = [], isJpegLoading = false, totalJpegs2Process = 0;
 
-var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
+var processJpgUrl = function(jpgURL, thumbURL, post_id, reRead, cb){
     "use strict";
 
-    if(processedJpegs[jpgURL]){
-
+    if(processedJpegs[jpgURL] && !reRead){
         if(processedJpegs[jpgURL].id != 'none'){
             $("#msg_" + processedJpegs[jpgURL].id).addClass('hidbord_msg_new');
         }
@@ -1799,9 +1798,10 @@ var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
         return;
     }
 
-    getURLasAB(jpgURL, function(arrayBuffer, date) {
+    getURLasAB(jpgURL +(reRead ? '?t='+Math.random():''), function(arrayBuffer, date) {
         if(arrayBuffer !== null){
-            processedJpegs[jpgURL] = {'id': 'none'};
+            processedJpegs[jpgURL] = {'id': 'none', 'src': jpgURL};
+            idxdbPutLink(processedJpegs[jpgURL]);
         }else{
             cb();
             return;
@@ -1815,7 +1815,8 @@ var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
         if(arc){
             var p = decodeMessage(arc);
             if(p){
-                processedJpegs[jpgURL] = {id: do_decode(p, null, thumbURL, date, post_id, jpgURL).id};
+                processedJpegs[jpgURL] = {id: do_decode(p, null, thumbURL, date, post_id, jpgURL).id, 'src': jpgURL};
+                idxdbPutLink(processedJpegs[jpgURL]);
             }
         }
     });
@@ -1837,13 +1838,13 @@ var process_olds = function() {
 };
 
 
-function readJpeg(url, thumb, post_id, skiptReaded){
+function readJpeg(url, thumb, post_id, skipReaded, forceReread){
     "use strict";
 
     totalJpegs2Process++;
 
-    if(!skiptReaded || !processedJpegs[url])
-        process_images.push([url, thumb, post_id]);
+    if(!skipReaded || !processedJpegs[url] || forceReread)
+        process_images.push([url, thumb, post_id, forceReread]);
 
     if(!isJpegLoading){
         isJpegLoading = true;
@@ -2795,7 +2796,7 @@ var inject_ui = function() {
             '    </div>'+
                 '<div style="position: absolute;left: 0;right: 0;bottom: 0;background-color: rgb(217,225,229);border-top: 1px solid #fff;  box-shadow: 0 0 10px #000;height: 27px;text-align: center;padding: 0 5px;">'+
                 '<input type="button" value="Write reply" style="font-weight: bold;float: left;font-size: 12px;" id="hidbord_btn_reply">'+
-                '<input type="button" value="Rescan thread" style="font-size: 12px;" id="hidbord_btn_getold">&nbsp;<label><input type="checkbox" id="hidboard_option_autofetch" style="vertical-align:middle;" checked>autoscan</label>'+
+                '<input type="button" value="Get posts" style="font-size: 12px;" id="hidbord_btn_getold" title="shift+click - reverse scan&#13;ctrl+click - force images rescan">&nbsp;<label><input type="checkbox" id="hidboard_option_autofetch" style="vertical-align:middle;" checked>autoscan</label>'+
                 '<a href="javascript:;" style="float: right;line-height: 27px;" id="hidbord_btn_checknew">check for new</a>'+
                 '<a href="javascript:;" style="float: right;line-height: 27px; padding-right: 15px;" id="hidbord_btn_save_thread" title="Save DDT thread as a file">save</a> '+
                 '<span style="float: right;line-height: 27px; padding-right: 15px; display:none" id="hidbord_btn_save_thread_info">Saving..</span> '+
@@ -2976,21 +2977,35 @@ var inject_ui = function() {
 var popup_del_timer;
 
 var do_popup = function(e) {
-	"use strict";
+    "use strict";
 
     var msgid = $(e.target).attr('alt'),
-        fromId = $(e.target).closest('.hidbord_msg').first().attr('id').replace(/^msg_/, ''),
-        msgClone, oMsg, oMsgH;
+        fromId = $(e.target).closest('.hidbord_msg').first().attr('id').replace(/^msg_/, '');
+
+    if(all_messages[msgid]){
+        _do_popup(e, all_messages[msgid], msgid, fromId);
+    }else{
+        idxdbGetPostById(msgid, function(msg){
+            _do_popup(e, msg, msgid, fromId);
+        });
+    }
+};
+
+
+var _do_popup = function(e, msg, msgid, fromId) {
+	"use strict";
+
+    var msgClone, oMsg, oMsgH;
 
     $('#hidbord_popup_' + msgid).remove();
     $('body').append('<div class="hidbord_popup" id="hidbord_popup_' + msgid + '" style="position: fixed; top: 0; right: -1250px; width: 611px;"></div');
 
-    if(!all_messages[msgid]){
+    if(!msg){
         oMsg = msgClone = $('<div style="padding: 10px; background: #fee; border: 1px solid #f00; font-weight: bold; text-align:center;">NOT FOUND</div>');
         $('#hidbord_popup_' + msgid).append(msgClone);
         oMsgH = 50;
     } else{
-        var msg = all_messages[msgid], txt, person, msgTimeTxt,
+        var txt, person, msgTimeTxt,
             msgDate = new Date();
 
         msgDate.setTime(parseInt(msg.txt.ts) * 1000);
@@ -3062,7 +3077,6 @@ var do_popup = function(e) {
             $('#hidbord_popup_' + msgid).remove();
         }, 200);
     });
-
 };
 
 var msgPopupTimers = {};
@@ -3328,13 +3342,15 @@ var push_msg = function(msg, msgPrepend, thumb, isOld) {
     }
 };
 
-var read_old_messages = function() {
+var read_old_messages = function(e) {
 	"use strict";
 
     if (isJpegReading()) {
         stopReadJpeg();
         return true;
     }
+
+    var i, urls = [];
 
     $('a[href*=jpg] img, a[href*=jpe] img, a[href^=blob] img').each(function(i, e) {
         var url = $(e).closest('a').attr('href');
@@ -3349,7 +3365,7 @@ var read_old_messages = function() {
         }
 
         if (url.match(/(^blob\:|\.jpe?g(\?.*)?$)/i)) {
-            readJpeg(url, $(e).attr('src'), post_id, true);
+            urls.push({url:url, thumb:$(e).attr('src'), post_id: post_id});
         }
     });
 
@@ -3360,16 +3376,16 @@ var read_old_messages = function() {
             var post_el = $(e).closest('.postinner');
             var post_id = i;
 
-            if(!first){
-                first = [url+'', url+'', post_id+0];
-            }else{
-                readJpeg(url, url, post_id);
-            }
+            urls.push({url:url, thumb:url, post_id: post_id});
         });
     }
 
-    if(first){
-        readJpeg(first[0], first[1], first[2]);
+    if(e.shiftKey){
+       urls.reverse();
+    }
+
+    for (i = 0; i < urls.length; i++) {
+        readJpeg(urls[i].url, urls[i].thumb, urls[i].post_id, true, e.ctrlKey);
     }
 };
 
@@ -4274,26 +4290,42 @@ function ddtSaveThread(){
 	processThumbs();
 }
 
-var idxdbStoreName = board_section + '-' + threadId;
+var idxdbThreadTag = board_section + '-' + threadId;
 
 function _idxdbOpen(cb){
 	"use strict";
-	var request = indexedDB.open("ddt_posts", 1);
+	var request = indexedDB.open("ddt_posts", 2);
 	
 	request.onupgradeneeded = function(event) {
-		event.target.result.createObjectStore(idxdbStoreName, {keyPath: "id"})
-			.createIndex("src", "src", {unique: false});
+		var db = event.target.result;
+
+        while (db.objectStoreNames.length>0) {
+			db.deleteObjectStore(db.objectStoreNames[0]);
+        }
+
+		var store = db.createObjectStore("posts", {keyPath: "id"});
+		store.createIndex("src", "src", {unique: false});
+		store.createIndex("inthread", "inthread", {unique: false});
+
+		store = db.createObjectStore("processed_links", {keyPath: "src"});
+		store.createIndex("inthread", "inthread", {unique: false});
 	};
 
 	request.onsuccess = function(event) {cb(event.target.result);};
 }
 
+function idxdbDropAll(){
+	"use strict";
+	indexedDB.deleteDatabase("ddt_posts");
+}
+
 function idxdbGetPosts(cb){
 	"use strict";
 	_idxdbOpen(function(db){
-	db.transaction([idxdbStoreName])
-		.objectStore(idxdbStoreName)
-		.openCursor().onsuccess = function(event) {
+	db.transaction(["posts"])
+		.objectStore("posts")
+		.index('inthread')
+		.openCursor(IDBKeyRange.only(idxdbThreadTag)).onsuccess = function(event) {
 			var cursor = event.target.result;
 			if (cursor) {
 				cb(cursor.value);
@@ -4303,12 +4335,50 @@ function idxdbGetPosts(cb){
 	});
 }
 
+function idxdbGetPostById(id, cb){
+	"use strict";
+	_idxdbOpen(function(db){
+		var req = db.transaction(["posts"])
+			.objectStore("posts")
+			.get(id);
+		req.onerror = function(event) {cb(null);};
+		req.onsuccess = function(event) {cb(event.target.result);};
+	});
+}
+
 function idxdbPutPost(post){
 	"use strict";
 	_idxdbOpen(function(db){
-		db.transaction([idxdbStoreName], "readwrite")
-			.objectStore(idxdbStoreName)
+		post.inthread = idxdbThreadTag;
+		db.transaction(["posts"], "readwrite")
+			.objectStore("posts")
 			.put(post);
+	});
+}
+
+function idxdbGetLinks(cb){
+	"use strict";
+	_idxdbOpen(function(db){
+	db.transaction(["processed_links"])
+		.objectStore("processed_links")
+		.index('inthread')
+		.openCursor(IDBKeyRange.only(idxdbThreadTag)).onsuccess = function(event) {
+			var cursor = event.target.result;
+			if (cursor) {
+				cb(cursor.value);
+				cursor.continue();
+			}
+		};
+	});
+}
+
+function idxdbPutLink(link){
+	"use strict";
+	_idxdbOpen(function(db){
+		link.inthread = idxdbThreadTag;
+		db.transaction(["processed_links"], "readwrite")
+			.objectStore("processed_links")
+			.put(link);
 	});
 }
 
@@ -4422,8 +4492,11 @@ $(function($) {
         $('.hidbord_notifer .hidbord_clickable').click();
     }
 
+    idxdbGetLinks(function(url){
+        processedJpegs[url.src] = url;
+    });
+
     idxdbGetPosts(function(post){
-        processedJpegs[post.src] = {id: post.id};
         push_msg(post, null, post.thumb, true);
     });
 
