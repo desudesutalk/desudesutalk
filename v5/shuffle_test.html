@@ -736,10 +736,10 @@ var lfsr = (function(){
 
 
 var randomArray = function (length) {
-    "use strict";    
-    for (var hex = [], r, i = 0; i < length; i++) {
-    	r = Math.round(Math.random()*255);
-        hex.push(r);
+    "use strict";
+    var hex = new Uint8Array(length);
+    for (var r, i = 0; i < length; i++) {
+    	hex[i] = Math.round(Math.random()*255);
     }
     return hex;
 };
