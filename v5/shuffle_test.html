@@ -408,31 +408,30 @@ var lfsr = (function(){
 			t = S[i];
 			S[i] = S[j];
 			S[j] = t;
-			random_index = S[(t + S[i]) & 255] << 24;
+			random_index = S[(t + S[i]) & 255] << 24 >>> 0;
 
 			i = (i + 1) & 255;
 			j = (j + S[i]) & 255;
 			t = S[i];
 			S[i] = S[j];
 			S[j] = t;
-			random_index |= S[(t + S[i]) & 255] << 16;
+			random_index = (random_index | S[(t + S[i]) & 255] << 16) >>> 0;
 
 			i = (i + 1) & 255;
 			j = (j + S[i]) & 255;
 			t = S[i];
 			S[i] = S[j];
 			S[j] = t;
-			random_index |= S[(t + S[i]) & 255] << 8;
+			random_index = (random_index | S[(t + S[i]) & 255] << 8) >>> 0;
 
 			i = (i + 1) & 255;
 			j = (j + S[i]) & 255;
 			t = S[i];
 			S[i] = S[j];
 			S[j] = t;
-			random_index |= S[(t + S[i]) & 255];
+			random_index = (random_index | S[(t + S[i]) & 255]) >>> 0;
 
 			random_index %= max_random;
-			if (random_index < 0) random_index += max_random;
 			max_random--;
 
 			t = data[random_index * 4];
@@ -652,37 +651,36 @@ var lfsr = (function(){
 		// shuffle data
 		for (k = 0; k < dl; ++k) {
 
-			i = (i + 1) & 255;
-			j = (j + S[i]) & 255;
-			t = S[i];
-			S[i] = S[j];
-			S[j] = t;
-			random_index = S[(t + S[i]) & 255] << 24;
+            i = (i + 1) & 255;
+            j = (j + S[i]) & 255;
+            t = S[i];
+            S[i] = S[j];
+            S[j] = t;
+            random_index = S[(t + S[i]) & 255] << 24 >>> 0;
 
-			i = (i + 1) & 255;
-			j = (j + S[i]) & 255;
-			t = S[i];
-			S[i] = S[j];
-			S[j] = t;
-			random_index |= S[(t + S[i]) & 255] << 16;
+            i = (i + 1) & 255;
+            j = (j + S[i]) & 255;
+            t = S[i];
+            S[i] = S[j];
+            S[j] = t;
+            random_index = (random_index | S[(t + S[i]) & 255] << 16) >>> 0;
 
-			i = (i + 1) & 255;
-			j = (j + S[i]) & 255;
-			t = S[i];
-			S[i] = S[j];
-			S[j] = t;
-			random_index |= S[(t + S[i]) & 255] << 8;
+            i = (i + 1) & 255;
+            j = (j + S[i]) & 255;
+            t = S[i];
+            S[i] = S[j];
+            S[j] = t;
+            random_index = (random_index | S[(t + S[i]) & 255] << 8) >>> 0;
 
-			i = (i + 1) & 255;
-			j = (j + S[i]) & 255;
-			t = S[i];
-			S[i] = S[j];
-			S[j] = t;
-			random_index |= S[(t + S[i]) & 255];
+            i = (i + 1) & 255;
+            j = (j + S[i]) & 255;
+            t = S[i];
+            S[i] = S[j];
+            S[j] = t;
+            random_index = (random_index | S[(t + S[i]) & 255]) >>> 0;
 
-			random_index %= max_random;
-			if (random_index < 0) random_index += max_random;
-			max_random--;
+            random_index %= max_random;
+            max_random--;
 
 		}
 	}
