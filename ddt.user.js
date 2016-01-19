@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.74
+// @version      0.4.75
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -1778,7 +1778,7 @@ var jpegExtract = function(inArBuf) {
     return data;
 };
 
-var processedJpegs = {}, process_images = [], isJpegLoading = false;
+var processedJpegs = {}, process_images = [], isJpegLoading = false, totalJpegs2Process = 0;
 
 var processJpgUrl = function(jpgURL, thumbURL, post_id, cb){
     "use strict";
@@ -1826,18 +1826,12 @@ var process_olds = function() {
 
     if (process_images.length > 0) {
         jpgURL = process_images.pop();
-
-        if (process_images.length !== 0) {
-            $('#hidbord_btn_getold').val('Stop fetch! ['+process_images.length+']');            
-            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], function(){setTimeout(process_olds, 0);});
-        }else{
-            $('#hidbord_btn_getold').val('Get old messages');
-            isJpegLoading = false;
-            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], function(){setTimeout(process_olds, 0);});
-        }
+        
+        $('#hidbord_btn_getold').val('Stop fetch! ['+(totalJpegs2Process-process_images.length)+'/'+totalJpegs2Process+']');            
+        processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], function(){setTimeout(process_olds, 0);});        
     } else {
-			freeStegger();
-		}
+	   stopReadJpeg();
+	}
 };
 
 
@@ -1845,6 +1839,7 @@ function readJpeg(url, thumb, post_id){
     "use strict";
 
     process_images.push([url, thumb, post_id]);
+    totalJpegs2Process++;
 
     if(!isJpegLoading){
         isJpegLoading = true;
@@ -1855,8 +1850,10 @@ function readJpeg(url, thumb, post_id){
 function stopReadJpeg(){
     "use strict";
 
+    freeStegger();
     process_images = [];
     isJpegLoading = false;
+    totalJpegs2Process = 0;
     $('#hidbord_btn_getold').val('Get old messages');
 }
 
@@ -4279,7 +4276,7 @@ $(function($) {
 
     $('<style type="text/css">@keyframes ' + insertAnimation + '@-moz-keyframes ' + insertAnimation + '@-webkit-keyframes ' +
         insertAnimation + '@-ms-keyframes ' + insertAnimation + '@-o-keyframes ' + insertAnimation +
-        'a[href*=jpg] img, a[href*=jpeg] img ' + animationTrigger + '</style>').appendTo('head');
+        'a[href*=jpg] img, a[href*=jpeg] img, a[href^=blob] img ' + animationTrigger + '</style>').appendTo('head');
 
     setTimeout(startAnimeWatch, 1000);
 
