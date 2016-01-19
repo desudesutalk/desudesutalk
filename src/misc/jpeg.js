@@ -13,6 +13,8 @@ var allocateStegger = function () {
     "use strict";
 	if (stegger === null) {
 		stegger = new Eph5.Simple();
+
+		console.log("Stegger allocated");
 	}
 };
 
@@ -131,9 +133,11 @@ var process_olds = function() {
         }else{
             $('#hidbord_btn_getold').val('Get old messages');
             isJpegLoading = false;
-            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], freeStegger);
+            processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], function(){setTimeout(process_olds, 0);});
         }
-    }
+    } else {
+			freeStegger();
+		}
 };
 
 
@@ -154,7 +158,6 @@ function stopReadJpeg(){
     process_images = [];
     isJpegLoading = false;
     $('#hidbord_btn_getold').val('Get old messages');
-	freeStegger();
 }
 
 function isJpegReading(){
