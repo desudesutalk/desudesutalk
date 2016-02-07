@@ -4,7 +4,7 @@ function repeat(pattern, count) {
     var result = '';
     while (count > 0) {
         if (count & 1) result += pattern;
-        count >>= 1; 
+        count >>= 1;
         pattern += pattern;
     }
     return result;
@@ -45,7 +45,7 @@ var dateToStr = function(date, onlyNums) {
     };
 
     if(onlyNums){
-        return '' + date.getFullYear() + z(date.getMonth() + 1) + z(date.getDate())+ '_' + z(date.getHours()) + z(date.getMinutes());    
+        return '' + date.getFullYear() + z(date.getMonth() + 1) + z(date.getDate())+ '_' + z(date.getHours()) + z(date.getMinutes());
     }
     return '' + date.getFullYear() + '-' + z(date.getMonth() + 1) + '-' + z(date.getDate()) + ' ' + z(date.getHours()) + ':' + z(date.getMinutes());
 };
@@ -140,7 +140,7 @@ var arrayBufferDataUri = function(raw) {
 var dataURLtoUint8Array = function(dataURL, dataType) {
     "use strict";
 
-    // Decode the dataURL    
+    // Decode the dataURL
     var binary = atob(dataURL.split(',')[1]);
     // Create 8-bit unsigned array
     var array = [];
@@ -196,7 +196,7 @@ var getHost = function(url){
 var getURLasAB = function(rawURL, cb) {
     "use strict";
 
-    if (rawURL.match(/^blob\:/i)) {
+    if (rawURL.match(/^blob\:/i) || rawURL.match(/^data\:/i)) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', rawURL, true);
         xhr.responseType = 'arraybuffer';
@@ -213,16 +213,16 @@ var getURLasAB = function(rawURL, cb) {
     }
 
     /*jshint newcap: false  */
-    if (typeof GM_xmlhttpRequest === "function") {        
+    if (typeof GM_xmlhttpRequest === "function") {
         if(navigator.userAgent.match(/Chrome\/([\d.]+)/)){
             GM_xmlhttpRequest({
                 method: "GET",
-                url: url.href,                
+                url: url.href,
                 responseType: "arraybuffer",
                 onload: function(oEvent) {
                     cb(oEvent.response, new Date(0));
                 },
-                onerror: function(oEvent) {                    
+                onerror: function(oEvent) {
                     cb(null, new Date());
                 }
             });
@@ -235,7 +235,7 @@ var getURLasAB = function(rawURL, cb) {
                     var ff_buffer = stringToByteArray(oEvent.responseText || oEvent.response);
                     cb(ff_buffer.buffer, new Date());
                 },
-                onerror: function(oEvent) {                    
+                onerror: function(oEvent) {
                     cb(null, new Date());
                 }
             });
@@ -251,7 +251,7 @@ var getURLasAB = function(rawURL, cb) {
         oReq.onerror = function(oEvent) {
             cb(null, new Date());
         };
-        oReq.send(null);        
+        oReq.send(null);
     }
 };
 
@@ -293,7 +293,7 @@ var shuffleArray = function (array) {
 
 var xorBytes = function (a, b) {
     "use strict";
-    
+
     if (a.length != b.length) {
         throw new Error("Длины не сходятся");
     }

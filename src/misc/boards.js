@@ -13,6 +13,30 @@ var sendBoardForm = function(file) {
     "use strict";
     replyForm.find("#do_encode").val('..Working...').attr("disabled", "disabled");
 
+    if(location.hostname == '127.0.0.1'){
+        var ta = $('textarea.reply-body, textarea#reply');
+
+        if(ta.length === 0){
+            alert('Can\'t find reply form.');
+            replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
+            return;
+        }
+
+        var out = '\n[img=' + arrayBufferDataUri(file) + ']';
+        if(out.length < 64518){
+            ta.first().val(ta.first().val() + out);
+            replyForm.remove();
+            replyForm = null;
+            container_image = null;
+            container_data = null;
+            return;
+        }else{
+            alert('File is too big!');
+            replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
+            return;
+        }
+    }
+
     if(["dmirrgetyojz735v.onion", "2-chru.net", "mirror.2-chru.net", "bypass.2-chru.net", "2chru.cafe", "2-chru.cafe"].indexOf(document.location.host.toLowerCase()) != -1){
         $('body').append('<iframe class="ninja" id="csstest" src="../csstest.foo"></iframe>');
         $('iframe.ninja#csstest').on('load', function(e){
@@ -46,8 +70,8 @@ var sendBoardForm = function(file) {
                 l.push({"name": "post", "value": $('form[name=post] input[type=submit]').val()});
 
                 //console.log("fresh post form: ", l);
-                
-                _sendBoardForm(file, l);  
+
+                _sendBoardForm(file, l);
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 alert('failed to get fresh form. Try again!');
@@ -56,13 +80,13 @@ var sendBoardForm = function(file) {
             }
         });
     }else{
-        _sendBoardForm(file, []);        
+        _sendBoardForm(file, []);
     }
 };
 
 var _sendBoardForm = function(file, formAddon) {
     "use strict";
-    
+
     var formData, fileInputName, formAction,
         fd = new FormData();
 
@@ -80,20 +104,20 @@ var _sendBoardForm = function(file, formAddon) {
     }else if(($('form#yukipostform').length !== 0)){
         formData = $('form#yukipostform').serializeArray();
         fileInputName = 'file_1';
-        fd.append('file_1_rating', 'SFW'); 
-        formAction = '/' + Hanabira.URL.board + '/post/new.xhtml' + "?X-Progress-ID=" + upload_handler;   
+        fd.append('file_1_rating', 'SFW');
+        formAction = '/' + Hanabira.URL.board + '/post/new.xhtml' + "?X-Progress-ID=" + upload_handler;
     }else if(($('form[name=post]').length !== 0)){
         formData = $('form[name=post]').first().serializeArray();
         fileInputName = $("form[name=post] input[type=file]").length ? $("form[name=post] input[type=file]")[0].name : 'file';
-        formAction = $("form[name=post]")[0].action; 
+        formAction = $("form[name=post]")[0].action;
     }else if(($('form#qr-postform').length !== 0)){
         formData = $('form#qr-postform').first().serializeArray();
         fileInputName = 'image1';
-        formAction = $("form#qr-postform")[0].action; 
+        formAction = $("form#qr-postform")[0].action;
     }else if(($('form#postform').length !== 0)){
         formData = $('form#postform').first().serializeArray();
         fileInputName = 'image1';
-        formAction = $("form#postform")[0].action; 
+        formAction = $("form#postform")[0].action;
     }
 
     if(is4chan){
@@ -103,7 +127,7 @@ var _sendBoardForm = function(file, formAddon) {
         }
 
         fileInputName = forForm.find("input[type=file]")[0].name;
-        formAction = forForm[0].action; 
+        formAction = forForm[0].action;
 
         formData = forForm.serializeArray();
 
@@ -118,11 +142,11 @@ var _sendBoardForm = function(file, formAddon) {
             formData.push({"name": "resto", "value": $('form[name=post] input[name=resto]').val()});
 
             formData.push({"name": "recaptcha_response_field", "value": $('div#qr .captcha-input.field').val()});
-            formAction = $('form[name=post]')[0].action; 
+            formAction = $('form[name=post]')[0].action;
             fileInputName = $("form[name=post] input[type=file]")[0].name;
         }
 
-//        console.log(formData);      
+//        console.log(formData);
     }
 
     if(formAddon.length > 0){
@@ -193,14 +217,14 @@ var _sendBoardForm = function(file, formAddon) {
                 $('.captcha-reload-button').click();
                 $('#qr-shampoo, #shampoo, #qr-captcha-value').val('');
                 $('#imgcaptcha').click();
-                $('#recaptcha_reload').click();                
+                $('#recaptcha_reload').click();
                 $('#captchainput').val('');
                 $('a#updateThread').click();
                 if(is4chan){
-                    setTimeout(function() {$('a[data-cmd=update]').first().click(); $('.thread-refresh-shortcut.fa.fa-refresh').first().click();}, 2500);                    
+                    setTimeout(function() {$('a[data-cmd=update]').first().click(); $('.thread-refresh-shortcut.fa.fa-refresh').first().click();}, 2500);
                     $('#qrCapField').val('');
                     $('#qrCaptcha').click();
-                    $('textarea[name=com]').val('');                    
+                    $('textarea[name=com]').val('');
                     $('div#qr .captcha-input.field').val('');
                     $('div#qr .captcha-img img').click();
                     $('div#qr textarea').val('');
@@ -227,7 +251,7 @@ var _sendBoardForm = function(file, formAddon) {
 
 var _sendBoardSync = function(file) {
  "use strict";
-    
+
     var formData, fileInputName, formAction,
         fd = new FormData();
 
@@ -235,7 +259,7 @@ var _sendBoardSync = function(file) {
     formData.push({"name": "json_response", "value": 1});
     formData.push({"name": "post", "value": $('form[name=post] input[type=submit]').val()});
     fileInputName = 'file';
-    formAction = $("form[name=post]")[0].action; 
+    formAction = $("form[name=post]")[0].action;
 
     for (var i = 0; i < formData.length; i++) {
         if (formData[i].name && formData[i].name != fileInputName && formData[i].name !== "") {

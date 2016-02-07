@@ -98,8 +98,9 @@ var inject_ui = function() {
             '    <img id="hidbord_show" class="hidbord_clickable" alt="Moshi moshi!" title="Moshi moshi!" src="' + desudesuicon +'" width="32" style="margin:0; z-index:1050;vertical-align: bottom;"/>'+
             '<span id="hidbord_notify_counter" class="hidbord_clickable" style="position: absolute;background: #f00;z-index: 100;bottom: 4px;right: 4px;font-weight: bold;padding: 2px 7px;border-radius: 30px; color: #fff;box-shadow: 0 0 1px #f00;font-size: 15px;display: none;">1</span>'+
             '</div>';
-    
+
     injectCSS('.hidbord_popup a, .hidbord_main a {color: #ff6600;} .hidbord_popup a:hover, .hidbord_main a:hover {color: #0066ff;}'+
+            '.hidbord_msg, .hidbord_msg div {float: none; clear: none; display: block;} .hidbord_msg_header {display: block;} .hidbord_msg_header div{display: block} .hidbord_nav div {float: none;}'+
             '.hidbord_notifer{ z-index: 1000; font-size: smaller !important;padding: 0;font-family: calibri;position: fixed;bottom: 25px;right: 25px;box-shadow: 0 0 10px #999;display: block;border: 3px solid #fff;border-radius: 5px;background-color: rgb(217,225,229);overflow: hidden;} '+
             '.hidbord_msg code { padding: 0 4px; font-size: 90%; color: #c7254e; background-color: #f9f2f4; white-space: nowrap; border-radius: 4px; } '+
             '.hidbord_msg code, .hidbord_msg kbd, .hidbord_msg pre, .hidbord_msg samp { font-family: Menlo,Monaco,Consolas,"Courier New",monospace; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word; } '+
@@ -122,22 +123,22 @@ var inject_ui = function() {
             '.hidbord_msg_focused { border: 1px dashed #e00; } '+
             '.hidbord_msg_new { background-color: #ffe; } '+
             '.hidbord_main hr, .hidbord_popup hr { background:#ddd; border:0; height:1px } '+
-            '.hidbord_mnu{ visibility: hidden; font-size: x-small; float:right; } '+
+            '.hidbord_mnu{ visibility: hidden; font-size: x-small; float:right !important; } '+
             '.hidbord_msg:hover .hidbord_mnu { visibility: visible; } '+
             '.hidbord_msg ol, .hidbord_msg ul { clear: both; } '+
             '.hidbord_mnu a { color: #999; padding: 0.2em 0.4em; text-decoration: none; border: 1px solid #fff; } '+
             '.hidbord_mnu a:hover { background: #fe8; border: 1px solid #db4; } '+
             '.hidbord_clickable { cursor: pointer; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: -moz-none; -ms-user-select: none; user-select: none; }'+
-            '.hidbord_hidden { display: none; } .hidbord_main h3 {background: none}'+
+            '.hidbord_hidden { display: none !important; } .hidbord_main h3 {background: none}'+
             '.hidbord_popup {z-index: 2000; font-size: small !important; font-family: \'open sans\', sans-serif; color: #800000 !important;}');
-    
+
     //Highlight.js
     injectCSS('.hljs { display: block; padding: 0.5em; background: #002b36; color: #839496; } .hljs-comment, .hljs-template_comment, .diff .hljs-header, .hljs-doctype, .hljs-pi, .lisp .hljs-string, .hljs-javadoc { color: #586e75; }  .hljs-keyword, .hljs-winutils, .method, .hljs-addition, .css .hljs-tag, .hljs-request, .hljs-status, .nginx .hljs-title { color: #859900; }  .hljs-number, .hljs-command, .hljs-string, .hljs-tag .hljs-value, .hljs-rules .hljs-value, .hljs-phpdoc, .tex .hljs-formula, .hljs-regexp, .hljs-hexcolor, .hljs-link_url { color: #2aa198; }  .hljs-title, .hljs-localvars, .hljs-chunk, .hljs-decorator, .hljs-built_in, .hljs-identifier, .vhdl .hljs-literal, .hljs-id, .css .hljs-function { color: #268bd2; }  .hljs-attribute, .hljs-variable, .lisp .hljs-body, .smalltalk .hljs-number, .hljs-constant, .hljs-class .hljs-title, .hljs-parent, .haskell .hljs-type, .hljs-link_reference { color: #b58900; }  .hljs-preprocessor, .hljs-preprocessor .hljs-keyword, .hljs-pragma, .hljs-shebang, .hljs-symbol, .hljs-symbol .hljs-string, .diff .hljs-change, .hljs-special, .hljs-attr_selector, .hljs-subst, .hljs-cdata, .clojure .hljs-title, .css .hljs-pseudo, .hljs-header { color: #cb4b16; }  .hljs-deletion, .hljs-important { color: #dc322f; }  .hljs-link_label { color: #6c71c4; } .tex .hljs-formula { background: #073642; } ');
-        
+
       if ($('form[name*="postcontrols"]').length !==0) {
             $('header').first().before(ui);
       }else{
-            $('body').prepend(ui);        
+            $('body').prepend(ui);
       }
 
     $('.hidbord_notifer .hidbord_clickable').on('click', function() {
@@ -193,7 +194,7 @@ var inject_ui = function() {
     }
 
     if(!contactsInLocalStorage){
-        $('#hidboard_option_pubstore').attr('checked', null);        
+        $('#hidboard_option_pubstore').attr('checked', null);
     }
 
     if(!autoscanNewJpegs){
@@ -226,10 +227,10 @@ var inject_ui = function() {
 
     $('#hidbord_btn_save_thread').on('click', function() {
         $('#hidbord_btn_save_thread').hide();
-        $('#hidbord_btn_save_thread_info').show();        
+        $('#hidbord_btn_save_thread_info').show();
         ddtSaveThread();
     });
-    
+
 
     $('#hidboard_option_autoscanison').on('change', function() {
         ssSet(boardHostName + 'autoscanDefault', !!$('#hidboard_option_autoscanison').attr('checked'));
@@ -284,11 +285,11 @@ var do_popup = function(e) {
     } else{
         var msg = all_messages[msgid], txt, person, msgTimeTxt,
             msgDate = new Date();
-        
+
         msgDate.setTime(parseInt(msg.txt.ts) * 1000);
-    
+
         if (msg.status == 'OK') {
-            txt = wkbmrk(msg.txt.msg, msgid);        
+            txt = wkbmrk(msg.txt.msg, msgid);
         } else {
             txt = '<p><strong style="color: #f00; font-size: x-large;">NOT FOR YOU! CAN\'T BE DECODED!</strong></p>';
         }
@@ -302,7 +303,7 @@ var do_popup = function(e) {
         }
 
         var code = '<div class="hidbord_msg" id="msg_' + msg.id + '" style="margin: 0;">'+
-                   '    <div style="overflow: hidden" class="hidbord_msg_header" >'+ 
+                   '    <div style="overflow: hidden" class="hidbord_msg_header" >'+
                    (msg.keyid !=='' ? '<span style="background: #fff;" class="idntcn2">' + msg.keyid + '</span>&nbsp;' : '') + person +
                    ' <i style="color: #999;">(' + msgTimeTxt + ') <span href="javascript:;" class="hidbord_mnu_reply hidbord_clickable">#'+msg.id.substr(0, 8)+'</span></i>'+
                    '    </div>'+
@@ -328,7 +329,7 @@ var do_popup = function(e) {
             height_css = (opy- 25);
             py = 10;
             msgClone.css({"overflow-y":"scroll", height: height_css+'px'});
-        }        
+        }
     }else{
         if(py + oMsgH + 20 > $(window).height()){
             height_css = ($(window).height() - py - 20);
@@ -363,14 +364,14 @@ var del_popup = function(e) {
 	"use strict";
 
     var msgid = $(e.target).attr('alt');
-    
+
     clearTimeout(msgPopupTimers[msgid]);
 
     if(msgid == 'file_selector'){
         $('#file_selector').remove();
         return;
     }
-    
+
     msgPopupTimers[msgid] = setTimeout(function() {
         if(msgid == 'msg_preview'){
             $('#prev_popup').remove();
@@ -410,7 +411,7 @@ var msgAppendListeners = function(msgQuery){
     $(msgQuery + ' .hidbord_post_img').on('click', function(e){
         var imgname = e.target.src.replace(/.+?\/([^\/]+)$/, '$1');
         window.scrollTo(0, $('a img[src*="' + imgname + '"]').offset().top);
-    });    
+    });
 
     var new_msg = $(msgQuery);
 
@@ -424,7 +425,7 @@ var msgAppendListeners = function(msgQuery){
     });
 
     new_msg.find('.hidbord_msglink').on('mouseover', function(e){
-        var msgid = $(e.target).attr('alt');   
+        var msgid = $(e.target).attr('alt');
         msgPopupTimers[msgid] = setTimeout(function() {
             do_popup(e);
         }, 200);
@@ -442,7 +443,7 @@ var msgAppendListeners = function(msgQuery){
     new_msg.find('.idntcn2').identicon5({
         rotate: true,
         size: 18
-    }); 
+    });
 };
 
 var renderRefs = function(msgId, elm){
@@ -549,9 +550,9 @@ var push_msg = function(msg, msgPrepend, thumb) {
     }
 
     msgDate.setTime(parseInt(msg.txt.ts) * 1000);
-    
+
     if (msg.status == 'OK') {
-        txt = wkbmrk(msg.txt.msg, msg.id);        
+        txt = wkbmrk(msg.txt.msg, msg.id);
     } else {
         txt = '<p><strong style="color: #f00; font-size: x-large;">NOT FOR YOU! CAN\'T BE DECODED!</strong></p>';
     }
@@ -559,7 +560,7 @@ var push_msg = function(msg, msgPrepend, thumb) {
     for (i = 0; i < msg.to.length; i++) {
         recipients += '<span style="background: #fff;" class="idntcn2">' + msg.to[i] + '</span>&nbsp;' + getContactHTML(msg.to[i]) + '; ';
     }
-    
+
     if(msg.contactsHidden){
         recipients = msg.contactsNum + ' hidden contacts.';
     }
@@ -584,7 +585,7 @@ var push_msg = function(msg, msgPrepend, thumb) {
             '        </div>'+
             '        <div style="clear: both; padding: 5px;"><strong>Sent to:</strong> ' + recipients + '</div>'+
             '    </div>'+
-            '    <div style="overflow: hidden" class="hidbord_msg_header" >'+ 
+            '    <div style="overflow: hidden" class="hidbord_msg_header" >'+
             (msg.keyid !=='' ? '<span style="background: #fff;" class="idntcn2">' + msg.keyid + '</span>&nbsp;' : '') + person +
             ' <i style="color: #999;">(' + msgTimeTxt + ') <span href="javascript:;" class="hidbord_mnu_reply hidbord_clickable">#'+msg.id.substr(0, 8)+'</span></i>'+
             '    </div>'+
@@ -593,7 +594,7 @@ var push_msg = function(msg, msgPrepend, thumb) {
             '<span class="msgrefs" style="font-size: 11px;font-style: italic;"></span>'+
             '</div>';
     var endP = $('.hidbord_thread p').last()[0],
-        pbbox1 = endP.getBoundingClientRect(), pbbox2; 
+        pbbox1 = endP.getBoundingClientRect(), pbbox2;
 
     $(prependTo).after($(code));
 
@@ -607,19 +608,19 @@ var push_msg = function(msg, msgPrepend, thumb) {
         }
 
         if(ref_map[refTo].indexOf(msg.id) == -1){
-            ref_map[refTo].push(msg.id);   
+            ref_map[refTo].push(msg.id);
         }
 
         renderRefs(refTo);
     });
 
     renderRefs(msg.id);
-    
+
     var mbbox = $('#msg_' + msg.id)[0].getBoundingClientRect();
     if(mbbox.top < 0){
-        pbbox2 = endP.getBoundingClientRect(); 
+        pbbox2 = endP.getBoundingClientRect();
         $('.hidbord_thread')[0].scrollTop += Math.round(pbbox2.top - pbbox1.top);
-    }  
+    }
 
     new_messages++;
     $('#hidbord_notify_counter').text(new_messages).show();
@@ -643,18 +644,33 @@ var read_old_messages = function() {
         if(post_el.length === 1){
             post_id = parseInt(post_el.attr('id').replace(/[^0-9]/g, ''));
             if(isNaN(post_id)){
-                post_id = 0;
+                post_id = i;
             }
         }
 
         if (url.indexOf('?') == -1 && url.match(/(^blob\:|\.jpe?g$)/i)) {
             if(!first){
-                first = [url+'', $(e).attr('src')+'', post_id+0];                
+                first = [url+'', $(e).attr('src')+'', post_id+0];
             }else{
                 readJpeg(url, $(e).attr('src'), post_id);
             }
         }
     });
+
+    // Support for NanoBoard
+    if(location.hostname == '127.0.0.1'){
+        $('img[src*=";base64,/9j/"]').each(function(i, e) {
+            var url = $(e).attr('src');
+            var post_el = $(e).closest('.postinner');
+            var post_id = i;
+
+            if(!first){
+                first = [url+'', url+'', post_id+0];
+            }else{
+                readJpeg(url, url, post_id);
+            }
+        });
+    }
 
     if(first){
         readJpeg(first[0], first[1], first[2]);
@@ -697,7 +713,7 @@ function handleFileSelect(evt) {
 
                         ctxB.beginPath();
                         ctxB.fillStyle = "white";
-                        ctxB.rect(0, 0, buffer.width, buffer.height); 
+                        ctxB.rect(0, 0, buffer.width, buffer.height);
                         ctxB.fill();
 
                         ctxB.drawImage(img, -o1, -o3);
@@ -750,7 +766,7 @@ var replytoMsgDirect = function(e) {
         return false;
     }
 
-    
+
     showReplyform('#msg_' + msg_id, '>>' + msg_id);
     $('#hidbord_cont_type').val('direct').trigger('change');
     $('#hidbord_cont_direct').val(usr_id);
@@ -806,7 +822,7 @@ var do_preview_popup = function(e) {
         if(py < 10 ){
             $('#prev_popup').find('.hidbord_msg').css('height', (e.clientY - 50) + 'px');
             py = 10;
-        }        
+        }
     }else{
         if(py + $('#prev_popup').height() + 10 > $(window).height()){
             $('#prev_popup').find('.hidbord_msg').css('height', ($(window).height() - py - 50) + 'px');
@@ -837,7 +853,7 @@ var do_imgpreview_popup = function(e) {
 
     $('#file_selector').remove();
     if (!container_image) return;
-    var txt = '<div class="hidbord_msg" style="box-shadow: 0 0 10px #555;"><img style="max-width: 200px; max-height: 200px;" src="' + container_image + 
+    var txt = '<div class="hidbord_msg" style="box-shadow: 0 0 10px #555;"><img style="max-width: 200px; max-height: 200px;" src="' + container_image +
               '"><p style="text-align: center; margin: 0; font-size: x-small;">' + bytesMagnitude(container_data.length) + '</p></div>';
     var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
         h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
@@ -902,11 +918,11 @@ var showReplyform = function(msg_id, textInsert) {
 
 
         if(!hidboard_hide_sender){
-            $('#hidboard_hide_sender').attr('checked', null);        
+            $('#hidboard_hide_sender').attr('checked', null);
         }
 
         if(!hidboard_hide_contacts){
-            $('#hidboard_hide_contacts').attr('checked', null);        
+            $('#hidboard_hide_contacts').attr('checked', null);
         }
 
         $('#hidboard_hide_sender').on('change', function() {
@@ -922,7 +938,7 @@ var showReplyform = function(msg_id, textInsert) {
 
         $('#hidbord_cont_type').on('change',function(){
             $('#hidbord_replyform').css('border-left', 'none');
-            
+
             if($('#hidbord_cont_type').val()=='direct'){
                 $('#hidbord_cont_direct').show();
                 $('#hidbord_replyform').css('border-left', '8px solid #090');
@@ -949,7 +965,7 @@ var showReplyform = function(msg_id, textInsert) {
 
         $('#hidbord_replyform #hidbordform_preview').on('mouseover', function(e){
             var evt = e;
-            
+
             msgPopupTimers.msg_preview = setTimeout((function(e){ return function(){
                 do_preview_popup(evt);
             };})(e), 200);
@@ -1025,7 +1041,7 @@ var showReplyform = function(msg_id, textInsert) {
     if (textInsert) {
         insertInto(document.getElementById('hidbord_reply_text'), textInsert + "\n");
     }
-    
+
     $(msg_id).after($('#hidbord_replyform'));
     $('#hidbord_replyform').show();
     $('#hidbord_reply_text').focus();
