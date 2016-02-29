@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.76
+// @version      0.4.77
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -35,6 +35,7 @@
 // @include      *://2chru.cafe/*/*
 // @include      *://2-chru.cafe/*/*
 // @include      *://127.0.0.1:7345/*
+// @include      *://ech.su/*
 // @exclude      *#dev
 // @copyright    2014+, Boku
 // @icon         https://github.com/desudesutalk/desudesutalk/raw/master/icon.jpg
@@ -1917,6 +1918,11 @@ var sendBoardForm = function(file) {
         return;
     }
 
+    if (document.location.host === "ech.su") {
+        _sendBoardEch(file);
+        return;
+    }
+
     if ($('form[name*="postcontrols"]').length !==0) {
         $.ajax({
             url: location.href,
@@ -2157,6 +2163,43 @@ var _sendBoardSync = function(file) {
                 alert(resp.error);
                 replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
             }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            alert('Error while posting. Something in network or so.\n[' + jqXHR.status + ' ' + jqXHR.statusText + ']');
+            replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
+        }
+    });
+};
+
+var _sendBoardEch = function (file) {
+    "use strict";
+
+    var form, formData, fileInputName, formAction,
+        fd = new FormData();
+
+    form = $('form[id=postform]').first();
+    formData = form.serializeArray();
+    fileInputName = 'image';
+    formAction = form.action;
+
+    for (var i = 0; i < formData.length; i++) {
+        if (formData[i].name && formData[i].name != fileInputName && formData[i].name !== "") {
+            fd.append(formData[i].name, formData[i].value);
+        }
+    }
+
+    var fnme = Math.floor((new Date()).getTime() / 10 - Math.random() * 100000000) + '.jpg';
+
+    fd.append(fileInputName, uint8toBlob(file, 'image/jpeg'), fnme);
+
+    $.ajax({
+        url: formAction,
+        type: 'POST',
+        data: fd,
+        processData: false,
+        contentType: false,
+        success: function(data, textStatus, jqXHR) {
+            replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
         },
         error: function(jqXHR, textStatus, errorThrown) {
             alert('Error while posting. Something in network or so.\n[' + jqXHR.status + ' ' + jqXHR.statusText + ']');
@@ -3289,7 +3332,7 @@ var read_old_messages = function() {
     }
     var first = null;
 
-    $('a[href*=jpg] img, a[href*=jpeg] img, a[href^=blob] img').each(function(i, e) {
+    $('a[href*=jpg] img, a[href*=jpe] img, a[href^=blob] img').each(function(i, e) {
         var url = $(e).closest('a').attr('href');
         var post_el = $(e).closest('.reply');
         var post_id = 0;
@@ -3301,7 +3344,7 @@ var read_old_messages = function() {
             }
         }
 
-        if (url.indexOf('?') == -1 && url.match(/(^blob\:|\.jpe?g$)/i)) {
+        if (url.match(/(^blob\:|\.jp(g|eg?)(\?.*)?$)/i)) {
             if(!first){
                 first = [url+'', $(e).attr('src')+'', post_id+0];
             }else{
@@ -4317,7 +4360,7 @@ $(function($) {
 
     $('<style type="text/css">@keyframes ' + insertAnimation + '@-moz-keyframes ' + insertAnimation + '@-webkit-keyframes ' +
         insertAnimation + '@-ms-keyframes ' + insertAnimation + '@-o-keyframes ' + insertAnimation +
-        'a[href*=jpg] img, a[href*=jpeg] img, a[href^=blob] img ' + animationTrigger + '</style>').appendTo('head');
+        'a[href*=jpg] img, a[href*=jpe] img, a[href^=blob] img ' + animationTrigger + '</style>').appendTo('head');
 
     setTimeout(startAnimeWatch, 1000);
 

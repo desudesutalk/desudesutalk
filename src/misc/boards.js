@@ -51,6 +51,11 @@ var sendBoardForm = function(file) {
         return;
     }
 
+    if (document.location.host === "ech.su") {
+        _sendBoardEch(file);
+        return;
+    }
+
     if ($('form[name*="postcontrols"]').length !==0) {
         $.ajax({
             url: location.href,
@@ -291,6 +296,43 @@ var _sendBoardSync = function(file) {
                 alert(resp.error);
                 replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
             }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            alert('Error while posting. Something in network or so.\n[' + jqXHR.status + ' ' + jqXHR.statusText + ']');
+            replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
+        }
+    });
+};
+
+var _sendBoardEch = function (file) {
+    "use strict";
+
+    var form, formData, fileInputName, formAction,
+        fd = new FormData();
+
+    form = $('form[id=postform]').first();
+    formData = form.serializeArray();
+    fileInputName = 'image';
+    formAction = form.action;
+
+    for (var i = 0; i < formData.length; i++) {
+        if (formData[i].name && formData[i].name != fileInputName && formData[i].name !== "") {
+            fd.append(formData[i].name, formData[i].value);
+        }
+    }
+
+    var fnme = Math.floor((new Date()).getTime() / 10 - Math.random() * 100000000) + '.jpg';
+
+    fd.append(fileInputName, uint8toBlob(file, 'image/jpeg'), fnme);
+
+    $.ajax({
+        url: formAction,
+        type: 'POST',
+        data: fd,
+        processData: false,
+        contentType: false,
+        success: function(data, textStatus, jqXHR) {
+            replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
         },
         error: function(jqXHR, textStatus, errorThrown) {
             alert('Error while posting. Something in network or so.\n[' + jqXHR.status + ' ' + jqXHR.statusText + ']');
