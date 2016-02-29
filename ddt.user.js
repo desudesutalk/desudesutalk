@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.77
+// @version      0.4.78
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -2200,6 +2200,10 @@ var _sendBoardEch = function (file) {
         contentType: false,
         success: function(data, textStatus, jqXHR) {
             replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
+            replyForm.remove();
+            replyForm = null;
+            container_image = null;
+            container_data = null;
         },
         error: function(jqXHR, textStatus, errorThrown) {
             alert('Error while posting. Something in network or so.\n[' + jqXHR.status + ' ' + jqXHR.statusText + ']');
