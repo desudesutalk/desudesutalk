@@ -83,7 +83,7 @@ $(function($) {
 
     $('<style type="text/css">@keyframes ' + insertAnimation + '@-moz-keyframes ' + insertAnimation + '@-webkit-keyframes ' +
         insertAnimation + '@-ms-keyframes ' + insertAnimation + '@-o-keyframes ' + insertAnimation +
-        'a[href*=jpg] img, a[href*=jpeg] img, a[href^=blob] img ' + animationTrigger + '</style>').appendTo('head');
+        'a[href*=jpg] img, a[href*=jpe] img, a[href^=blob] img ' + animationTrigger + '</style>').appendTo('head');
 
     setTimeout(startAnimeWatch, 1000);
 
