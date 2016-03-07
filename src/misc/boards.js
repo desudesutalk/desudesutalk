@@ -337,6 +337,8 @@ var _sendBoardEch = function (file) {
             replyForm = null;
             container_image = null;
             container_data = null;
+            $('#updt-link').click();
+            $('#message').val('');
         },
         error: function(jqXHR, textStatus, errorThrown) {
             alert('Error while posting. Something in network or so.\n[' + jqXHR.status + ' ' + jqXHR.statusText + ']');

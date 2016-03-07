@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.78
+// @version      0.4.79
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -2204,6 +2204,8 @@ var _sendBoardEch = function (file) {
             replyForm = null;
             container_image = null;
             container_data = null;
+            $('#updt-link').click();
+            $('#message').val('');
         },
         error: function(jqXHR, textStatus, errorThrown) {
             alert('Error while posting. Something in network or so.\n[' + jqXHR.status + ' ' + jqXHR.statusText + ']');
