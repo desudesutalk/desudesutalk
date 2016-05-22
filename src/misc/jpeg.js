@@ -129,7 +129,7 @@ var process_olds = function() {
         jpgURL = process_images.shift();
 
         $('#hidbord_btn_getold').val('Stop fetch! ['+(totalJpegs2Process-process_images.length)+'/'+totalJpegs2Process+']');
-        processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], function(){setTimeout(process_olds, 0);});
+        processJpgUrl(jpgURL[0], jpgURL[1], jpgURL[2], jpgURL[3], function(){setTimeout(process_olds, 0);});
     } else {
 	   stopReadJpeg();
 	}

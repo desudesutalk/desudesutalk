@@ -42,9 +42,11 @@ var jpegInserted = function(event) {
         var post_el = $(event.target).closest('.reply');
         var post_id = 0;
 
-        if(jpgURL.match(/\?/) && (jpgURL.match(/iqdb/) || jpgURL.match(/google/))){
+/*        if(jpgURL.match(/\?/) && (jpgURL.match(/iqdb/) || jpgURL.match(/google/))){
             return false;
-        }
+        }*/
+
+        if(processedJpegs[jpgURL]) return;
 
         if(post_el.length === 1){
             post_id = parseInt(post_el.attr('id').replace(/[^0-9]/g, ''));
@@ -78,14 +80,7 @@ $(function($) {
 
     sjcl.random.startCollectors();
 
-    var insertAnimation = ' hidbordNodeInserted{from{clip:rect(1px,auto,auto,auto);}to{clip:rect(0px,auto,auto,auto);}}',
-        animationTrigger = '{animation-duration:0.001s;-o-animation-duration:0.001s;-ms-animation-duration:0.001s;-moz-animation-duration:0.001s;-webkit-animation-duration:0.001s;animation-name:hidbordNodeInserted;-o-animation-name:hidbordNodeInserted;-ms-animation-name:hidbordNodeInserted;-moz-animation-name:hidbordNodeInserted;-webkit-animation-name:hidbordNodeInserted;}';
 
-    $('<style type="text/css">@keyframes ' + insertAnimation + '@-moz-keyframes ' + insertAnimation + '@-webkit-keyframes ' +
-        insertAnimation + '@-ms-keyframes ' + insertAnimation + '@-o-keyframes ' + insertAnimation +
-        'a[href*=jpg] img, a[href*=jpe] img, a[href^=blob] img ' + animationTrigger + '</style>').appendTo('head');
-
-    setTimeout(startAnimeWatch, 1000);
 
     $('.hidbord_main').remove();
 
@@ -106,14 +101,42 @@ $(function($) {
         }
 
         $('.hidbord_notifer .hidbord_clickable').click();
+    }else{
+        $('a[href*=jpg] img, a[href*=jpe] img, a[href^=blob] img ').each(function(){
+            var e = $(this),
+                jpgURL = e.closest('a').attr('href'),
+                thumbURL = e.attr('src'),
+                post_el = e.closest('.reply'),
+                post_id = 0;
+
+            if(post_el.length === 1){
+                post_id = parseInt(post_el.attr('id').replace(/[^0-9]/g, ''));
+                if(isNaN(post_id)){
+                    post_id = 0;
+                }
+            }
+
+            idxdbGetPostBySrc(jpgURL, function(post){
+                push_msg(post, jpgURL, post.thumb, true);
+                processedJpegs[jpgURL] = jpgURL;
+            });
+        });
     }
 
     idxdbGetLinks(function(url){
         processedJpegs[url.src] = url;
     });
 
-    idxdbGetPosts(function(post){
+    /*idxdbGetPosts(function(post){
         push_msg(post, null, post.thumb, true);
-    });
+    });*/
 
+    var insertAnimation = ' hidbordNodeInserted{from{clip:rect(1px,auto,auto,auto);}to{clip:rect(0px,auto,auto,auto);}}',
+        animationTrigger = '{animation-duration:0.001s;-o-animation-duration:0.001s;-ms-animation-duration:0.001s;-moz-animation-duration:0.001s;-webkit-animation-duration:0.001s;animation-name:hidbordNodeInserted;-o-animation-name:hidbordNodeInserted;-ms-animation-name:hidbordNodeInserted;-moz-animation-name:hidbordNodeInserted;-webkit-animation-name:hidbordNodeInserted;}';
+
+    $('<style type="text/css">@keyframes ' + insertAnimation + '@-moz-keyframes ' + insertAnimation + '@-webkit-keyframes ' +
+        insertAnimation + '@-ms-keyframes ' + insertAnimation + '@-o-keyframes ' + insertAnimation +
+        'a[href*=jpg] img, a[href*=jpe] img, a[href^=blob] img ' + animationTrigger + '</style>').appendTo('head');
+
+    setTimeout(startAnimeWatch, 1000);
 });

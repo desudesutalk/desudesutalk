@@ -3,7 +3,7 @@ var idxdbThreadTag = board_section + '-' + threadId;
 function _idxdbOpen(cb){
 	"use strict";
 	var request = indexedDB.open("ddt_posts", 2);
-	
+
 	request.onupgradeneeded = function(event) {
 		var db = event.target.result;
 
@@ -51,6 +51,22 @@ function idxdbGetPostById(id, cb){
 			.get(id);
 		req.onerror = function(event) {cb(null);};
 		req.onsuccess = function(event) {cb(event.target.result);};
+	});
+}
+
+function idxdbGetPostBySrc(src, cb){
+	"use strict";
+	_idxdbOpen(function(db){
+	db.transaction(["posts"])
+		.objectStore("posts")
+		.index('src')
+		.openCursor(IDBKeyRange.only(src)).onsuccess = function(event) {
+			var cursor = event.target.result;
+			if (cursor) {
+				cb(cursor.value);
+				cursor.continue();
+			}
+		};
 	});
 }
 
