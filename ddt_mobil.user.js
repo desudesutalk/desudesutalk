@@ -3604,7 +3604,7 @@ var showReplyform = function(msg_id, textInsert) {
             contactsSelector()+
             '  <div>' +
             '    <div style="margin:  3px;">' +
-            '      <div style="width: 590px;">' +
+            '      <div style="width: 100%;">' +
             '        <input type="file" id="c_file" name="c_file" style="max-width: 300px;" alt="file_selector">' +
             '            <span style="float: right;" id="hidbordTextControls">' +
             '              <span title="Bold"><input value="B" style="font-weight: bold;" type="button" id="hidbordBtBold"></span>' +
@@ -3616,7 +3616,7 @@ var showReplyform = function(msg_id, textInsert) {
             '              <span title="Quote selected"><input value=">" style="font-weight: bold;" type="button" id="hidbordBtQuote"></span>' +
             '            </span>  ' +
             '      </div>  ' +
-            '      <textarea style="font-family: monospace; max-width: none; margin: 2px; width: 580px; height: 136px; resize: vertical; background-image: none; background-position: 0% 0%; background-repeat: repeat repeat;" id="hidbord_reply_text"></textarea>  ' +
+            '      <textarea style="font-family: monospace; max-width: none; margin: 2px; width: 100%; height: 136px; resize: vertical; background-image: none; background-position: 0% 0%; background-repeat: repeat repeat;" id="hidbord_reply_text"></textarea>  ' +
             '      <div style="width: 100%;">' +
             '        <span>Hide: <label><input id="hidboard_hide_sender" type="checkbox" checked/> sender</label>; <label><input id="hidboard_hide_contacts" type="checkbox"  checked/> contacts</label></span><br>'+
             '        <input type="button" value="crypt and send" id="do_encode">  ' +
