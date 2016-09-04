@@ -3617,7 +3617,7 @@ var showReplyform = function(msg_id, textInsert) {
             '            </span>  ' +
             '      </div>  ' +
             '      <textarea style="font-family: monospace; max-width: none; margin: 2px; width: 580px; height: 136px; resize: vertical; background-image: none; background-position: 0% 0%; background-repeat: repeat repeat;" id="hidbord_reply_text"></textarea>  ' +
-            '      <div style="width: 590px;">' +
+            '      <div style="width: 100%;">' +
             '        <span>Hide: <label><input id="hidboard_hide_sender" type="checkbox" checked/> sender</label>; <label><input id="hidboard_hide_contacts" type="checkbox"  checked/> contacts</label></span><br>'+
             '        <input type="button" value="crypt and send" id="do_encode">  ' +
             '        <span style="float: right;"><a href="javascript:;" id="hidbordform_preview" alt="msg_preview">message preview</a></span>  ' +
