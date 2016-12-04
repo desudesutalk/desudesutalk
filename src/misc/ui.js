@@ -23,6 +23,8 @@ var inject_ui = function() {
             '    <div class="hidbord_contacts hidbord_maincontent" style="display: none"></div>'+
             '    <div class="hidbord_config hidbord_maincontent" style="display: none">'+
             '    <div class="hidbord_msg"><h3 style="text-align: center;">Your key:</h3><p id="identi" style="text-align: center;"></p>'+
+            '<p style="text-align: center; font-size: x-small;"><a href="javascript:;" id="hidboard_key_random">generate random</a> | <a href="javascript:;" id="hidboard_key_export">export private key</a> | <a href="javascript:;" id="hidboard_key_import">import private key</a></p>'+
+            '<input type="file" style="display:none" id="hidboard_key_import_file">'+
             '        <form name="loginform" style="margin: 0;">'+
             '                    <table style="margin-left:auto; margin-right:auto; text-align: right;"><tr><td>Password: </td><td><input name="passwd" type="text" value=""  style="width: 300px; color: rgb(221, 221, 221); max-width: none;"></td></tr><tr><td>Salt: </td>'+
             '                    <td><input name="magik_num" type="text" value="" style="width: 300px; color: rgb(221, 221, 221); max-width: none;"></td></tr>'+
@@ -263,8 +265,32 @@ var inject_ui = function() {
         steg_iv = [];
     });
 
+    $('#hidboard_key_random').on('click', function(){do_login(false, false, false, true);});
+    $('#hidboard_key_export').on('click', function(){cryptCore.savePKey();});
+    $('#hidboard_key_import').on('click', function(){$('#hidboard_key_import_file').click();});
 
+    $('#hidboard_key_import_file').on('change', handleKeySelect);
 };
+
+function handleKeySelect(evt) {
+    "use strict";
+
+    var files = evt.target.files,
+        reader = new FileReader();
+
+    reader.onload = function(e) {
+        var pKey = e.target.result;
+
+        if(pKey.length > 100) {
+            alert('Inkorrect key file!');
+            return;
+        }
+        do_login(false, false, pKey);
+
+    };
+
+    reader.readAsText(files[0]);
+}
 
 var popup_del_timer;
 

@@ -2,35 +2,43 @@ var rsaProfile = {},
     rsa = null,
     rsa_hash, rsa_hashB64, broadProfile = {}, broad_hashB64;
 
-var do_login = function(e, key) {
+var do_login = function(e, fromCfg, key, rnd) {
     "use strict";
-    var lf = document.loginform;
-    if(!key){     
-        rsaProfile = cryptCore.login(lf.passwd.value, lf.magik_num.value, false);
+    var lf = document.loginform,
+        pwd = lf.passwd.value,
+        slt = lf.magik_num.value;
+
+    lf.magik_num.value = lf.passwd.value = '';
+
+    if(key){
+        rsaProfile = cryptCore.login(null, null, false, key);
+    }else if(rnd){
+        rsaProfile = cryptCore.login();
+    }else if(!fromCfg){
+        rsaProfile = cryptCore.login(pwd, slt, false);
     }else{
         rsaProfile = cryptCore.login(null, null, true);
     }
+
     if(!rsaProfile) {
         rsaProfile = {};
         return false;
     }
-    lf.magik_num.value = lf.passwd.value = '';
 
     rsa_hash = rsaProfile.publicKeyPairPrintableHash;
-    rsa_hashB64 = rsaProfile.publicKeyPairPrintable;        
-
+    rsa_hashB64 = rsaProfile.publicKeyPairPrintable;
 
     $('#identi').html(rsa_hashB64).identicon5({
         rotate: true,
         size: 64
     });
-    $('#identi').append('<br/><br/><i style="color: #009;">'+rsa_hashB64+'</i>');  
+    $('#identi').append('<br/><br/><i style="color: #009;">'+rsa_hashB64+'</i>');
 };
 
 var do_loginBroadcast = function(e, key) {
     "use strict";
     var lf = document.broadcastform;
-    if(!key){     
+    if(!key){
         broadProfile = cryptCore.loginBroadcast(lf.passwd.value, lf.magik_num.value, false);
     }else{
         broadProfile = cryptCore.loginBroadcast(null, null, true);
@@ -43,7 +51,7 @@ var do_loginBroadcast = function(e, key) {
         rotate: true,
         size: 64
     });
-    $('#identi_broad').append('<br/><br/><i style="color: #009;">'+broad_hashB64+'</i>');  
+    $('#identi_broad').append('<br/><br/><i style="color: #009;">'+broad_hashB64+'</i>');
 };
 
 
@@ -71,7 +79,7 @@ var do_encode = function() {
 
     if(!("publicKeyPairPrintable" in rsaProfile)){
         alert('Please log in.');
-        return false;   
+        return false;
     }
 
     payLoad.text = $('#hidbord_reply_text').val();
@@ -94,7 +102,7 @@ var do_encode = function() {
                 keys[c] = contacts[c];
                 continue;
             }
-            
+
             if('hide' in contacts[c] && contacts[c].hide == 1){
                 continue;
             }
@@ -130,7 +138,7 @@ var do_encode = function() {
     if(!final_container) return false;
 
     //var out_file = appendBuffer(final_container, lastRand);
-    
+
     //var compressedB64 = arrayBufferDataUri(out_file);
 
     sendBoardForm(final_container);

@@ -10,17 +10,21 @@ var cryptCore = (function(){
 		return sjcl.codec.bytes.fromBits(sjcl.hash.sha256.hash(sjcl.codec.bytes.toBits(sharedSecret)));
 	};
 
-	cryptCore.login = function login(password, salt, key) {
+	cryptCore.login = function login(password, salt, fromCfg, key) {
 	    var privateKey = null, encKey = null;
 
 	    if(key){
+	    	privateKey = bs58.dec(key);
+	    }else if(fromCfg){
 		    if (ssGet(boardHostName + profileStoreName)) {
 		        privateKey = bs58.dec(ssGet(boardHostName + profileStoreName).privateKeyPair);
 		    }else{
 		    	return false;
 		    }
-	    }else{
+	    }else if(password && salt){
 	    	privateKey = sjcl.codec.bytes.fromBits(sjcl.misc.pbkdf2(password, salt, 500017, 256));
+	    }else{
+	    	privateKey = ECcrypt.genKeyPair().getPrivate().toArray();
 	    }
 
 	    encKey = ECcrypt.keyPair(privateKey);
@@ -120,7 +124,7 @@ var cryptCore = (function(){
 	        ephemeral_byte = hexToBytes(ephemeral.getPublic(true, "hex"));
 
 	    if(hideSender && numContacts < 3) hideRecievers = true;
-	    
+
 	    ephemeral_byte[0] ^= (Math.random() * 0x100 | 0) & 0xfe;
 
 	    sessionKey[31] = 0xAA;
@@ -137,7 +141,7 @@ var cryptCore = (function(){
 
 	    msgHash.update(sjcl.codec.bytes.toBits(ephemeral_byte));
 	    msgHash.update(iv);
-	    
+
 	    for (i = 0; i < slots.length; i++) {
 	        msgHash.update(sjcl.codec.bytes.toBits(slots[i]));
 	    }
@@ -146,7 +150,7 @@ var cryptCore = (function(){
 	        msgLength += 80; // Length of signature here!
 	    }
 
-	    if(!hideRecievers){        
+	    if(!hideRecievers){
 	        msgLength += 32 + 33 * numContacts;
 	    }else if(!hideSender){
 	        msgLength += 33; // add sender address
@@ -158,7 +162,7 @@ var cryptCore = (function(){
 
 	    if(!hideSender){
 	        container2sig = new Uint8Array(containerAB, 0, msgLength - 88);
-	    }        
+	    }
 
 	    var addByte = function(byte){
 	        container[contPos++] = byte;
@@ -174,7 +178,7 @@ var cryptCore = (function(){
 	        1, // container version;
 	        (hideSender ? 1 : 0) + (hideRecievers ? 2 : 0),  //flags
 	        0, // reserved
-	    
+
 	        codedAt & 255, //coding unix_timestamp
 	        (codedAt >> 8) & 255,
 	        (codedAt >> 16) & 255,
@@ -195,7 +199,7 @@ var cryptCore = (function(){
 
 	        for (i in contacts) {
 	            if(contacts[i].publicKeyPairPrintable != keyPair.publicKeyPairPrintable)
-	                msgContacts.push(contacts[i].publicKeyPair);            
+	                msgContacts.push(contacts[i].publicKeyPair);
 	        }
 	        msgContacts = shuffleArray(msgContacts);
 	    }
@@ -217,11 +221,11 @@ var cryptCore = (function(){
 
 	    if(!hideSender){
 	        var sig = keyPair.privateEnc.sign(sjcl.codec.bytes.fromBits(msgHash.update(sjcl.codec.bytes.toBits(container2sig)).finalize())).toDER();
-	        
+
 	        if(sig.length > 80){
 	            throw 'SIGNATURE TO LOONG!!!';
 	        }
-	        
+
 	        if(sig.length < 80){
 	            var add = 80 - sig.length;
 	            for (i = 0; i < add; i++) {
@@ -230,7 +234,7 @@ var cryptCore = (function(){
 	        }
 
 	        addBytes(sig);
-	    }   
+	    }
 
 	    var aes_cypher = new sjcl.cipher.aes(sessionKeyBits),
 	        crypted_msg = sjcl.codec.bytes.fromBits(sjcl.mode.ccm.encrypt(aes_cypher, sjcl.codec.bytes.toBits(container), iv, [], 64)),
@@ -262,7 +266,7 @@ var cryptCore = (function(){
 	        secrets   = new Uint8Array(msg, 81),
 	        msgHash   = new sjcl.hash.sha256(),
 	        shift = 0, secret, sessionKey = [], ephemeral = [], i, j, aesDecryptor, message = {};
-	        
+
 	        msgHash.update(sjcl.codec.bytes.toBits(ephemAB));
 	        msgHash.update(sjcl.codec.bytes.toBits(iv));
 
@@ -273,7 +277,7 @@ var cryptCore = (function(){
 	        ephemeral[0] &= 1;
 	        ephemeral[0] |= 2;
 
-	        var firstByte = 0xAA;        
+	        var firstByte = 0xAA;
 
 	        try {
 	            secret = getSharedSecret(forBroadcast ? keyPairBroadcast.privateEnc : keyPair.privateEnc, ephemeral);
@@ -284,7 +288,7 @@ var cryptCore = (function(){
 	        }
 
 	        while(shift < secrets.byteLength){
-	            
+
 	            if(firstByte != secrets[shift + 31]){
 	                shift += 32;
 	                continue;
@@ -312,18 +316,18 @@ var cryptCore = (function(){
 	                var crypted_msg = appendBuffer(contHead, new Uint8Array(msg, 81 + 32 * message.contactsNum, message.msgLength - 32));
 
 	                aes_decypher = new sjcl.cipher.aes(sjcl.codec.bytes.toBits(sessionKey));
-	                try{	                
+	                try{
 	                	res = sjcl.mode.ccm.decrypt(aes_decypher, sjcl.codec.bytes.toBits(crypted_msg), sjcl.codec.bytes.toBits(iv), [], 64);
 	                } catch(e){
-	                	return undefined;   
+	                	return undefined;
 	                }
 
-	                msgHash.update(sjcl.codec.bytes.toBits(new Uint8Array(msg, 81, 32 * message.contactsNum)));                
+	                msgHash.update(sjcl.codec.bytes.toBits(new Uint8Array(msg, 81, 32 * message.contactsNum)));
 
 	                res = sjcl.codec.bytes.fromBits(res);
 
 	                if(message.senderHidden){
-	                    message.text = utf8ArrToStr(pako.inflateRaw(res.slice(16 + (message.contactsHidden?0:(32 + 33*message.contactsNum)))));  // 
+	                    message.text = utf8ArrToStr(pako.inflateRaw(res.slice(16 + (message.contactsHidden?0:(32 + 33*message.contactsNum)))));  //
 	                    msgHash.update(sjcl.codec.bytes.toBits(res));
 	                }else{
 	                    message.text = utf8ArrToStr(pako.inflateRaw(res.slice(16 + (message.contactsHidden?33:(32 + 33*message.contactsNum)), -80)));
@@ -341,18 +345,18 @@ var cryptCore = (function(){
 
 	                    for (i = 0; i < message.contactsNum; i++) {
 	                        otherSecrets[i] = [];
-	                        for (j = 0; j < 32; j++) {                        
+	                        for (j = 0; j < 32; j++) {
 	                            otherSecrets[i][j] = secrets[j + i*32] ^ message.sessionKey[j];
 	                        }
 	                         otherSecrets[i] = arrayBufferDataUri(otherSecrets[i]);
-	                    }                    
+	                    }
 
 	                    for (i = 0; i < message.contactsNum; i++) {
 	                        pubEncKey = res.slice(     48 + i*33, 33 + 48 + i*33);
 	                        tmpSecret = arrayBufferDataUri(getSharedSecret(message.ephemeralPriv, pubEncKey));
 
 	                        if(otherSecrets.indexOf(tmpSecret) == -1){
-	                            return undefined;                            
+	                            return undefined;
 	                        }
 
 	                        message.msgContacts.push(bs58.enc(res.slice(     48 + i*33, 33 + 48 + i*33)));
@@ -364,7 +368,7 @@ var cryptCore = (function(){
 	                    message.sender = bs58.enc(res.slice(16 + (message.contactsHidden?0:32), 33 + 16 + (message.contactsHidden?0:32)));
 
 	                    if(!pubSigKey.verify(message.msgHash, res.slice(-80))){
-	                        return undefined; 
+	                        return undefined;
 	                    }
 	                    message.signatureOk = true;
 	                }
@@ -378,6 +382,16 @@ var cryptCore = (function(){
 	        }
 
 	        return null;
+	};
+
+	cryptCore.savePKey = function savePKey(){
+		if(!keyPair || !keyPair.publicKeyPairPrintable || !keyPair.privateKeyPair){
+			alert('Nothing to export. Log In first.');
+			return false;
+		}
+
+		var blob =
+		saveAs(new Blob([keyPair.privateKeyPair], {type: "text/plain;charset=utf-8"}), keyPair.publicKeyPairPrintable+".privateKey", true);
 	};
 
 	return cryptCore;
