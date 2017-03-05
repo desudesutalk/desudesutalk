@@ -57,33 +57,49 @@ var sendBoardForm = function(file) {
     }
 
     if ($('form[name*="postcontrols"]').length !==0) {
-        $.ajax({
-            url: location.href,
-            type: 'GET',
-            processData: false,
-            contentType: false,
-            success: function(data, textStatus, jqXHR) {
-                var doc = document.implementation.createHTMLDocument('');
-                doc.documentElement.innerHTML = data;
+        var successFunc = function(data, textStatus, jqXHR) {
+            if(!jqXHR) data = data.responseText || data.response;
 
-                var l = $("form[action*=post]", doc).serializeArray();
-                l = l.filter(function(a){
-                    if(TinyBoardFields.indexOf(a.name) > -1) return false;
-                    return true;
-                });
+            var doc = document.implementation.createHTMLDocument('');
+            doc.documentElement.innerHTML = data;
 
-                l.push({"name": "post", "value": $('form[name=post] input[type=submit]').val()});
+            var l = $("form[action*=post]", doc).serializeArray();
+            l = l.filter(function(a){
+                if(TinyBoardFields.indexOf(a.name) > -1) return false;
+                return true;
+            });
 
-                //console.log("fresh post form: ", l);
+            l.push({"name": "post", "value": $('form[name=post] input[type=submit]').val()});
 
-                _sendBoardForm(file, l);
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                alert('failed to get fresh form. Try again!');
-                replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
-                upload_handler = (new Date()).getTime() * 10000;
-            }
-        });
+            //console.log("fresh post form: ", l);
+
+            _sendBoardForm(file, l);
+        },
+            errorFunc = function(jqXHR, textStatus, errorThrown) {
+            alert('failed to get fresh form. Try again!');
+            replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
+            upload_handler = (new Date()).getTime() * 10000;
+        };
+
+        if (typeof GM_xmlhttpRequest === "function") {
+            GM_xmlhttpRequest({
+                url: location.href,
+                method: "GET",
+                headers: {'content-type': 'multipart/form-data',
+                'referer': location.href},
+                onload: successFunc,
+                onerror: errorFunc
+            });
+        }else{
+            $.ajax({
+                url: location.href,
+                type: 'GET',
+                processData: false,
+                contentType: false,
+                success: successFunc,
+                error: errorFunc
+            });
+        }
     }else{
         _sendBoardForm(file, []);
     }
@@ -174,16 +190,16 @@ var _sendBoardForm = function(file, formAddon) {
 
     fd.append(fileInputName, uint8toBlob(file, 'image/jpeg'), fnme);
 
-    $.ajax({
-        url: formAction,
-        type: 'POST',
-        data: fd,
-        processData: false,
-        contentType: false,
-        success: function(data, textStatus, jqXHR) {
+    var successFunc = function(data, textStatus, jqXHR) {
+            if(!jqXHR) {
+                jqXHR = data;
+                data = data.responseText || data.response;
+            }
             var doc = document.implementation.createHTMLDocument(''),
-                p;
+                p, errMsg;
             doc.documentElement.innerHTML = data;
+
+            try{data = JSON.parse(data);}catch(err){}
 
             if (jqXHR.status === 200 && jqXHR.readyState === 4) {
                 p = $('form[action*="delete"]', doc).length +
@@ -205,6 +221,10 @@ var _sendBoardForm = function(file, formAddon) {
             }
 
             if(typeof data == "string" && data.match(/<h1>Ошибка!<\/h1>/)) p = 0;
+            if(typeof data == "string" && data.match(/<title>(Error|Ошибка)<\/title>/)){
+                p = 0;
+                errMsg = $('h2', doc).text();
+            }
 
             if (p !== 0 || (data.Status && data.Status == "OK")) {
                 $('#de-pform textarea').val('');
@@ -242,19 +262,43 @@ var _sendBoardForm = function(file, formAddon) {
                 container_data = null;
 
             } else {
-                alert('Can\'t post. Wrong capch? Fucked up imageboard software?.');
+                if(errMsg){
+                    alert('Can\'t post.\n\n' + errMsg);
+                }else{
+                    alert('Can\'t post. Wrong capch? Fucked up imageboard software?.');
+                }
+
                 replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
             }
             upload_handler = (new Date()).getTime() * 10000;
         },
-        error: function(jqXHR, textStatus, errorThrown) {
+        errorFunc = function(jqXHR, textStatus, errorThrown) {
             alert('Error while posting. Something in network or so.\n[' + jqXHR.status + ' ' + jqXHR.statusText + ']');
             replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
             upload_handler = (new Date()).getTime() * 10000;
-        }
-    });
-};
+        };
 
+    if (typeof GM_xmlhttpRequest === "function") {
+        GM_xmlhttpRequest({
+            url: formAction,
+            method: "POST",
+            data: fd,
+            headers: {'referer': location.href},
+            onload: successFunc,
+            onerror: errorFunc
+        });
+    }else{
+        $.ajax({
+            url: formAction,
+            type: 'POST',
+            data: fd,
+            processData: false,
+            contentType: false,
+            success: successFunc,
+            error: errorFunc
+        });
+    }
+};
 
 var _sendBoardSync = function(file) {
  "use strict";
@@ -278,13 +322,11 @@ var _sendBoardSync = function(file) {
 
     fd.append(fileInputName, uint8toBlob(file, 'image/jpeg'), fnme);
 
-    $.ajax({
-        url: formAction,
-        type: 'POST',
-        data: fd,
-        processData: false,
-        contentType: false,
-        success: function(data, textStatus, jqXHR) {
+    var successFunc = function(data, textStatus, jqXHR) {
+            if(!jqXHR) {
+                jqXHR = data;
+                data = data.responseText || data.response;
+            }
             var resp = JSON.parse(data);
             if (resp.redirect) {
                 $('a#updateThread').click();
@@ -299,11 +341,31 @@ var _sendBoardSync = function(file) {
                 replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
             }
         },
-        error: function(jqXHR, textStatus, errorThrown) {
+        errorFunc = function(jqXHR, textStatus, errorThrown) {
             alert('Error while posting. Something in network or so.\n[' + jqXHR.status + ' ' + jqXHR.statusText + ']');
             replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
-        }
-    });
+        };
+
+    if (typeof GM_xmlhttpRequest === "function") {
+        GM_xmlhttpRequest({
+            url: formAction,
+            method: "POST",
+            data: fd,
+            headers: {'referer': location.href},
+            onload: successFunc,
+            onerror: errorFunc
+        });
+    }else{
+        $.ajax({
+            url: formAction,
+            type: 'POST',
+            data: fd,
+            processData: false,
+            contentType: false,
+            success: successFunc,
+            error: errorFunc
+        });
+    }
 };
 
 var _sendBoardEch = function (file) {
@@ -327,13 +389,7 @@ var _sendBoardEch = function (file) {
 
     fd.append(fileInputName, uint8toBlob(file, 'image/jpeg'), fnme);
 
-    $.ajax({
-        url: formAction,
-        type: 'POST',
-        data: fd,
-        processData: false,
-        contentType: false,
-        success: function(data, textStatus, jqXHR) {
+    var successFunc = function(data, textStatus, jqXHR) {
             replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
             replyForm.remove();
             replyForm = null;
@@ -342,9 +398,29 @@ var _sendBoardEch = function (file) {
             $('#updt-link').click();
             $('#message').val('');
         },
-        error: function(jqXHR, textStatus, errorThrown) {
+        errorFunc = function(jqXHR, textStatus, errorThrown) {
             alert('Error while posting. Something in network or so.\n[' + jqXHR.status + ' ' + jqXHR.statusText + ']');
             replyForm.find("#do_encode").val('crypt and send').removeAttr("disabled");
-        }
-    });
+        };
+
+    if (typeof GM_xmlhttpRequest === "function") {
+        GM_xmlhttpRequest({
+            url: formAction,
+            method: "POST",
+            data: fd,
+            headers: {'referer': location.href},
+            onload: successFunc,
+            onerror: errorFunc
+        });
+    }else{
+        $.ajax({
+            url: formAction,
+            type: 'POST',
+            data: fd,
+            processData: false,
+            contentType: false,
+            success: successFunc,
+            error: errorFunc
+        });
+    }
 };
