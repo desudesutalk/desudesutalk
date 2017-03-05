@@ -137,8 +137,11 @@ var _sendBoardForm = function(file, formAddon) {
         formData = forForm.serializeArray();
 
         if($('div#qr form').length !==0){
-            formData.push({"name": "recaptcha_response_field", "value": $('div#qr .captcha-input.field').val()});
-            formData.push({"name": "recaptcha_challenge_field", "value": $('div#qr .captcha-img img').attr('alt')});
+            if(!window.passEnabled){
+                formData.push({"name": "recaptcha_response_field", "value": $('div#qr .captcha-input.field').val()});
+                formData.push({"name": "recaptcha_challenge_field", "value": $('div#qr .captcha-img img').attr('alt')});
+            }
+
             formData.push({"name": "com", "value": $('div#qr textarea').val()});
 
             formData.push({"name": "MAX_FILE_SIZE", "value": $('form[name=post] input[name=MAX_FILE_SIZE]').val()});
@@ -146,7 +149,6 @@ var _sendBoardForm = function(file, formAddon) {
             formData.push({"name": "pwd", "value": $('form[name=post] input[name=pwd]').val()});
             formData.push({"name": "resto", "value": $('form[name=post] input[name=resto]').val()});
 
-            formData.push({"name": "recaptcha_response_field", "value": $('div#qr .captcha-input.field').val()});
             formAction = $('form[name=post]')[0].action;
             fileInputName = $("form[name=post] input[type=file]")[0].name;
         }
