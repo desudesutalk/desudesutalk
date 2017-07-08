@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.85
+// @version      0.4.86
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -4669,11 +4669,12 @@ $(function($) {
 
     setTimeout(startAnimeWatch, 1000);
 });
-if(window.location.href.substring(window.location.href.length-4,window.location.href.length)===".jpg")
-{
+
+if(window.location.href.match(/\.jpe?g$/i)){
     process_images.push([window.location.href, window.location.href, 0, true]);
     process_olds();
 }
+
 }
 
 ddtMainFunction();
