@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesuDesuTalk
 // @namespace    udp://desushelter/*
-// @version      0.4.86
+// @version      0.4.87
 // @description  Write something useful!
 // @include      *://dobrochan.com/*/*
 // @include      *://dobrochan.ru/*/*
@@ -20,6 +20,7 @@
 // @include      *://syn-ch.ru/*/*
 // @include      *://krautchan.net/*/*
 // @include      *://boards.4chan.org/*/*
+// @include      *://boards.4channel.org/*/*
 // @include      *://2ch.hk/*/*
 // @include      *://2ch.re/*/*
 // @include      *://2ch.pm/*/*
